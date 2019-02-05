@@ -1,1 +1,2 @@
-# limb_darkening_calculator
+# limb_darkening
+limb darkening calculator
