@@ -1,0 +1,4 @@
+*.pyc
+*.egg-info/
+MANIFEST.in
+pylimb/*_local_*
