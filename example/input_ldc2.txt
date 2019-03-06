@@ -10,9 +10,9 @@ user_output				!basic		complete
 output_path                  .
 #
 ##for INDIVIDUAL calculation_type
-target_names				Sun	Cool	VeryCool	Mario	
-star_effective_temperature		5780.0	3510.0	2430.0		3131.0
-star_log_gravity			4.5	5.0	5.5		3.06
+target_names				Sun	
+star_effective_temperature		5780.0
+star_log_gravity			4.5
 star_metallicity			0.0
 #
 ##for GRID calculation_type		
