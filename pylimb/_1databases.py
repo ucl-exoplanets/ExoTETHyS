@@ -1,104 +1,91 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import pkg_resources
 
 from ._0imports import *
 
 
 class Database:
 
-    def __init__(self, database_name, vital=False, date_to_update='daily', force_update=False, ask_size=None):
+	def __init__(self, database_name, vital=False, date_to_update='daily', force_update=False, ask_size=None):
 
-        package_name = 'pylimb'
-        info_file_name = '_0database.pickle'
-        directory_name = 'database'
-        last_update_file_name = 'database_last_update.txt'
+		self.database_name = database_name
 
-        info_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), info_file_name)
-        package_path = os.path.join(os.path.expanduser('~'), '.{0}'.format(package_name))
-        if not os.path.isdir(package_path):
-            os.mkdir(package_path)
-        directory_path = os.path.join(package_path, '{0}_{1}'.format(database_name, directory_name))
-        last_update_file_path = os.path.join(package_path, '{0}_{1}'.format(database_name, last_update_file_name))
+		package_name = 'pylimb'
+		info_file_name = '_0database.pickle'
+		#directory_name = 'database'
+		last_update_file_name = 'database_last_update.txt'
 
-        if date_to_update == 'daily':
-            date_to_update = int(time.strftime('%y%m%d'))
-        else:
-            date_to_update = int(date_to_update)
+		info_file_path = pkg_resources.resource_filename(package_name, info_file_name)
+		package_path = os.path.join(os.path.expanduser('~'), '.{0}'.format(package_name))
+		if not os.path.isdir(package_path):
+			os.mkdir(package_path)
 
-        if os.path.isdir(directory_path):
-            if force_update or len(glob.glob(os.path.join(directory_path, '*'))) == 0:
-                shutil.rmtree(directory_path)
-                os.mkdir(directory_path)
-                update = True
-            else:
-                if not os.path.isfile(last_update_file_path):
-                    update = True
-                elif int(open(last_update_file_path).readlines()[0]) < date_to_update:
-                    update = True
-                else:
-                    update = False
-        else:
-            os.mkdir(directory_path)
-            update = True
+		self.package_path = package_path
 
-        if update and ask_size:
-            if input('Downloading {0} database (up to {1})... proceed with download now? (y/n): '.format(
-                    database_name, ask_size)) == 'y':
-                update = True
-            else:
-                update = False
+		#self.directory_path = os.path.join(package_path, '{0}_{1}'.format(database_name, directory_name))
+		self.directory_path = os.path.join(package_path, '{0}'.format(database_name))
+		last_update_file_path = os.path.join(package_path, '{0}_{1}'.format(database_name, last_update_file_name))
 
-        if update:
-            # noinspection PyBroadException
-            try:
-                print('\nDownloading {0} database...'.format(database_name))
+		if date_to_update == 'daily':
+			date_to_update = int(time.strftime('%y%m%d'))
+		else:
+			date_to_update = int(date_to_update)
 
-                dbx_files = pickle.load(open(info_file_path, 'rb'))
-                dbx_files = dbx_files['{0}_{1}'.format(database_name, directory_name)]
+		if os.path.isdir(self.directory_path):
+			if force_update or len(glob.glob(os.path.join(self.directory_path, '*'))) == 0:
+				shutil.rmtree(self.directory_path)
+				os.mkdir(self.directory_path)
+				update = True
+			else:
+				if not os.path.isfile(last_update_file_path):
+					update = True
+				elif int(open(last_update_file_path).readlines()[0]) < date_to_update:
+					update = True
+				else:
+					update = False
+		else:
+			os.mkdir(self.directory_path)
+			update = True
 
-                for current_file in glob.glob(os.path.join(directory_path, '*')):
-                    if os.path.split(current_file)[1] not in dbx_files:
-                        os.remove(current_file)
+		with open(os.path.join(package_name, info_file_name), 'rb') as file:
+			dbx_files_dict = pickle.load(file)
+			self.dbx_files = dbx_files_dict[database_name]
 
-                for dbx_file in dbx_files:
-                    if not os.path.isfile(os.path.join(package_path, dbx_files[dbx_file]['local_path'])):
-                        print('Downloading... ', dbx_file)
-                        urlretrieve(dbx_files[dbx_file]['link'], os.path.join(package_path,
-                                                                              dbx_files[dbx_file]['local_path']))
-                    else:
-                        print('File already here... ', dbx_file)
-
-                w = open(last_update_file_path, 'w')
-                w.write(time.strftime('%y%m%d'))
-                w.close()
-
-            except Exception as inst:
-                print('\nDownloading {0} database failed. A download will be attempted next time.'.format(
-                    database_name))
-                print('Error:', sys.exc_info()[0])
-                print(inst.args)
-                pass
-
-        if (not os.path.isdir(directory_path) or
-                len(glob.glob(os.path.join(directory_path, '*'))) == 0):
-            if vital:
-                print('{0} database not available.'.format(database_name))
-                exit()
-            else:
-                print('\n{0} features cannot be used.'.format(database_name))
-                self.path = False
-        else:
-            self.path = directory_path
+		#dbx_files = pickle.load(open(info_file_path, 'rb'))
+		#dbx_files = dbx_files['{0}_{1}'.format(database_name, directory_name)]
 
 
-class Databases:
+#	def self_print(self):
+#		print(self.database_name)
+#		print(self.directory_name)
+#		print(self.package_path)
+#		print(self.directory_path)
 
-    def __init__(self):
+	def get_file_content(self, dbx_file):
+		abs_path_file = os.path.join(self.package_path, self.dbx_files[dbx_file]['local_path'])
 
-        self.passbands = Database('passbands', date_to_update='190208', vital=True).path
-        self.phoenix201213 = Database('phoenix201213', date_to_update='190208', vital=True).path
-        self.phoenix2018 = Database('phoenix2018', date_to_update='190208', vital=True).path
+		if not os.path.isfile(abs_path_file):
+			print('Downloading... ', dbx_file)
+			urlretrieve(self.dbx_files[dbx_file]['link'], os.path.join(self.package_path, self.dbx_files[dbx_file]['local_path']))
+
+		else:
+			print('File already here... ', dbx_file)
+
+		with open(abs_path_file, 'rb') as file:
+			model_dict = pickle.load(file)
+		return model_dict
 
 
-databases = Databases()
+	def get_filename_list(self):
+		file_list = self.dbx_files.keys()
+		return file_list
+
+
+
+databases = {
+"Phoenix_2012_13":Database('Phoenix_2012_13', date_to_update='190208', vital=True),
+"Phoenix_2018":Database("Phoenix_2018", date_to_update='190208', vital=True),
+"passbands":Database("passbands", date_to_update='190208', vital=True)
+}

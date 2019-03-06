@@ -289,7 +289,9 @@ def check_configuration(input_dict):
     if not check_length(passbands):
         print('ERROR: invalid length=', len(passbands), 'for passbands. It must have length>=1.')
         check = False
-    allowed_passbands = ['WFC3_G141', 'Kepler'] #user-defined should be added, maybe also rectangle
+    #allowed_passbands = ['WFC3_G141', 'Kepler'] #user-defined should be added, maybe also rectangle
+    list_passbands = [f for f in os.listdir('Passbands/') if f.endswith('.pass')]
+    allowed_passbands = [f[:-5] for f in list_passbands]
     for item in passbands:
         if item not in allowed_passbands:
             print('ERROR:',item,'is not a valid passbands.')
@@ -577,6 +579,7 @@ def get_individual_parameters(input_dict):
 
 
 def stellar_params_from_file_name(file_name):
+    params = file_name.split('/')[-1]
     params = file_name.replace('.pickle', '').split('_')
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
@@ -585,18 +588,10 @@ def stellar_params_from_file_name(file_name):
 
 
 def get_grid_parameters(stellar_models_grid):
-    if stellar_models_grid=='Phoenix_2018':
-        path = databases.phoenix2018
-        files = [f for f in os.listdir(path) if f.startswith('teff')]
-        star_params_grid = np.zeros((len(files),3))
-        for i in range(len(files)):
-            star_params_grid[i,:] = stellar_params_from_file_name(files[i])
-    elif stellar_models_grid=='Phoenix_2012_13':
-        path = databases.phoenix201213
-        files = [f for f in os.listdir(path) if f.startswith('teff')]
-        star_params_grid = np.zeros((len(files),3))
-        for i in range(len(files)):
-            star_params_grid[i,:] = stellar_params_from_file_name(files[i])
+    files = databases[stellar_models_grid].get_filename_list()
+    star_params_grid = np.zeros((len(files),3))
+    for i in range(len(files)):
+        star_params_grid[i,:] = stellar_params_from_file_name(files[i])
     return files, star_params_grid
 
 
@@ -675,7 +670,7 @@ def get_subgrid(input_dict):
     else:
         star_params_subgrid = star_params_grid[subgrid_indices,:]
         files_subgrid = [files[i] for i in subgrid_indices]
-    return files_subgrid, star_params_subgrid
+    return files_subgrid, star_params_subgrid, subgrid_indices
 
 
 
@@ -710,7 +705,7 @@ def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_
         indices_teff_sup = np.where(star_params_grid[:,0]>=star_effective_temperature)[0]
         indices_teff_inf = np.where(star_params_grid[:,0]<=star_effective_temperature)[0]
         teff_upper = np.min(star_params_grid[indices_teff_sup,0])
-        teff_lower = np.min(star_params_grid[indices_teff_inf,0])
+        teff_lower = np.max(star_params_grid[indices_teff_inf,0])
         indices_teff_upper = np.where(star_params_grid[:,0]==teff_upper)[0]
         indices_teff_lower = np.where(star_params_grid[:,0]==teff_lower)[0]
         indices_logg_sup = np.where(star_params_grid[:,1]>=star_log_gravity)[0]
@@ -751,9 +746,8 @@ def check_passband_limits(pb, stellar_models_grid):
 
 
 def get_passband(passband, stellar_models_grid):
-    path = databases.passbands
     ext = '.pass'
-    [pb, check] = read_as_numpy_array(os.path.join(path, '{0}{1}'.format(passband, ext)))
+    [pb, check] = read_as_numpy_array('Passbands/'+passband+'.pass')
     if not check:
         print('WARNING: Skipping passband', passband, '.')
         return np.array([]), check
@@ -779,7 +773,7 @@ def get_wavelength_bins(wavelength_bins_file, pb, passband):
     if wavelength_bins_file == 'no_bins':
         check = True
         return np.array([]), check
-    path = '/Users/pepe/Desktop/ld_code_to_publish/'
+    path = 'Wavelength_bins_files/'
     #ext = '.txt'
     [wb, check] = read_as_numpy_array(path+wavelength_bins_file)
     if not check:
@@ -825,19 +819,6 @@ def compute_integrated_intensities(model_wavelengths, model_intensities, respons
         integ_ints += (model_wavelengths[i+1]-model_wavelengths[i-1])*response[i]*model_wavelengths[i]*model_intensities[i,:]
     integ_ints = integ_ints/integ_ints[-1]
     return integ_ints
-
-
-def get_model_intensities(filename, stellar_models_grid):
-    if stellar_models_grid == 'Phoenix_2018':
-        path = databases.phoenix2018
-        with open(os.path.join(path, filename), 'rb') as file:
-            model_dict = pickle.load(file, encoding='latin1')
-        return model_dict
-    elif stellar_models_grid == 'Phoenix_2012_13':
-        path = databases.phoenix201213
-        with open(os.path.join(path, filename), 'rb') as file:
-            model_dict = pickle.load(file, encoding='latin1')
-        return model_dict
 
 
 def get_integrated_intensities(model_dict, passbands_dict, wavelength_bins_dict):
@@ -1023,7 +1004,7 @@ def process_configuration(input_dict):
     if 'output_path' in input_keys:
         output_path = input_dict_local['output_path'][0]
     else:
-        output_path = 'results/'
+        output_path = 'Results/'
     stellar_models_grid = input_dict_local['stellar_models_grid'][0]
     limb_darkening_laws = input_dict_local['limb_darkening_laws']
     gen_poly_orders = None
@@ -1043,6 +1024,7 @@ def process_configuration(input_dict):
     passbands_dict = {}
     wavelength_bins_dict = {}
     for i in range(n_pass):
+	check = True
         [pb, check] = get_passband(passbands[i], stellar_models_grid)
         if check:
             [wb, check] = get_wavelength_bins(wavelength_bins_files[i], pb, passbands[i])
@@ -1059,8 +1041,8 @@ def process_configuration(input_dict):
             neigh_indices = get_neighbour_files_indices(target_names[i],star_effective_temperature[i],star_log_gravity[i],star_metallicity[i],star_params_grid,stellar_models_grid)
             neighbour_files_indices = my_vstack(neighbour_files_indices, neigh_indices)
             if len(neigh_indices)==0:
-                #print('WARNING:', target_names[i], 'cannot be calculated. Stellar parameters are out of the', stellar_models_grid, 'grid.')
                 indices_to_delete += [i,]
+	neighbour_files_indices = np.atleast_2d(neighbour_files_indices)
         star_effective_temperature = np.delete(star_effective_temperature, indices_to_delete)
         star_log_gravity = np.delete(star_log_gravity, indices_to_delete)
         star_metallicity = np.delete(star_metallicity, indices_to_delete)
@@ -1071,7 +1053,7 @@ def process_configuration(input_dict):
         neighbour_integrated_intensities = {}
         neighbour_limb_darkening_coefficients = {}
         for i in neighbour_files_indices_list:
-            neighbour_model_intensities[i] = get_model_intensities(star_files_grid[i], stellar_models_grid)
+            neighbour_model_intensities[i] = databases[stellar_models_grid].get_file_content(dbx_file=star_files_grid[i])
             neighbour_integrated_intensities[i] = get_integrated_intensities(neighbour_model_intensities[i], passbands_dict, wavelength_bins_dict)
             neighbour_limb_darkening_coefficients[i] = get_limb_darkening_coefficients(neighbour_integrated_intensities[i], limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders)
             neighbour_limb_darkening_coefficients[i]['star_params'] = star_params_grid[i]
@@ -1079,7 +1061,6 @@ def process_configuration(input_dict):
         target_limb_darkening_coefficients = {}
         i0 = neighbour_files_indices_list[0]
         final_passbands = list(neighbour_limb_darkening_coefficients[i0]['passbands'].keys())
-        print(neighbour_limb_darkening_coefficients[i0])
         final_limb_darkening_laws = neighbour_limb_darkening_coefficients[i0]['passbands'][final_passbands[0]]['laws'].keys()
         for i in range(n_targets):
             target_limb_darkening_coefficients[target_names[i]] = {}
@@ -1098,27 +1079,28 @@ def process_configuration(input_dict):
         with open(os.path.join(output_path, 'target_ldc.pickle') , 'wb') as out1:
             pickle.dump(target_limb_darkening_coefficients, out1, protocol=pickle.HIGHEST_PROTOCOL)
         if user_output == 'complete':
-            with open(output_path+'neighbour_ldc.pickle' , 'wb') as out2:
+            with open(os.path.join(output_path, 'neighbour_ldc.pickle') , 'wb') as out2:
                 pickle.dump(neighbour_limb_darkening_coefficients, out2, protocol=pickle.HIGHEST_PROTOCOL)
-            with open(output_path+'neighbour_intensities.pickle' , 'wb') as out3:
+            with open(os.path.join(output_path, 'neighbour_intensities.pickle') , 'wb') as out3:
                 pickle.dump(neighbour_integrated_intensities, out3, protocol=pickle.HIGHEST_PROTOCOL)
         return limb_darkening_coefficients, neighbour_integrated_intensities
     elif calculation_type=='grid':
-        [star_files_subgrid, star_params_subgrid] = get_subgrid(input_dict_local)
+        [star_files_subgrid, star_params_subgrid, subgrid_indices] = get_subgrid(input_dict_local)
         n_files = len(star_files_subgrid)
         model_intensities = {}
         integrated_intensities = {}
         limb_darkening_coefficients = {}
         for i in range(n_files):
             label = 'teff' + str(star_params_subgrid[i,0]) + '_logg' + str(star_params_subgrid[i,1]) + '_MH' + str(star_params_subgrid[i,2])
-            model_intensities[label] = get_model_intensities(star_files_subgrid[i], stellar_models_grid)
+            model_intensities[label] = databases[stellar_models_grid].get_file_content(dbx_file=star_files_grid[subgrid_indices[i]])
+            integrated_intensities[label] = {}
             integrated_intensities[label] = get_integrated_intensities(model_intensities[label], passbands_dict, wavelength_bins_dict)
             limb_darkening_coefficients[label] = get_limb_darkening_coefficients(integrated_intensities[label], limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders)
             limb_darkening_coefficients[label]['star_params'] = star_params_subgrid[i]
-        with open(output_path+'grid_ldc.pickle', 'wb') as out1:
+        with open(os.path.join(output_path, 'grid_ldc.pickle'), 'wb') as out1:
             pickle.dump(limb_darkening_coefficients, out1, protocol=pickle.HIGHEST_PROTOCOL)
         if user_output == 'complete':
-            with open(output_path+'grid_intensities.pickle', 'wb') as out2:
+            with open(os.path.join(output_path, 'grid_intensities.pickle'), 'wb') as out2:
                 pickle.dump(integrated_intensities, out2, protocol=pickle.HIGHEST_PROTOCOL)
         return limb_darkening_coefficients, integrated_intensities
 
@@ -1126,6 +1108,6 @@ def process_configuration(input_dict):
 def limbcalc(parameters_file):
     input_dict = read_configuration(parameters_file)
     if check_configuration(input_dict):
-        return process_configuration(input_dict)
+        process_configuration(input_dict)
     else:
         print('Something went wrong with the input.')
