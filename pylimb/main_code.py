@@ -849,7 +849,7 @@ def rescale_and_weights(mu, intensities):
     rmax_dr = 0.5*( radi[np.argmax(dint_dr)+1] + radi[np.argmax(dint_dr)] )
     radicut_dr = radi[np.where(radi<=rmax_dr)]/rmax_dr
     mucut_dr = np.sqrt(1.0-radicut_dr**2.0)
-    intensitiescut_dmu = intensities[np.where(radi<=rmax_dr)]
+    intensitiescut_dr = intensities[np.where(radi<=rmax_dr)]
     weights_dr = np.zeros_like(radicut_dr)
     weights_dr[1:-1] = -0.5*(radicut_dr[2:]-radicut_dr[:-2])
     weights_dr[0] = (1.0-radicut_dr[0]) - 0.5*(radicut_dr[1]-radicut_dr[0])
