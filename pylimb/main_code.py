@@ -844,15 +844,17 @@ def get_integrated_intensities(model_dict, passbands_dict, wavelength_bins_dict)
 
 
 def rescale_and_weights(mu, intensities):
-    dint_dmu = np.abs( (intensities[1:]-intensities[:-1])/(mu[1:]-mu[:-1]) )
-    mumin_dmu = 0.5*( mu[np.argmax(dint_dmu)+1] + mu[np.argmax(dint_dmu)] )
-    mucut_dmu = (mu[np.where(mu>mumin_dmu)] - mumin_dmu)/(1.0 - mumin_dmu)
-    intensitiescut_dmu = intensities[np.where(mu>mumin_dmu)]
-    weights_dmu = np.zeros_like(mucut_dmu)
-    weights_dmu[1:-1] = 0.5*(mucut_dmu[2:]-mucut_dmu[:-2])
-    weights_dmu[0] = mucut_dmu[0] + (mucut_dmu[1]-mucut_dmu[0])/2.0
-    weights_dmu[-1] = (1.0-mucut_dmu[-2])/2.0
-    return mucut_dmu, intensitiescut_dmu, weights_dmu
+    radi = np.sqrt(1.0-mu**2.0)
+    dint_dr = np.abs( (intensities[1:]-intensities[:-1])/(radi[1:]-radi[:-1]) )
+    rmax_dr = 0.5*( radi[np.argmax(dint_dr)+1] + radi[np.argmax(dint_dr)] )
+    radicut_dr = radi[np.where(radi<=rmax_dr)]/rmax_dr
+    mucut_dr = np.sqrt(1.0-radicut_dr**2.0)
+    intensitiescut_dmu = intensities[np.where(radi<=rmax_dr)]
+    weights_dr = np.zeros_like(radicut_dr)
+    weights_dr[1:-1] = -0.5*(radicut_dr[2:]-radicut_dr[:-2])
+    weights_dr[0] = (1.0-radicut_dr[0]) - 0.5*(radicut_dr[1]-radicut_dr[0])
+    weights_dr[-1] = 0.5*radicut_dr[-2]
+    return mucut_dr, intensitiescut_dr, weights_dr
 
 
 
