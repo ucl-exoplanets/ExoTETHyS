@@ -4,4 +4,5 @@ from __future__ import print_function
 
 __version__ = '1.0.0'
 
-from .main_code import *
+from .sail import *
+from .milc import *
