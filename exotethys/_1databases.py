@@ -12,7 +12,7 @@ class Database:
 
 		self.database_name = database_name
 
-		package_name = 'pylimb'
+		package_name = 'exotethys'
 		info_file_name = '_0database.pickle'
 		#directory_name = 'database'
 		last_update_file_name = 'database_last_update.txt'
