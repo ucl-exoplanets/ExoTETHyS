@@ -1078,8 +1078,9 @@ def process_configuration(input_dict):
         limb_darkening_coefficients = {}
         limb_darkening_coefficients['neighbour'] = neighbour_limb_darkening_coefficients
         limb_darkening_coefficients['target'] = target_limb_darkening_coefficients
-        with open(os.path.join(output_path, 'target_ldc.pickle') , 'wb') as out1:
-            pickle.dump(target_limb_darkening_coefficients, out1, protocol=pickle.HIGHEST_PROTOCOL)
+	for i in range(n_targets):
+            with open(os.path.join(output_path, target_names[i]+'_ldc.pickle') , 'wb') as out1:
+                pickle.dump(target_limb_darkening_coefficients[target_names[i]], out1, protocol=pickle.HIGHEST_PROTOCOL)
         if user_output == 'complete':
             with open(os.path.join(output_path, 'neighbour_ldc.pickle') , 'wb') as out2:
                 pickle.dump(neighbour_limb_darkening_coefficients, out2, protocol=pickle.HIGHEST_PROTOCOL)
