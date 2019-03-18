@@ -1026,7 +1026,7 @@ def process_configuration(input_dict):
     passbands_dict = {}
     wavelength_bins_dict = {}
     for i in range(n_pass):
-	check = True
+        check = True
         [pb, check] = get_passband(passbands[i], stellar_models_grid)
         if check:
             [wb, check] = get_wavelength_bins(wavelength_bins_files[i], pb, passbands[i])
