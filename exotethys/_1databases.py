@@ -74,12 +74,15 @@ class Database:
 			print('File already here... ', dbx_file)
 
 		with open(abs_path_file, 'rb') as file:
-			model_dict = pickle.load(file)
+			try: #python2
+				model_dict = pickle.load(file)
+			except UnicodeDecodeError: #python3
+				model_dict = pickle.load(file, encoding='latin1')
 		return model_dict
 
 
 	def get_filename_list(self):
-		file_list = self.dbx_files.keys()
+		file_list = list(self.dbx_files.keys())
 		return file_list
 
 
