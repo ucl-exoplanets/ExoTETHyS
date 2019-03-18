@@ -1044,7 +1044,7 @@ def process_configuration(input_dict):
             neighbour_files_indices = my_vstack(neighbour_files_indices, neigh_indices)
             if len(neigh_indices)==0:
                 indices_to_delete += [i,]
-	neighbour_files_indices = np.atleast_2d(neighbour_files_indices)
+        neighbour_files_indices = np.atleast_2d(neighbour_files_indices)
         star_effective_temperature = np.delete(star_effective_temperature, indices_to_delete)
         star_log_gravity = np.delete(star_log_gravity, indices_to_delete)
         star_metallicity = np.delete(star_metallicity, indices_to_delete)
@@ -1078,7 +1078,7 @@ def process_configuration(input_dict):
         limb_darkening_coefficients = {}
         limb_darkening_coefficients['neighbour'] = neighbour_limb_darkening_coefficients
         limb_darkening_coefficients['target'] = target_limb_darkening_coefficients
-	for i in range(n_targets):
+        for i in range(n_targets):
             with open(os.path.join(output_path, target_names[i]+'_ldc.pickle') , 'wb') as out1:
                 pickle.dump(target_limb_darkening_coefficients[target_names[i]], out1, protocol=pickle.HIGHEST_PROTOCOL)
         if user_output == 'complete':
