@@ -186,7 +186,7 @@ def check_configuration(input_dict):
 #This function checks whether the dictionary created from the input file is fine and returns a boolean value.
     check = True
     input_dict_local = copy_dict(input_dict)
-    input_keys = input_dict_local.keys()
+    input_keys = list(input_dict_local.keys())
     mandatory_keys = ['calculation_type', 'stellar_models_grid', 'limb_darkening_laws', 'passbands']
     allowed_keys = mandatory_keys + ['target_names', 'gen_claret_orders', 'gen_poly_orders', 'star_effective_temperature', 'star_log_gravity', 'star_metallicity', 'star_minimum_effective_temperature', 'star_maximum_effective_temperature', 'star_minimum_log_gravity', 'star_maximum_log_gravity', 'star_minimum_metallicity', 'star_maximum_metallicity', 'wavelength_bins_files', 'user_output', 'output_path']
 
@@ -377,7 +377,7 @@ def check_configuration(input_dict):
         for i in keys_to_delete:
             del input_dict_local[i]
 
-    input_keys = input_dict_local.keys()
+    input_keys = list(input_dict_local.keys())
 
     ##Checking the keywords which are specific to one of the alternative calculation_type.
     ##NOTE: There are no checks here that the number of values for the various parameters are consistent. These are checked in the functions get_individual_parameters and get_grid_parameters.
@@ -499,7 +499,7 @@ def check_configuration(input_dict):
 
 def get_individual_parameters(input_dict):
     input_dict_local = copy.deepcopy(input_dict)
-    input_keys = input_dict_local.keys()
+    input_keys = list(input_dict_local.keys())
     input_star_effective_temperature = input_dict_local['star_effective_temperature']
     if check_type_in_list(input_star_effective_temperature, str):
         [star_effective_temperature, check] = read_as_numpy_array(input_star_effective_temperature[0])
@@ -597,7 +597,7 @@ def get_grid_parameters(stellar_models_grid):
 
 def get_subgrid(input_dict):
     input_dict_local = copy.deepcopy(input_dict)
-    input_keys = input_dict_local.keys()
+    input_keys = list(input_dict_local.keys())
     stellar_models_grid = input_dict_local['stellar_models_grid'][0]
     [files, star_params_grid] = get_grid_parameters(stellar_models_grid)
     subgrid_indices = np.arange(np.shape(star_params_grid)[0])
@@ -825,7 +825,7 @@ def get_integrated_intensities(model_dict, passbands_dict, wavelength_bins_dict)
     model_wavelengths = model_dict['wavelengths']
     model_intensities = model_dict['intensities']
     mu = model_dict['mu']
-    passbands = passbands_dict.keys()
+    passbands = list(passbands_dict.keys())
     integ_dict = {}
     integ_dict['mu'] = mu
     for passband in passbands:
@@ -860,7 +860,7 @@ def rescale_and_weights(mu, intensities):
 
 def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders):
     mu = integ_dict['mu']
-    passbands = [key for key in integ_dict.keys() if key!='mu']
+    passbands = [key for key in list(integ_dict.keys()) if key!='mu']
     ldc_dict = {}
     ldc_dict['passbands'] = {}
     for passband in passbands:
@@ -997,7 +997,7 @@ def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_dark
 
 def process_configuration(input_dict):
     input_dict_local = copy.deepcopy(input_dict)
-    input_keys = input_dict_local.keys()
+    input_keys = list(input_dict_local.keys())
     calculation_type = input_dict_local['calculation_type'][0]
     if 'user_output' in input_keys:
         user_output = input_dict_local['user_output'][0]
@@ -1063,7 +1063,7 @@ def process_configuration(input_dict):
         target_limb_darkening_coefficients = {}
         i0 = neighbour_files_indices_list[0]
         final_passbands = list(neighbour_limb_darkening_coefficients[i0]['passbands'].keys())
-        final_limb_darkening_laws = neighbour_limb_darkening_coefficients[i0]['passbands'][final_passbands[0]]['laws'].keys()
+        final_limb_darkening_laws = list(neighbour_limb_darkening_coefficients[i0]['passbands'][final_passbands[0]]['laws'].keys())
         for i in range(n_targets):
             target_limb_darkening_coefficients[target_names[i]] = {}
             target_limb_darkening_coefficients[target_names[i]]['star_params'] = np.array([star_effective_temperature[i], star_log_gravity[i], star_metallicity[i]])
