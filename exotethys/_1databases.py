@@ -14,7 +14,7 @@ class Database:
 
 		package_name = 'exotethys'
 		info_file_name = '_0database.pickle'
-		#directory_name = 'database'
+		package_data = {package_name:'Passbands/*.pass'}
 		last_update_file_name = 'database_last_update.txt'
 
 		info_file_path = pkg_resources.resource_filename(package_name, info_file_name)
@@ -49,7 +49,8 @@ class Database:
 			os.mkdir(self.directory_path)
 			update = True
 
-		with open(os.path.join(package_name, info_file_name), 'rb') as file:
+		#with open(os.path.join(package_name, info_file_name), 'rb') as file:
+		with open(info_file_path,'rb') as file: #Christophe correction
 			dbx_files_dict = pickle.load(file)
 			self.dbx_files = dbx_files_dict[database_name]
 
@@ -89,6 +90,5 @@ class Database:
 
 databases = {
 "Phoenix_2012_13":Database('Phoenix_2012_13', date_to_update='190208', vital=True),
-"Phoenix_2018":Database("Phoenix_2018", date_to_update='190208', vital=True),
-"passbands":Database("passbands", date_to_update='190208', vital=True)
+"Phoenix_2018":Database("Phoenix_2018", date_to_update='190208', vital=True)
 }

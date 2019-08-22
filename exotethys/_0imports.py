@@ -35,6 +35,7 @@ import numpy as np
 import os
 from scipy.optimize import minimize
 from scipy.interpolate import LinearNDInterpolator as interp
+from scipy.interpolate import interp1d
 
 import copy
 import pickle
