@@ -15,5 +15,12 @@ sail: this subpackage can provide sets of stellar limb-darkening coefficients wi
       - built-in or user-defined passbands (with or without spectroscopic bins);
       - built-in or user-defined limb-darkening laws;
       - using different databases of stellar model-atmospheres.
+
+how to run:
+>>> from exotethys import sail
+>>> sail.ldc_calculate('examples/sail_example1.txt')
       
 trip: this subpackage can compute transit light-curves by using stellar specific intensities rather than (approximate) limb-darkening coefficients.
+how to run:
+>>> from exotethys import trip
+>>> sail.ldc_calculate('examples/trip_example.txt')
