@@ -1,7 +1,5 @@
 # ExoTETHyS
 
-[//]: # (![MacDown logo]())
-
 Beta version -- README tutorial in preparation
 
 This repository stores codes to help modeling exoplanetary transits and eclipsing binaries.
