@@ -361,10 +361,10 @@ def check_configuration(input_dict):
         print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
         check = False
     else:
-        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13']
+        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Atlas_2000']
         stellar_models_grid = stellar_models_grid[0]
         if stellar_models_grid not in allowed_stellar_models_grid:
-            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13.')
+            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Atlas_2000.')
             check = False
 
     #Checking the choice of limb_darkening_laws; at least one law must be specified in the input file (no default).
@@ -820,7 +820,7 @@ def get_subgrid(input_dict):
 
 
 def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_gravity,star_metallicity,star_params_grid,stellar_models_grid):
-#This function searchs for uo to 2^n neighbours for a given set of stellar parameters and returns the corresponding indices in the files list.
+#This function searchs for up to 2^n neighbours for a given set of stellar parameters and returns the corresponding indices in the files list.
     teff_min = np.min(star_params_grid[:,0])
     teff_max = np.max(star_params_grid[:,0])
     logg_min = np.min(star_params_grid[:,1])
@@ -845,49 +845,84 @@ def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_
     if cond1 or cond2 or cond3 or cond4 or cond5 or cond6:
         return neigh_indices
     #
-    if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13']:
-        indices_teff_sup = np.where(star_params_grid[:,0]>=star_effective_temperature)[0]
-        indices_teff_inf = np.where(star_params_grid[:,0]<=star_effective_temperature)[0]
-        teff_upper = np.min(star_params_grid[indices_teff_sup,0])
-        teff_lower = np.max(star_params_grid[indices_teff_inf,0])
-        indices_teff_upper = np.where(star_params_grid[:,0]==teff_upper)[0]
-        indices_teff_lower = np.where(star_params_grid[:,0]==teff_lower)[0]
-        indices_logg_sup = np.where(star_params_grid[:,1]>=star_log_gravity)[0]
-        indices_logg_inf = np.where(star_params_grid[:,1]<=star_log_gravity)[0]
-        indices_teff_upper_logg_sup = np.intersect1d( indices_teff_upper, indices_logg_sup )
-        indices_teff_upper_logg_inf = np.intersect1d( indices_teff_upper, indices_logg_inf )
-        indices_teff_lower_logg_sup = np.intersect1d( indices_teff_lower, indices_logg_sup )
-        indices_teff_lower_logg_inf = np.intersect1d( indices_teff_lower, indices_logg_inf )
-        logg_upper1 = np.min(star_params_grid[indices_teff_upper_logg_sup,1])
-        logg_lower1 = np.max(star_params_grid[indices_teff_upper_logg_inf,1])
-        logg_upper2 = np.min(star_params_grid[indices_teff_lower_logg_sup,1])
-        logg_lower2 = np.max(star_params_grid[indices_teff_lower_logg_inf,1])
-        indices_logg_upper1 = np.where(star_params_grid[:,1]==logg_upper1)[0]
-        indices_logg_lower1 = np.where(star_params_grid[:,1]==logg_lower1)[0]
-        indices_logg_upper2 = np.where(star_params_grid[:,1]==logg_upper2)[0]
-        indices_logg_lower2 = np.where(star_params_grid[:,1]==logg_lower2)[0]
-        index_teff_upper_logg_upper = np.intersect1d( indices_teff_upper_logg_sup, indices_logg_upper1 )[0]
-        index_teff_upper_logg_lower = np.intersect1d( indices_teff_upper_logg_inf, indices_logg_lower1 )[0]
-        index_teff_lower_logg_upper = np.intersect1d( indices_teff_lower_logg_sup, indices_logg_upper2 )[0]
-        index_teff_lower_logg_lower = np.intersect1d( indices_teff_lower_logg_inf, indices_logg_lower2 )[0]
-        neigh_indices = np.array([index_teff_upper_logg_upper, index_teff_upper_logg_lower, index_teff_lower_logg_upper, index_teff_lower_logg_lower])
-        return neigh_indices
+    indices_teff_sup = np.where(star_params_grid[:,0]>=star_effective_temperature)[0]
+    indices_teff_inf = np.where(star_params_grid[:,0]<=star_effective_temperature)[0]
+    indices_logg_sup = np.where(star_params_grid[:,1]>=star_log_gravity)[0]
+    indices_logg_inf = np.where(star_params_grid[:,1]<=star_log_gravity)[0]
+    indices_mh_sup = np.where(star_params_grid[:,2]>=star_metallicity)[0]
+    indices_mh_inf = np.where(star_params_grid[:,2]<=star_metallicity)[0]
+    #
+    indices_teff_sup_logg_sup = np.intersect1d( indices_teff_sup, indices_logg_sup )
+    indices_teff_sup_logg_sup_mh_sup = np.intersect1d( indices_teff_sup_logg_sup, indices_mh_sup )
+    indices_teff_sup_logg_sup_mh_inf = np.intersect1d( indices_teff_sup_logg_sup, indices_mh_inf )
+    indices_teff_sup_logg_inf = np.intersect1d( indices_teff_sup, indices_logg_inf )
+    indices_teff_sup_logg_inf_mh_sup = np.intersect1d( indices_teff_sup_logg_inf, indices_mh_sup )
+    indices_teff_sup_logg_inf_mh_inf = np.intersect1d( indices_teff_sup_logg_inf, indices_mh_inf )
+    indices_teff_inf_logg_sup = np.intersect1d( indices_teff_inf, indices_logg_sup )
+    indices_teff_inf_logg_sup_mh_sup = np.intersect1d( indices_teff_inf_logg_sup, indices_mh_sup )
+    indices_teff_inf_logg_sup_mh_inf = np.intersect1d( indices_teff_inf_logg_sup, indices_mh_inf )
+    indices_teff_inf_logg_inf = np.intersect1d( indices_teff_inf, indices_logg_inf )
+    indices_teff_inf_logg_inf_mh_sup = np.intersect1d( indices_teff_inf_logg_inf, indices_mh_sup )
+    indices_teff_inf_logg_inf_mh_inf = np.intersect1d( indices_teff_inf_logg_inf, indices_mh_inf )
+    #
+    indices1t = indices_teff_sup_logg_sup_mh_sup[np.where( star_params_grid[indices_teff_sup_logg_sup_mh_sup,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_sup_mh_sup,0]-star_effective_temperature) )[0] ]
+    indices1tg = indices1t[np.where( star_params_grid[indices1t,1]-star_log_gravity == np.min(star_params_grid[indices1t,1]-star_log_gravity) )[0] ]
+    index1tgm = indices1tg[np.argmin( star_params_grid[indices1tg,2]-star_metallicity )]
+    #
+    indices2t = indices_teff_sup_logg_sup_mh_inf[np.where( star_params_grid[indices_teff_sup_logg_sup_mh_inf,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_sup_mh_inf,0]-star_effective_temperature) )[0] ]
+    indices2tg = indices2t[np.where( star_params_grid[indices2t,1]-star_log_gravity == np.min(star_params_grid[indices2t,1]-star_log_gravity) )[0] ]
+    index2tgm = indices2tg[np.argmin( star_metallicity-star_params_grid[indices2tg,2] )]
+    #
+    indices3t = indices_teff_sup_logg_inf_mh_sup[np.where( star_params_grid[indices_teff_sup_logg_inf_mh_sup,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_inf_mh_sup,0]-star_effective_temperature) )[0] ]
+    indices3tg = indices3t[np.where( star_log_gravity-star_params_grid[indices3t,1] == np.min(star_log_gravity-star_params_grid[indices3t,1]) )[0] ]
+    index3tgm = indices3tg[np.argmin( star_params_grid[indices3tg,2]-star_metallicity )]
+    #
+    indices4t = indices_teff_sup_logg_inf_mh_inf[np.where( star_params_grid[indices_teff_sup_logg_inf_mh_inf,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_inf_mh_inf,0]-star_effective_temperature) )[0] ]
+    indices4tg = indices4t[np.where( star_log_gravity-star_params_grid[indices4t,1] == np.min(star_log_gravity-star_params_grid[indices4t,1]) )[0] ]
+    index4tgm = indices4tg[np.argmin( star_metallicity-star_params_grid[indices4tg,2] )]
+    #
+    indices5t = indices_teff_inf_logg_sup_mh_sup[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_sup,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_sup,0]) )[0] ]
+    indices5tg = indices5t[np.where( star_params_grid[indices5t,1]-star_log_gravity == np.min(star_params_grid[indices5t,1]-star_log_gravity) )[0] ]
+    index5tgm = indices5tg[np.argmin( star_params_grid[indices5tg,2]-star_metallicity )]
+    #
+    indices6t = indices_teff_inf_logg_sup_mh_inf[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_inf,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_inf,0]) )[0] ]
+    indices6tg = indices6t[np.where( star_params_grid[indices6t,1]-star_log_gravity == np.min(star_params_grid[indices6t,1]-star_log_gravity) )[0] ]
+    index6tgm = indices6tg[np.argmin( star_metallicity-star_params_grid[indices6tg,2] )]
+    #
+    indices7t = indices_teff_inf_logg_inf_mh_sup[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_sup,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_sup,0]) )[0] ]
+    indices7tg = indices7t[np.where( star_log_gravity-star_params_grid[indices7t,1] == np.min(star_log_gravity-star_params_grid[indices7t,1]) )[0] ]
+    index7tgm = indices7tg[np.argmin( star_params_grid[indices7tg,2]-star_metallicity )]
+    #
+    indices8t = indices_teff_inf_logg_inf_mh_inf[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_inf,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_inf,0]) )[0] ]
+    indices8tg = indices8t[np.where( star_log_gravity-star_params_grid[indices8t,1] == np.min(star_log_gravity-star_params_grid[indices8t,1]) )[0] ]
+    index8tgm = indices8tg[np.argmin( star_metallicity-star_params_grid[indices8tg,2] )]
+    #
+    neigh_indices = np.array([index1tgm, index2tgm, index3tgm, index4tgm, index5tgm, index6tgm, index7tgm, index8tgm])
+    return neigh_indices
+
             
 
 def check_passband_limits(pb, stellar_models_grid):
 #This function checks that the wavelengths read from a passband file are within the limits for the chosen stellar_models_grid.
+    check = True
     if stellar_models_grid == 'Phoenix_2018':
         minimum_wavelength = 500.0
         maximum_wavelength = 25999.0
         if np.min(pb[:,0])<minimum_wavelength or np.max(pb[:,0])>maximum_wavelength:
-            pb = False
-        return pb
+            check = False
+        return pb, check
     elif stellar_models_grid == 'Phoenix_2012_13':
         minimum_wavelength = 2500.0
         maximum_wavelength = 99995.0
         if np.min(pb[:,0])<minimum_wavelength or np.max(pb[:,0])>maximum_wavelength:
+            check = False
+        return pb, check
+    elif stellar_models_grid == 'Atlas_2000':
+        minimum_wavelength = 90.9
+        maximum_wavelength = 1600000.0
+        if np.min(pb[:,0])<minimum_wavelength or np.max(pb[:,0])>maximum_wavelength:
             pb = False
-        return pb
+        return pb, check
 
 
 def get_passband(passbands_path, passbands_ext, passband, stellar_models_grid):
@@ -906,7 +941,7 @@ def get_passband(passbands_path, passbands_ext, passband, stellar_models_grid):
         print('WARNING: negative value found in file', passband, 'passband file. Skipping', passband, 'passband.')
         check = False
         return np.array([]), check
-    pb = check_passband_limits(pb, stellar_models_grid)
+    [pb, check] = check_passband_limits(pb, stellar_models_grid)
     if not check:
         print('WARNING:', passband, 'passband exceeds wavelength range for the', stellar_models_grid, 'stellar model grid. Skipping', passband, 'passband.')
         return np.array([]), check
@@ -967,7 +1002,7 @@ def compute_integrated_intensities(model_wavelengths, model_intensities, respons
     #model_intensities = model_intensities/np.mean(model_intensities[:,-1]) #arbitrary normalization
     for i in range(1,len(model_wavelengths)-1):
         integ_ints += (model_wavelengths[i+1]-model_wavelengths[i-1])*response[i]*model_wavelengths[i]*model_intensities[i,:]
-    integ_ints = integ_ints/integ_ints[-1]
+    integ_ints = integ_ints/np.max(integ_ints)
     return integ_ints
 
 
@@ -995,22 +1030,31 @@ def get_integrated_intensities(model_dict, passbands_dict, wavelength_bins_dict)
 
 
 
-def rescale_and_weights(mu, intensities):
+def rescale_and_weights(mu, intensities, stellar_models_grid):
 #This functions finds the drop-off in the spherical intensity models, removes the values after the drop-off and rescales the other mu/radi values,
 #then applies the quasi-spherical cut-off and compute weights for the intensity model-fit.
     radi = np.sqrt(1.0-mu**2.0)
-    dint_dr = np.abs( (intensities[1:]-intensities[:-1])/(radi[1:]-radi[:-1]) )
-    rmax_dr = 0.5*( radi[np.argmax(dint_dr)+1] + radi[np.argmax(dint_dr)] )
-    radicut_dr = radi[np.where(radi<=rmax_dr)]/rmax_dr
-    intensitiescut_dr = intensities[np.where(radi<=rmax_dr)]
-    radicut_dr_qs = radicut_dr[np.where(radicut_dr<=0.99623)]
-    intensitiescut_dr_qs = intensitiescut_dr[np.where(radicut_dr<=0.99623)]
-    mucut_dr_qs = np.sqrt(1.0-radicut_dr_qs**2.0)
-    weights_dr_qs = np.zeros_like(radicut_dr_qs)
-    weights_dr_qs[1:-1] = -0.5*(radicut_dr_qs[2:]-radicut_dr_qs[:-2])
-    weights_dr_qs[0] = (1.0-radicut_dr_qs[0]) - 0.5*(radicut_dr_qs[1]-radicut_dr_qs[0])
-    weights_dr_qs[-1] = 0.5*radicut_dr_qs[-2]
-    return mucut_dr_qs, intensitiescut_dr_qs, weights_dr_qs
+    if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13']:
+        #mu increasing, r decreasing
+        dint_dr = np.abs( (intensities[1:]-intensities[:-1])/(radi[1:]-radi[:-1]) )
+        rmax_dr = 0.5*( radi[np.argmax(dint_dr)+1] + radi[np.argmax(dint_dr)] )
+        radicut_dr = radi[np.where(radi<=rmax_dr)]/rmax_dr
+        intensitiescut_dr = intensities[np.where(radi<=rmax_dr)]
+        radicut_dr_qs = radicut_dr[np.where(radicut_dr<=0.99623)]
+        intensitiescut_dr_qs = intensitiescut_dr[np.where(radicut_dr<=0.99623)]
+        mucut_dr_qs = np.sqrt(1.0-radicut_dr_qs**2.0)
+        weights_dr_qs = np.zeros_like(radicut_dr_qs)
+        weights_dr_qs[1:-1] = -0.5*(radicut_dr_qs[2:]-radicut_dr_qs[:-2])
+        weights_dr_qs[0] = (1.0-radicut_dr_qs[0]) - 0.5*(radicut_dr_qs[1]-radicut_dr_qs[0])
+        weights_dr_qs[-1] = 0.5*radicut_dr_qs[-2]
+        return mucut_dr_qs, intensitiescut_dr_qs, weights_dr_qs
+    elif stellar_models_grid in ['Atlas_2000']:
+        #mu decreasing, r increasing
+        weights_dr = np.zeros_like(radi)
+        weights_dr[1:-1] = 0.5*(radi[2:]-radi[:-2])
+        weights_dr[0] = 0.5*radi[1]
+        weights_dr[-1] = (1.0-radi[-1]) + 0.5*(radi[-1]-radi[-2])
+        return mu, intensities, weights_dr
 
 
 
@@ -1024,12 +1068,12 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
     for passband in passbands:
         integ_ints = integ_dict[passband]
         ldc_dict['passbands'][passband] = {}
-        if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13']:
-            [res_mu, res_integ_ints, weights] = rescale_and_weights(mu, integ_ints)
-            ldc_dict['passbands'][passband]['rescaled_mu'] = res_mu
-            ldc_dict['passbands'][passband]['rescaled_intensities'] = res_integ_ints
-            ldc_dict['passbands'][passband]['weights'] = weights
-            ldc_dict['passbands'][passband]['laws'] = {}
+        #if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13']:
+        [res_mu, res_integ_ints, weights] = rescale_and_weights(mu, integ_ints, stellar_models_grid)
+        ldc_dict['passbands'][passband]['rescaled_mu'] = res_mu
+        ldc_dict['passbands'][passband]['rescaled_intensities'] = res_integ_ints
+        ldc_dict['passbands'][passband]['weights'] = weights
+        ldc_dict['passbands'][passband]['laws'] = {}
         if 'claret4' in limb_darkening_laws:
             ldc_dict['passbands'][passband]['laws']['claret4'] = {}
             conv = False
@@ -1108,50 +1152,162 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
 def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_darkening_coefficients):
 #This function interpolates the limb-darkening coefficients from the neighbours by sequential linear interpolation.
 #It returns the interpolated coefficients and weighted root mean square of the fitting residuals.
-    #First interpolate in logg between the two models with the upper temperature value
+    coeffs_tgm = np.array([])
+    wres_tgm = np.atleast_1d(np.array([]))
+    star_params_tgm = np.array([])
+    for i in neigh_indices:
+        coeffs_tgm = my_vstack(coeffs_tgm, neighbour_limb_darkening_coefficients[i]['passbands'][passband]['laws'][law]['coefficients'])
+        wres_tgm = my_vstack(wres_tgm, np.atleast_1d(neighbour_limb_darkening_coefficients[i]['passbands'][passband]['laws'][law]['weighted_rms_res']))
+        star_params_tgm = my_vstack(star_params_tgm, neighbour_limb_darkening_coefficients[i]['star_params'])
+    #star metallicity interpolation
+    coeffs_tg = np.array([])
+    wres_tg = np.atleast_1d(np.array([]))
+    star_params_tg = np.array([])
+    for i in [0, 2, 4, 6]:
+        w2 = star_params_tgm[i,2]-mh
+        w1 = mh-star_params_tgm[i+1,2]
+        if w1+w2==0:
+            coeffs_tg = my_vstack(coeffs_tg, coeffs_tgm[i,:])
+            wres_tg = my_vstack(wres_tg, np.atleast_1d(wres_tgm[i]))
+            star_params_tg = my_vstack(star_params_tg, star_params_tgm[i,:])
+        else:
+            w_coeffs = (w1*coeffs_tgm[i,:]+w2*coeffs_tgm[i+1,:])/(w1+w2)
+            w_wres = (w1*wres_tgm[i]+w2*wres_tgm[i+1])/(w1+w2)
+            w_star_params = (w1*star_params_tgm[i,:]+w2*star_params_tgm[i+1,:])/(w1+w2)
+            coeffs_tg = my_vstack(coeffs_tg, w_coeffs)
+            wres_tg = my_vstack(wres_tg, np.atleast_1d(w_wres))
+            star_params_tg = my_vstack(star_params_tg, w_star_params)
+    #star log gravity interpolation
+    coeffs_t = np.array([])
+    wres_t = np.atleast_1d(np.array([]))
+    star_params_t = np.array([])
+    for i in [0, 2]:
+        w2 = star_params_tg[i,1]-logg
+        w1 = logg-star_params_tg[i+1,1]
+        if w1+w2==0:
+            coeffs_t = my_vstack(coeffs_t, coeffs_tg[i,:])
+            wres_t = my_vstack(wres_t, np.atleast_1d(wres_tg[i]))
+            star_params_t = my_vstack(star_params_t, star_params_tg[i,:])
+        else:
+            w_coeffs = (w1*coeffs_tg[i,:]+w2*coeffs_tg[i+1,:])/(w1+w2)
+            w_wres = (w1*wres_tg[i]+w2*wres_tg[i+1])/(w1+w2)
+            w_star_params = (w1*star_params_tg[i,:]+w2*star_params_tg[i+1,:])/(w1+w2)
+            coeffs_t = my_vstack(coeffs_t, w_coeffs)
+            wres_t = my_vstack(wres_t, np.atleast_1d(w_wres))
+            star_params_t = my_vstack(star_params_t, w_star_params)
+    #star temperature interpolation
+    coeffs = np.array([])
+    wres = np.atleast_1d(np.array([]))
+    star_params = np.array([])
+    w2 = star_params_t[0,0]-teff
+    w1 = teff-star_params_t[1,0]
+    if w1+w2==0:
+        coeffs = my_vstack(coeffs, coeffs_t[0,:])
+        wres = my_vstack(wres, np.atleast_1d(wres_t[0]))
+    else:
+        coeffs = (w1*coeffs_t[0,:]+w2*coeffs_t[1,:])/(w1+w2)
+        wres = (w1*wres_t[0]+w2*wres_t[1])/(w1+w2)
+    return coeffs, wres
+
+
+def interp_ldc_old(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_darkening_coefficients):
+#This function interpolates the limb-darkening coefficients from the neighbours by sequential linear interpolation.
+#It returns the interpolated coefficients and weighted root mean square of the fitting residuals.
+    #First interpolate in mh between the two models with the upper temperature and upper logg values
     if neigh_indices[0]==neigh_indices[1]:
         coeffs_01 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['coefficients']
         w_res_01 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['weighted_rms_res']
     else:
         coeffs_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['coefficients']
         w_res_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        logg_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['star_params'][1]
+        mh_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['star_params'][2]
         coeffs_1 = neighbour_limb_darkening_coefficients[neigh_indices[1]]['passbands'][passband]['laws'][law]['coefficients']
         w_res_1 = neighbour_limb_darkening_coefficients[neigh_indices[1]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        logg_1 = neighbour_limb_darkening_coefficients[neigh_indices[1]]['star_params'][1]
-        w0 = (logg_0 - logg)/(logg_0 - logg_1)
-        w1 = (logg - logg_1)/(logg_0 - logg_1)
+        mh_1 = neighbour_limb_darkening_coefficients[neigh_indices[1]]['star_params'][2]
+        w0 = (mh_0 - mh)/(mh_0 - mh_1)
+        w1 = (mh - mh_1)/(mh_0 - mh_1)
         coeffs_01 = w0*coeffs_0 + w1*coeffs_1
         w_res_01 = w0*w_res_0 + w1*w_res_1
-    #Then interpolate in logg between the two models with the lower temperature value
+    #Then interpolate in mh between the two models with the upper temperature and lower logg values
     if neigh_indices[2]==neigh_indices[3]:
         coeffs_23 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['coefficients']
         w_res_23 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['weighted_rms_res']
     else:
         coeffs_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['coefficients']
         w_res_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        logg_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['star_params'][1]
+        mh_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['star_params'][2]
         coeffs_3 = neighbour_limb_darkening_coefficients[neigh_indices[3]]['passbands'][passband]['laws'][law]['coefficients']
         w_res_3 = neighbour_limb_darkening_coefficients[neigh_indices[3]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        logg_3 = neighbour_limb_darkening_coefficients[neigh_indices[3]]['star_params'][1]
-        w2 = (logg_2 - logg)/(logg_2 - logg_3)
-        w3 = (logg - logg_3)/(logg_2 - logg_3)
+        mh_3 = neighbour_limb_darkening_coefficients[neigh_indices[3]]['star_params'][2]
+        w2 = (mh_2 - mh)/(mh_2 - mh_3)
+        w3 = (mh - mh_3)/(mh_2 - mh_3)
         coeffs_23 = w2*coeffs_2 + w3*coeffs_3
         w_res_23 = w2*w_res_2 + w3*w_res_3
-    #Finally interpolate in teff between the two interpolated models with the upper and lower temperatures
+    #Then interpolate in mh between the two models with the lower temperature and upper logg values
+    if neigh_indices[4]==neigh_indices[5]:
+        coeffs_45 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['coefficients']
+        w_res_45 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['weighted_rms_res']
+    else:
+        coeffs_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['coefficients']
+        w_res_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['weighted_rms_res']
+        mh_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['star_params'][2]
+        coeffs_5 = neighbour_limb_darkening_coefficients[neigh_indices[5]]['passbands'][passband]['laws'][law]['coefficients']
+        w_res_5 = neighbour_limb_darkening_coefficients[neigh_indices[5]]['passbands'][passband]['laws'][law]['weighted_rms_res']
+        mh_5 = neighbour_limb_darkening_coefficients[neigh_indices[5]]['star_params'][2]
+        w4 = (mh_4 - mh)/(mh_4 - mh_5)
+        w5 = (mh - mh_5)/(mh_4 - mh_5)
+        coeffs_45 = w4*coeffs_4 + w5*coeffs_5
+        w_res_45 = w4*w_res_4 + w5*w_res_5
+    #Then interpolate in mh between the two models with the lower temperature and lower logg values
+    if neigh_indices[6]==neigh_indices[7]:
+        coeffs_67 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['coefficients']
+        w_res_67 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['weighted_rms_res']
+    else:
+        coeffs_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['coefficients']
+        w_res_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['weighted_rms_res']
+        mh_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['star_params'][2]
+        coeffs_7 = neighbour_limb_darkening_coefficients[neigh_indices[7]]['passbands'][passband]['laws'][law]['coefficients']
+        w_res_7 = neighbour_limb_darkening_coefficients[neigh_indices[7]]['passbands'][passband]['laws'][law]['weighted_rms_res']
+        mh_7 = neighbour_limb_darkening_coefficients[neigh_indices[7]]['star_params'][2]
+        w6 = (mh_6 - mh)/(mh_6 - mh_7)
+        w7 = (mh - mh_7)/(mh_6 - mh_7)
+        coeffs_67 = w6*coeffs_6 + w7*coeffs_7
+        w_res_67 = w6*w_res_6 + w7*w_res_7
+    #Now interpolate in logg between the two interpolated models with the upper temperatures
     if neigh_indices[0]==neigh_indices[2]:
-        coeffs = coeffs_01*1.0
-        w_res = w_res_01*1.0
+        coeffs_0123 = coeffs_01*1.0
+        w_res_0123 = w_res_01*1.0
+    else:
+        logg_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['star_params'][1]
+        logg_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['star_params'][1]
+        w01 = (logg_0 - logg)/(logg_0 - logg_2)
+        w23 = (logg - logg_2)/(logg_0 - logg_2)
+        coeffs_0123 = w01*coeffs_01 + w23*coeffs_23
+        w_res_0123 = w01*w_res_01 + w23*w_res_23
+    #Then interpolate in logg between the two interpolated models with the lower temperatures
+    if neigh_indices[4]==neigh_indices[6]:
+        coeffs_4567 = coeffs_45*1.0
+        w_res_4567 = w_res_45*1.0
+    else:
+        logg_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['star_params'][1]
+        logg_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['star_params'][1]
+        w45 = (logg_4 - logg)/(logg_4 - logg_6)
+        w67 = (logg - logg_6)/(logg_4 - logg_6)
+        coeffs_4567 = w45*coeffs_45 + w67*coeffs_67
+        w_res_4567 = w45*w_res_45 + w67*w_res_67
+    #Finally interpolate in teff between the two interpolated models
+    if neigh_indices[0]==neigh_indices[4]:
+        coeffs = coeffs_0123*1.0
+        w_res = w_res_0123*1.0
     else:
         teff_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['star_params'][0]
-        teff_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['star_params'][0]
-        w01 = (teff_0 - teff)/(teff_0 - teff_2)
-        w23 = (teff - teff_2)/(teff_0 - teff_2)
-        coeffs = w01*coeffs_01 + w23*coeffs_23
-        w_res = w01*w_res_01 + w23*w_res_23
+        teff_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['star_params'][0]
+        w0123 = (teff_0 - teff)/(teff_0 - teff_4)
+        w4567 = (teff - teff_4)/(teff_0 - teff_4)
+        coeffs = w0123*coeffs_0123 + w4567*coeffs_4567
+        w_res = w0123*w_res_0123 + w4567*w_res_4567
     return coeffs, w_res
 
-            
 
 
 
@@ -1218,6 +1374,9 @@ def process_configuration(input_dict):
         n_targets = len(star_effective_temperature)
         #Reading neighbours files from the stellar database, and computing the corresponding limb-darkening coefficients
         neighbour_files_indices_list = np.unique(neighbour_files_indices)
+        if len(neighbour_files_indices_list)==0:
+            print('ERROR: No legal targets to calculate.')
+            exit()
         neighbour_model_intensities = {}
         neighbour_integrated_intensities = {}
         neighbour_limb_darkening_coefficients = {}
@@ -1230,6 +1389,9 @@ def process_configuration(input_dict):
         target_limb_darkening_coefficients = {}
         i0 = neighbour_files_indices_list[0]
         final_passbands = list(neighbour_limb_darkening_coefficients[i0]['passbands'].keys())
+        if len(final_passbands)==0:
+            print('ERROR: No legal passbands to calculate.')
+            exit()
         final_limb_darkening_laws = list(neighbour_limb_darkening_coefficients[i0]['passbands'][final_passbands[0]]['laws'].keys())
         for i in range(n_targets):
             target_limb_darkening_coefficients[target_names[i]] = {}
