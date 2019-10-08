@@ -2,7 +2,7 @@
 output_path				/Users/pepe/Desktop/exotethys_output/
 ##GENERIC
 calculation_type			grid		!individual
-stellar_models_grid			!Phoenix_2018	Phoenix_2012_13		!Atlas
+stellar_models_grid			!Phoenix_2018	Phoenix_2012_13		!Atlas_2000
 limb_darkening_laws			claret4		!power2		!square_root	!quadratic	!linear		!gen_claret	!gen_poly
 #gen_claret_orders			1 2 3 4 5 6
 #gen_poly_orders				1 2 3 4 5 6
