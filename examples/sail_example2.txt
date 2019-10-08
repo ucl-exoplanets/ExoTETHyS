@@ -6,9 +6,9 @@ stellar_models_grid			!Phoenix_2018	Phoenix_2012_13		!Atlas_2000
 limb_darkening_laws			claret4		!power2		!square_root	!quadratic	!linear		!gen_claret	!gen_poly
 #gen_claret_orders			1 2 3 4 5 6
 #gen_poly_orders				1 2 3 4 5 6
-#passbands_path				/Users/pepe/Desktop/Passbands/
+#passbands_path				/Users/pepe/Desktop/exotethys_versions/ExoTETHyS-master/exotethys/Passbands/
 passbands				TESS
-#wavelength_bins_path			/Users/pepe/Desktop/Wavelength_bins_files/
+#wavelength_bins_path			/Users/pepe/Desktop/exotethys_versions/ExoTETHyS-master/Wavelength_bins_files/
 #wavelength_bins_files			no_bins
 #user_output				basic		!complete
 #
