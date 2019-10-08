@@ -17,7 +17,7 @@ user_output				!basic		complete
 #targets_file				target_list2a.txt
 #target_names				HD209458b
 star_effective_temperature		28300.0
-star_log_gravity			4.35
+star_log_gravity			2.6
 star_metallicity			-0.23
 #
 ##for GRID calculation_type
