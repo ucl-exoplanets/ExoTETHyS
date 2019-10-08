@@ -864,6 +864,33 @@ def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_
     indices_teff_inf_logg_inf = np.intersect1d( indices_teff_inf, indices_logg_inf )
     indices_teff_inf_logg_inf_mh_sup = np.intersect1d( indices_teff_inf_logg_inf, indices_mh_sup )
     indices_teff_inf_logg_inf_mh_inf = np.intersect1d( indices_teff_inf_logg_inf, indices_mh_inf )
+    condd1 = (len(indices_teff_sup_logg_sup_mh_sup)==0)
+    condd2 = (len(indices_teff_sup_logg_sup_mh_inf)==0)
+    condd3 = (len(indices_teff_sup_logg_inf_mh_sup)==0)
+    condd4 = (len(indices_teff_sup_logg_inf_mh_inf)==0)
+    condd5 = (len(indices_teff_inf_logg_sup_mh_sup)==0)
+    condd6 = (len(indices_teff_inf_logg_sup_mh_inf)==0)
+    condd7 = (len(indices_teff_inf_logg_inf_mh_sup)==0)
+    condd8 = (len(indices_teff_inf_logg_inf_mh_inf)==0)
+    if condd1:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 1 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd2:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 2 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd3:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 3 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd4:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 4 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd5:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 5 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd6:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 6 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd7:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 7 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd8:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 8 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd1 or condd2 or condd3 or condd4 or condd5 or condd6 or condd7 or condd8:
+        neigh_indices = np.array([])
+        return neigh_indices
     #
     indices1t = indices_teff_sup_logg_sup_mh_sup[np.where( star_params_grid[indices_teff_sup_logg_sup_mh_sup,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_sup_mh_sup,0]-star_effective_temperature) )[0] ]
     indices1tg = indices1t[np.where( star_params_grid[indices1t,1]-star_log_gravity == np.min(star_params_grid[indices1t,1]-star_log_gravity) )[0] ]
@@ -1210,106 +1237,6 @@ def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_dark
     return coeffs, wres
 
 
-def interp_ldc_old(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_darkening_coefficients):
-#This function interpolates the limb-darkening coefficients from the neighbours by sequential linear interpolation.
-#It returns the interpolated coefficients and weighted root mean square of the fitting residuals.
-    #First interpolate in mh between the two models with the upper temperature and upper logg values
-    if neigh_indices[0]==neigh_indices[1]:
-        coeffs_01 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_01 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-    else:
-        coeffs_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['star_params'][2]
-        coeffs_1 = neighbour_limb_darkening_coefficients[neigh_indices[1]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_1 = neighbour_limb_darkening_coefficients[neigh_indices[1]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_1 = neighbour_limb_darkening_coefficients[neigh_indices[1]]['star_params'][2]
-        w0 = (mh_0 - mh)/(mh_0 - mh_1)
-        w1 = (mh - mh_1)/(mh_0 - mh_1)
-        coeffs_01 = w0*coeffs_0 + w1*coeffs_1
-        w_res_01 = w0*w_res_0 + w1*w_res_1
-    #Then interpolate in mh between the two models with the upper temperature and lower logg values
-    if neigh_indices[2]==neigh_indices[3]:
-        coeffs_23 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_23 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-    else:
-        coeffs_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['star_params'][2]
-        coeffs_3 = neighbour_limb_darkening_coefficients[neigh_indices[3]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_3 = neighbour_limb_darkening_coefficients[neigh_indices[3]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_3 = neighbour_limb_darkening_coefficients[neigh_indices[3]]['star_params'][2]
-        w2 = (mh_2 - mh)/(mh_2 - mh_3)
-        w3 = (mh - mh_3)/(mh_2 - mh_3)
-        coeffs_23 = w2*coeffs_2 + w3*coeffs_3
-        w_res_23 = w2*w_res_2 + w3*w_res_3
-    #Then interpolate in mh between the two models with the lower temperature and upper logg values
-    if neigh_indices[4]==neigh_indices[5]:
-        coeffs_45 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_45 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-    else:
-        coeffs_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['star_params'][2]
-        coeffs_5 = neighbour_limb_darkening_coefficients[neigh_indices[5]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_5 = neighbour_limb_darkening_coefficients[neigh_indices[5]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_5 = neighbour_limb_darkening_coefficients[neigh_indices[5]]['star_params'][2]
-        w4 = (mh_4 - mh)/(mh_4 - mh_5)
-        w5 = (mh - mh_5)/(mh_4 - mh_5)
-        coeffs_45 = w4*coeffs_4 + w5*coeffs_5
-        w_res_45 = w4*w_res_4 + w5*w_res_5
-    #Then interpolate in mh between the two models with the lower temperature and lower logg values
-    if neigh_indices[6]==neigh_indices[7]:
-        coeffs_67 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_67 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-    else:
-        coeffs_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['star_params'][2]
-        coeffs_7 = neighbour_limb_darkening_coefficients[neigh_indices[7]]['passbands'][passband]['laws'][law]['coefficients']
-        w_res_7 = neighbour_limb_darkening_coefficients[neigh_indices[7]]['passbands'][passband]['laws'][law]['weighted_rms_res']
-        mh_7 = neighbour_limb_darkening_coefficients[neigh_indices[7]]['star_params'][2]
-        w6 = (mh_6 - mh)/(mh_6 - mh_7)
-        w7 = (mh - mh_7)/(mh_6 - mh_7)
-        coeffs_67 = w6*coeffs_6 + w7*coeffs_7
-        w_res_67 = w6*w_res_6 + w7*w_res_7
-    #Now interpolate in logg between the two interpolated models with the upper temperatures
-    if neigh_indices[0]==neigh_indices[2]:
-        coeffs_0123 = coeffs_01*1.0
-        w_res_0123 = w_res_01*1.0
-    else:
-        logg_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['star_params'][1]
-        logg_2 = neighbour_limb_darkening_coefficients[neigh_indices[2]]['star_params'][1]
-        w01 = (logg_0 - logg)/(logg_0 - logg_2)
-        w23 = (logg - logg_2)/(logg_0 - logg_2)
-        coeffs_0123 = w01*coeffs_01 + w23*coeffs_23
-        w_res_0123 = w01*w_res_01 + w23*w_res_23
-    #Then interpolate in logg between the two interpolated models with the lower temperatures
-    if neigh_indices[4]==neigh_indices[6]:
-        coeffs_4567 = coeffs_45*1.0
-        w_res_4567 = w_res_45*1.0
-    else:
-        logg_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['star_params'][1]
-        logg_6 = neighbour_limb_darkening_coefficients[neigh_indices[6]]['star_params'][1]
-        w45 = (logg_4 - logg)/(logg_4 - logg_6)
-        w67 = (logg - logg_6)/(logg_4 - logg_6)
-        coeffs_4567 = w45*coeffs_45 + w67*coeffs_67
-        w_res_4567 = w45*w_res_45 + w67*w_res_67
-    #Finally interpolate in teff between the two interpolated models
-    if neigh_indices[0]==neigh_indices[4]:
-        coeffs = coeffs_0123*1.0
-        w_res = w_res_0123*1.0
-    else:
-        teff_0 = neighbour_limb_darkening_coefficients[neigh_indices[0]]['star_params'][0]
-        teff_4 = neighbour_limb_darkening_coefficients[neigh_indices[4]]['star_params'][0]
-        w0123 = (teff_0 - teff)/(teff_0 - teff_4)
-        w4567 = (teff - teff_4)/(teff_0 - teff_4)
-        coeffs = w0123*coeffs_0123 + w4567*coeffs_4567
-        w_res = w0123*w_res_0123 + w4567*w_res_4567
-    return coeffs, w_res
-
-
-
 
 def process_configuration(input_dict):
 #This function contains the whole process from reading the configuration file to computing the limb-darkening coefficients and saving the output files.
@@ -1363,6 +1290,8 @@ def process_configuration(input_dict):
         indices_to_delete = []
         for i in range(n_targets):
             neigh_indices = get_neighbour_files_indices(target_names[i],star_effective_temperature[i],star_log_gravity[i],star_metallicity[i],star_params_grid,stellar_models_grid)
+            #print(neigh_indices)
+            #print(star_params_grid[neigh_indices,:])
             neighbour_files_indices = my_vstack(neighbour_files_indices, neigh_indices)
             if len(neigh_indices)==0:
                 indices_to_delete += [i,]
