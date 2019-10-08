@@ -1,6 +1,8 @@
 # ExoTETHyS
 
-Beta version -- README tutorial in preparation
+[//]: # (![MacDown logo](http://macdown.uranusjr.com/static/images/logo-160.png))
+
+Version 1.0.1
 
 This repository stores codes to help modeling exoplanetary transits and eclipsing binaries.
 
@@ -59,7 +61,7 @@ Below I describe the available keywords:
 values: "individual" (for specific targets) or "grid" (for database models)
 
 **stellar\_models\_grid** (MANDATORY)  
-values: "Phoenix_2018", "Phoenix_2012_13" or "Atlas" (choose only one of them)
+values: "Phoenix\_2018", "Phoenix\_2012\_13" or "Atlas\_2000" (choose only one of them)
 
 **limb\_darkening\_laws** (MANDATORY)  
 values: "claret4", "power2", "square_root", "quadratic", "linear", "gen\_claret" and/or "gen\_poly"
@@ -74,13 +76,14 @@ values: positive integer numbers
 values: path to user passbands (it should end with /)
 
 **passbands** (MANDATORY)  
-values: built-in passband names if not passbands\_path ("Kepler", "TESS", "WFC3\_G141", "STIS\_G430L", "STIS\_G750L", "irac1subarray", "irac2subarray", "irac3subarray", "irac4subarray", "uniform\_2012\_13") or user file names
+values: built-in passband names if not passbands\_path ("Kepler", "TESS", "WFC3\_G141", "STIS\_G430L", "STIS\_G750L", "irac1subarray", "irac2subarray", "irac3subarray", "irac4subarray", "uniform\_phoenix\_2012\_13", "uniform\_phoenix\_2018", "uniform\_atlas\_2000") or user file names
 
 **wavelength\_bins\_path** (OPTIONAL)  
 values: path to wavelength bins files (it should end with /)
 
 **wavelength\_bins\_files** (OPTIONAL)  
-values: user file names or "no\_bins"
+values: user file names or "no\_bins"  
+This refers to a text file with 2 columns reporting the lower and upper limits of the desired wavelength bins (each row defines a wavelength bin).
 
 **user\_output** (OPTIONAL)  
 values: "basic" (default) or "complete"
@@ -92,7 +95,8 @@ values: path to where to store the results (it should end with /)
 values: path to target file (it should end with /)
 
 **targets\_file** (only if individual calculation\_type, optional)  
-values: user file name (examples are in the "target\_list" folder)
+values: user file name (examples are in the "target\_list" folder)  
+This refers to a text file with up to 4 columns. The first row contains the keywords in arbitrary order: target\_names (optional), star\_effective\_temperature (mandatory), star\_log\_gravity (optional) and star\_metallicity (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available, it should be reported as "X", so that all rows have the same number of elements.
 
 **target\_names** (only if individual calculation\_type, if not targets\_file, optional)  
 values: string type for target names
@@ -123,6 +127,114 @@ values: single float value
 
 **star\_maximum\_metallicity** (only if grid calculation\_type, optional)  
 values: single float value
+
+
+## TRIP configuration file
+The TRIP configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with \# are ignored; keyword values preceded by \! are also ignored. Examples of configuration files can be found in the "examples" folder.
+
+Below I describe the available keywords:
+
+**input\_limb\_type** (MANDATORY)  
+values: "mu" or "radi" (specify first column of the input limb-darkening file)
+
+**input\_limb\_path** (OPTIONAL)  
+values: path to input limb-darkening file (it should end with /)
+
+**input\_limb\_file** (MANDATORY)  
+values: user file name (examples are in the "aux\_files" folder)
+This refers to a text file with 2 columns. The first column reports the mu or radi coordinates that define the positions on the projected stellar disk (0 <= mu, radi <= 1). The second column reports the specific intensities with dimension [energy]/([area][time][wavelength][solid angle]).
+
+**input\_series\_type** (MANDATORY)  
+values: "phi" (orbital phase values - integer numbers correspond to inferior conjunction) or "time" (Julian Dates or any other time units) or "z\_sep" (sky-projected star-planet separations in units of the the stellar radius)
+
+**input\_series\_path** (OPTIONAL)  
+values: path to input timeseries file (it should end with /)
+
+**input\_series\_file** (MANDATORY)  
+values: user file name (examples are in the "aux\_files" folder)  
+This refers to a text file with 1 column reporting the points at which to compute the light-curve.
+
+**rp\_over\_rs** (MANDATORY)
+values: float type (non-negative)
+
+**sma\_over\_rs** (only if phi or time input\_series\_type, mandatory)
+values: float type (sma\_over\_rs >= 1)
+
+**inclination** (only if phi or time input\_series\_type, mandatory)
+values: float type (0 <= inclination <= 90)
+
+**eccentricity** (only if phi or time input\_series\_type, optional)
+values: float type (0 <= eccentricity < 1.0, default is 0.0)
+
+**arg\_pericenter** (only if phi or time input\_series\_type, optional)
+values: float type (-180.0 < arg\_pericenter < 360.0, default is 0.0)
+
+**period\_orbital** (only if time input\_series\_type, mandatory)
+values: float type (positive)
+
+**epoch\_of\_transit** (only if time input\_series\_type, mandatory)
+values: float type  
+It must be in the same units of the input timeseries.
+
+**time\_conversion\_factor** (only if time input\_series\_type, optional)
+values: float type (positive, default is 1)  
+It is the ratio between timeseries and orbital period units (e.g., time\_conversion\_factor = 1.157407407407407e-05 if timeseries in seconds and orbital period in days).
+
+**n\_annuli** (OPTIONAL)
+values: positive integer number (default is 100000)
+
+**interpolation\_type** (OPTIONAL)
+values: "linear" (default), "nearest", "zero", "slinear", "quadratic", "cubic", "previous" or "next"  
+Check scipy.interpolate.interp1d function for details.
+
+**interpolation\_variable** (OPTIONAL)
+values: "mu" (default) or "radi"
+
+**cutting\_limb** (OPTIONAL)
+values: "no\_cut" (default), "radi\_gradient", "mu\_gradient" or "user\_cut"  
+Different options for truncating the input limb-darkening model.
+
+**user\_cut\_mu** (only if user\_cut cutting\_limb and no user\_cut\_radi, mandatory)
+values: float number (0 < user\_cut\_mu < 1)
+
+**user\_cut\_radi** (only if user\_cut cutting\_limb and no user\_cut\_mu, mandatory)
+values: float number (0 < user\_cut\_radi < 1)
+
+**rescaling\_limb** (OPTIONAL)
+values: "as\_cut" (default), "no\_rescale" or "user\_rescale"  
+Different options for rescaling the mu or radi coordinates of the input limb-darkening model.
+
+**user\_rescale\_mu** (only if user\_rescale rescaling\_limb and no user\_rescale\_radi, mandatory)
+values: float number (0 < user\_rescale\_mu < 1)
+
+**user\_rescale\_radi** (only if user\_rescale rescaling\_limb and no user\_rescale\_mu, mandatory)
+values: float number (0 < user\_rescale\_radi < 1)
+
+**rescaling\_input\_params** (OPTIONAL)
+values: "no" (default) or "yes"  
+If yes, the rp\_over\_rs and sma\_over\_rs values are divided by the rescaling radius.
+
+**output\_path** (OPTIONAL)  
+values: path to where to store the results (it should end with /)
+
+**output\_filename** (OPTIONAL)  
+values: string type (without extension)
+
+**output\_fileext** (OPTIONAL)  
+values: ".pickle" (default) and/or ".txt"
+
+
+## History of versions
+
+**version 1.0.0**  
+First online release
+
+**version 1.0.1**  
+* Added new database Atlas\_2000  
+* Phoenix\_2012\_13 and Phoenix\_2018 databases migrated to a different online directory  
+* Added check to passband wavelength limits  
+* Added error message if all required targets cannot be calculated  
+
 
 
 
