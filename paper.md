@@ -16,7 +16,7 @@ authors:
   affiliation: 1  
 - name: Christophe Cossou
   affiliation: 6  
-- name: Angelos Tsiaras
+- name: Angelos Tsiara
   affiliation: 3  
 - name: Pierre-Olivier Lagage
   affiliation: 1  
@@ -43,7 +43,7 @@ ExoTETHyS is a python2/3 package which aims to provide a stand-alone set of tool
 1. SAIL (Stellar Atmosphere Intensity Limb), i.e., a calculator of stellar limb-darkening coefficients that outperforms the existing software by one order of magnitude in terms of light-curve model accuracy, i.e., down to <10 parts per million (ppm);  
 2. TRIP (Transit Ring-Integrated Profile), which can compute an exact transit light-curve by direct integration of the occulted stellar flux from the model intensities, without using a parameterization (limb-darkening law) to approximate the stellar intensity profile.
 
-More details are contained in a companion paper (-`@2019arXiv190809599M`, under review) and in the technical documentation on GitHub. The package is currently being used with synthetic data in order to assess the overall uncertainty in exoplanet spectra obtained with the JWST and ARIEL instruments, including the uncertainties in the measured stellar parameters and in the stellar models. It is also being used for the analysis of real exoplanetary transits. Another project is the empirical validation of stellar limb-darkening models through the analysis of high-precision photometric observations obtained, in particular, with Kepler, K2, TESS, CHEOPS and PLATO.
+More details are contained in a companion paper (@2019arXiv190809599M, under review) and in the technical documentation on GitHub. The package is currently being used with synthetic data in order to assess the overall uncertainty in exoplanet spectra obtained with the JWST and ARIEL instruments, including the uncertainties in the measured stellar parameters and in the stellar models. It is also being used for the analysis of real exoplanetary transits. Another project is the empirical validation of stellar limb-darkening models through the analysis of high-precision photometric observations obtained, in particular, with Kepler, K2, TESS, CHEOPS and PLATO.
 
 
 # Acknowledgments  
