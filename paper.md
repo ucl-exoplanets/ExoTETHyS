@@ -31,7 +31,7 @@ affiliations:
    index: 4  
  - name: Dept. Física Teórica y del Cosmos, Universidad de Granada, Campus de Fuentenueva s/n, 10871, Granada, Spain  
    index: 5  
- - name: Institut d'Astrophysique Spatiale, CNRS/Université Paris-Sud, Université Paris-Saclay, bâtiment 121, Université Paris-Sud, 91405, Orsay Cedex, France  
+ - name: Institut d'Astrophysique Spatiale, CNRS/Université Paris-Sud, Université Paris-Saclay, bâtiment 121, Université Paris-Sud, 91405, Orsay Cedex, France  
    index: 6
  date: 8 October 2019  
 
