@@ -19,7 +19,7 @@ authors:
  - name: Angelos Tsiaras   
    affiliation: 3  
  - name: Pierre-Olivier Lagage    
-   affiliation: 1    
+   affiliation: 1  
 affiliations:  
  - name: AIM, CEA, CNRS, Université Paris-Saclay, Université Paris Diderot, Sorbonne Paris Cité, F-91191 Gif-sur-Yvette, France  
    index: 1  
