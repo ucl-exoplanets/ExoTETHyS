@@ -9,9 +9,9 @@ tags:
 authors:  
  - name: Giuseppe Morello  
    orcid: 0000-0002-4262-5661  
-   affiliation: 1, 2, 3  
+   affiliation: "1, 2, 3"  
  - name: Antonio Claret    
-   affiliation: 4, 5  
+   affiliation: "4, 5"  
  - name: Marine Martin-Lagarde   
    affiliation: 1  
  - name: Christophe Cossou   
