@@ -1,5 +1,5 @@
 ---
-title: 'ExoTETHyS: Tools for Exoplanetary Transits around host stars'
+title: 'ExoTETHyS: Tools for Exoplanetary Transits around host stars'  
 tags:
  - python
  - astronomy
