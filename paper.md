@@ -46,6 +46,8 @@ ExoTETHyS is a python2/3 package which aims to provide a stand-alone set of tool
 More details are contained in a companion paper (arXiv:1908.09599, under review) and in the technical documentation on GitHub. The package is currently being used with synthetic data in order to assess the overall uncertainty in exoplanet spectra obtained with the JWST and ARIEL instruments, including the uncertainties in the measured stellar parameters and in the stellar models. It is also being used for the analysis of real exoplanetary transits. Another project is the empirical validation of stellar limb-darkening models through the analysis of high-precision photometric observations obtained, in particular, with Kepler, K2, TESS, CHEOPS and PLATO.
 
 
-#Acknowledgments  
+# Acknowledgments  
 G. M., M. M.-L. and P.-O. L. were supported by the LabEx P2IO, the French ANR contract 05-BLANNT09-573739 and the European Unions Horizon 2020 Research and Innovation Programme, under Grant Agreement N 776403. G.M. also acknowledges the contribution from INAF through the "Progetto Premiale: A Way to Other Worlds" of the Italian Ministry of Education, University, and Research.
 A.C. acknowledges financial support from the Spanish MEC (AYA2015-71718-R and ESP2017-87676-C5-2-R), the State Agency for Research of the Spanish MCIU through the "Center of Excellence Severo Ochoa" award for the Instituto de Astrofísica de Andalucía (SEV-2017-0709).
+
+# References
