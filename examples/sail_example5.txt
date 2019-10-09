@@ -1,5 +1,5 @@
 #Setting specific I/O paths		
-output_path				/Users/pepe/Desktop/exotethys_output/
+#output_path				/Users/pepe/Desktop/exotethys_output/
 ##GENERIC
 calculation_type			grid		!individual
 stellar_models_grid			!Phoenix_2018	Phoenix_2012_13		!Atlas_2000
