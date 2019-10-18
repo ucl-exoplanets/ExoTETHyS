@@ -622,7 +622,7 @@ def compute_z_sep(phi, inclination, sma_over_rs, eccentricity, arg_pericenter):
 	inclination = inclination * np.pi / 180.0
 	arg_pericenter = arg_pericenter * np.pi / 180.0
 
-	if eccentricity <> 0:
+	if eccentricity != 0:
 		n = len(theta)
 		E = np.zeros(n)
 		ecc2 = np.sqrt((1.0+eccentricity)/(1.0-eccentricity))
