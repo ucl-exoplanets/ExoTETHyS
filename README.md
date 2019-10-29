@@ -1,6 +1,6 @@
 # ExoTETHyS
 
-# ![ExoTETHyS logo](https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png=3x3)
+# ![ExoTETHyS logo](https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png)
 
 Version 1.0.1
 
