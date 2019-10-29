@@ -4,7 +4,7 @@
 
 Version 1.0.1
 
-This repository stores codes to help modeling exoplanetary transits and eclipsing binaries.
+ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
 
 If you use this code for your research, please consider citing Morello et al. 2019, ... (arXiv:1908.09599)
 
