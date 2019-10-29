@@ -1,6 +1,6 @@
 # ExoTETHyS
 
-[//]: # (![MacDown logo](http://macdown.uranusjr.com/static/images/logo-160.png))
+# (![ExoTETHyS logo](https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png))
 
 Version 1.0.1
 
