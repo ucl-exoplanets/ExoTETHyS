@@ -3,13 +3,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import sys
-
-if sys.version_info[0] > 2:
-    from urllib.request import urlretrieve
-else:
-    from urllib import urlretrieve
-    input = raw_input
 
 import matplotlib
 if os.environ.get('DISPLAY', '') == '':
@@ -18,20 +11,11 @@ if os.environ.get('DISPLAY', '') == '':
 else:
     matplotlib.use('TkAgg')
 
-import glob
-import time
-import shutil
-import astropy.io.fits as pyfits
 import numpy as np
-import os
-from scipy.optimize import minimize
-from scipy.interpolate import LinearNDInterpolator as interp
 from scipy.interpolate import interp1d
 
 import copy
 import pickle
-
-from ._1databases import *
 
 
 def str2float(s): #function in common with SAIL
