@@ -29,6 +29,18 @@ from ._1databases import *
 #weighted root mean square of residuals between the input and parametrised model intensities
 
 def claret4(params, mucut, intscut, weights):
+    """
+    This function computes the weighted root mean square of residuals
+    between the model intensities and the parametrized values
+    with claret4 limb-darkening coefficients
+    
+    :param np.array params
+    :param np.array mucut
+    :param np.array intscut
+    :param np.array weights
+    :return: the weighted rms of residuals between model and intscut
+    :rtype: float
+    """
     c1 = params[0]
     c2 = params[1]
     c3 = params[2]
