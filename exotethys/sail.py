@@ -719,8 +719,7 @@ def get_individual_parameters(input_dict):
 
 def stellar_params_from_file_name(file_name):
 #This function extracts and returns the stellar parameters from the file name in the database.
-    params = file_name.split('/')[-1]
-    params = file_name.replace('.pickle', '').split('_')
+    params = os.path.basename(file_name).replace('.pickle', '').split('_')
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
     mh = float(params[2].replace('MH', ''))
