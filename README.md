@@ -17,7 +17,7 @@ If you use this code for your research, please consider citing Morello et al. 20
 1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository.
 2. Open a terminal window and access the ExoTETHyS-master folder (you may need to unzip first). The exact path and instructions depends on which operating systems you run.
 3. After accessing the ExoTETHyS-master folder from terminal, type ```
-	python setup.py install``` to install the package.  
+	pip install .``` to install the package.  
 	Alternatively you could import the package without installation, if you run python from the ExoTETHyS-master folder.
 4. To test the installation, you can open a python shell and try the following commands:
 
