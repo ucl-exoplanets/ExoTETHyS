@@ -639,16 +639,16 @@ def compute_z_sep(phi, inclination, sma_over_rs, eccentricity, arg_pericenter):
 		n = len(theta)
 		E = np.zeros(n)
 		ecc2 = np.sqrt((1.0+eccentricity)/(1.0-eccentricity))
-		fref = np.pi/2.0 - omega #setting reference point for the true anomaly
+		fref = np.pi/2.0 - arg_pericenter #setting reference point for the true anomaly
 		Eref = 2.0 * np.arctan(1.0/ecc2 * np.tan(fref/2.0))
 		if Eref < -np.pi/2.0:
 			Eref = Eref + 2.0*np.pi
-		Mref = Eref - (ecc * np.sin(Eref))
+		Mref = Eref - (eccentricity * np.sin(Eref))
 		for i in range(n):
 			Mtmp = theta[i] +  Mref
 			Etmp = Mtmp
 			for j in range(10):
-				Etmp = Etmp + ((Mtmp + ecc*np.sin(Etmp) - Etmp) / (1.0-eccentricity*np.cos(Etmp)))
+				Etmp = Etmp + ((Mtmp + eccentricity*np.sin(Etmp) - Etmp) / (1.0-eccentricity*np.cos(Etmp)))
 			E[i] = Etmp
 		#calculating true anomaly
 		f = 2.0*np.arctan(ecc2*np.tan(E/2.0))
