@@ -23,7 +23,7 @@ import time
 import shutil
 import astropy.io.fits as pyfits
 import numpy as np
-import os
+#import os
 from scipy.optimize import minimize
 from scipy.interpolate import LinearNDInterpolator as interp
 from scipy.interpolate import interp1d
