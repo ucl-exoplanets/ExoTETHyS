@@ -3,8 +3,37 @@ from __future__ import division
 from __future__ import print_function
 import pkg_resources
 
-from ._0imports import *
+#from ._0imports import *
+import os
+import sys
 
+if sys.version_info[0] > 2:
+    from urllib.request import urlretrieve
+else:
+    from urllib import urlretrieve
+    input = raw_input
+
+import matplotlib
+if os.environ.get('DISPLAY', '') == '':
+    print('no display found. Using non-interactive Agg backend')
+    matplotlib.use('Agg')
+else:
+    matplotlib.use('TkAgg')
+
+import glob
+import time
+import shutil
+import astropy.io.fits as pyfits
+import numpy as np
+import os
+from scipy.optimize import minimize
+from scipy.interpolate import LinearNDInterpolator as interp
+from scipy.interpolate import interp1d
+
+import copy
+import pickle
+
+__all__ = ["databases"]
 
 class Database:
 
