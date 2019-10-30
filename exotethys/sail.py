@@ -34,10 +34,10 @@ def claret4(params, mucut, intscut, weights):
     between the model intensities and the parametrized values
     with claret4 limb-darkening coefficients
     
-    :param np.array params
-    :param np.array mucut
-    :param np.array intscut
-    :param np.array weights
+    :param np.array params: 1D array with four limb-darkening coefficients
+    :param np.array mucut: 1D array with mu values
+    :param np.array intscut: 1D array with normalized model intensities at the mu values
+    :param np.array weights: 1D array of weights for the fitting algorithm
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
