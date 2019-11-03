@@ -187,8 +187,8 @@ def str2float(s):
     This function converts a string to a float, if the string is a number.
     
     :param str s
-    :return: 
-    :rtype: 
+    :return: the unmodified string or the number corresponding the string
+    :rtype: str or float
     """
     try:
         return float(s)
@@ -197,15 +197,24 @@ def str2float(s):
 
 
 def my_vstack(array1,array2):
-#This function modifies the numpy.vstack to avoid error if one of the two arrays is empty.
-#WARNING: It also works if none of the arrays is empty but they have different lengths, which is not expected to happen in this code.
+    """
+    This function is a variant of numpy.vstack that accepts if one of the two arrays is empty.
+    
+    :param np.array array1
+    :param np.array array2
+    :return: the array formed by stacking the given arrays
+    :rtype: np.array
+    """
     try:
         return np.vstack((array1,array2))
     except ValueError:
-        if len(array1)<len(array2):
+        if len(array1)==0:
             return array2
-        elif len(array1)>len(array2):
+        elif len(array2)==0:
             return array1
+        else:
+            return np.vstack((array1,array2))
+
 
 def check_length(vector, min_length=1, max_length=None):
 #This function checks if the length of a vector is within the expected range and returns a boolean value.
