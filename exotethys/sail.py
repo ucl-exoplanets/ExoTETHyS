@@ -32,12 +32,14 @@ def claret4(params, mucut, intscut, weights):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
-    with claret4 limb-darkening coefficients
+    with claret4 limb-darkening coefficients:
+    I(mu)/I(1) = 1.0 - c1*(1-mu^(1/2)) - c2*(1-mu) - c3*(1-mu^(3/2)) - c4*(1-mu^2)
     
     :param np.array params: 1D array with four limb-darkening coefficients
     :param np.array mucut: 1D array with mu values
     :param np.array intscut: 1D array with normalized model intensities at the mu values
     :param np.array weights: 1D array of weights for the fitting algorithm
+    ..note:: mucut, intscut and weights must have the same size
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
@@ -50,6 +52,20 @@ def claret4(params, mucut, intscut, weights):
 
 
 def power2(params, mucut, intscut, weights):
+    """
+    This function computes the weighted root mean square of residuals
+    between the model intensities and the parametrized values
+    with power2 limb-darkening coefficients:
+    I(mu)/I(1) = 1.0 - u*(1-mu^a)
+    
+    :param np.array params: 1D array with two limb-darkening coefficients
+    :param np.array mucut: 1D array with mu values
+    :param np.array intscut: 1D array with normalized model intensities at the mu values
+    :param np.array weights: 1D array of weights for the fitting algorithm
+    ..note:: mucut, intscut and weights must have the same size
+    :return: the weighted rms of residuals between model and intscut
+    :rtype: float
+    """
     u = params[0]
     a = params[1]
     model = 1.0 - u*(1.0-mucut**a)
@@ -57,6 +73,20 @@ def power2(params, mucut, intscut, weights):
 
 
 def square_root(params, mucut, intscut, weights):
+    """
+    This function computes the weighted root mean square of residuals
+    between the model intensities and the parametrized values
+    with square-root limb-darkening coefficients:
+    I(mu)/I(1) = 1.0 - c1*(1-mu^(1/2)) - c2*(1-mu)
+    
+    :param np.array params: 1D array with two limb-darkening coefficients
+    :param np.array mucut: 1D array with mu values
+    :param np.array intscut: 1D array with normalized model intensities at the mu values
+    :param np.array weights: 1D array of weights for the fitting algorithm
+    ..note:: mucut, intscut and weights must have the same size
+    :return: the weighted rms of residuals between model and intscut
+    :rtype: float
+    """
     c1 = params[0]
     c2 = params[1]
     model = 1.0 - c1*(1.0-mucut**0.5) - c2*(1.0-mucut)
@@ -64,6 +94,20 @@ def square_root(params, mucut, intscut, weights):
 
 
 def quadratic(params, mucut, intscut, weights):
+    """
+    This function computes the weighted root mean square of residuals
+    between the model intensities and the parametrized values
+    with quadratic limb-darkening coefficients:
+    I(mu)/I(1) = 1.0 - g1*(1-mu) - g2*(1-mu)^2
+    
+    :param np.array params: 1D array with two limb-darkening coefficients
+    :param np.array mucut: 1D array with mu values
+    :param np.array intscut: 1D array with normalized model intensities at the mu values
+    :param np.array weights: 1D array of weights for the fitting algorithm
+    ..note:: mucut, intscut and weights must have the same size
+    :return: the weighted rms of residuals between model and intscut
+    :rtype: float
+    """
     g1 = params[0]
     g2 = params[1]
     model = 1.0 - g1*(1.0-mucut) - g2*(1.0-mucut)**2.0
@@ -71,12 +115,40 @@ def quadratic(params, mucut, intscut, weights):
 
 
 def linear(params, mucut, intscut, weights):
+    """
+    This function computes the weighted root mean square of residuals
+    between the model intensities and the parametrized values
+    with a linear limb-darkening coefficient:
+    I(mu)/I(1) = 1.0 - u*(1-mu)
+    
+    :param np.array params: 1D array with one limb-darkening coefficient
+    :param np.array mucut: 1D array with mu values
+    :param np.array intscut: 1D array with normalized model intensities at the mu values
+    :param np.array weights: 1D array of weights for the fitting algorithm
+    ..note:: mucut, intscut and weights must have the same size
+    :return: the weighted rms of residuals between model and intscut
+    :rtype: float
+    """
     u = params[0]
     model = 1.0 - u*(1.0-mucut)
     return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
 
 
 def gen_poly(params, mucut, intscut, weights):
+    """
+    This function computes the weighted root mean square of residuals
+    between the model intensities and the parametrized values
+    with polynomial limb-darkening coefficients:
+    I(mu)/I(1) = 1.0 - g1*(1-mu) - g2*(1-mu^2) - g3*(1-mu^3) - ... - gn*(1-mu^n)
+    
+    :param np.array params: 1D array with limb-darkening coefficients
+    :param np.array mucut: 1D array with mu values
+    :param np.array intscut: 1D array with normalized model intensities at the mu values
+    :param np.array weights: 1D array of weights for the fitting algorithm
+    ..note:: mucut, intscut and weights must have the same size
+    :return: the weighted rms of residuals between model and intscut
+    :rtype: float
+    """
     g = params.copy()
     n_params = len(g)
     model = 1.0
@@ -86,6 +158,20 @@ def gen_poly(params, mucut, intscut, weights):
 
 
 def gen_claret(params, mucut, intscut, weights):
+    """
+    This function computes the weighted root mean square of residuals
+    between the model intensities and the parametrized values
+    with claret-n limb-darkening coefficients:
+    I(mu)/I(1) = 1.0 - c1*(1-mu^(1/2)) - c2*(1-mu) - c3*(1-mu^(3/2)) - ... - cn*(1-mu^(n/2))
+    
+    :param np.array params: 1D array with limb-darkening coefficients
+    :param np.array mucut: 1D array with mu values
+    :param np.array intscut: 1D array with normalized model intensities at the mu values
+    :param np.array weights: 1D array of weights for the fitting algorithm
+    ..note:: mucut, intscut and weights must have the same size
+    :return: the weighted rms of residuals between model and intscut
+    :rtype: float
+    """
     c = params.copy()
     n_params = len(c)
     model = 1.0
@@ -97,7 +183,13 @@ def gen_claret(params, mucut, intscut, weights):
 
 
 def str2float(s):
-#This function converts a string to a float, if the string is a number.
+    """
+    This function converts a string to a float, if the string is a number.
+    
+    :param str s
+    :return: 
+    :rtype: 
+    """
     try:
         return float(s)
     except ValueError:
