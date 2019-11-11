@@ -319,9 +319,15 @@ def check_2Darray(arr, n_col=None):
 
 
 def read_configuration(filename):
-#This function reads the input file line by line and returns a dictionary.
-#For each line the first word is a keyword, the following are values (either string or float).
-#The lines starting with '#' will be ignored. The values preceded by '!' (without spaces) will be also ignored.
+    """
+    This function reads the input file line by line and returns a dictionary.
+    For each line the first word is a keyword, the following are values (either string or float).
+    The lines starting with '#' will be ignored. The values preceded by '!' (without spaces) will be also ignored. 
+    
+    :param str filename: absolute or relative path including the file name
+    :return: the configuration dictionary
+    :rtype: dict
+    """
     with open(filename, 'r') as file:
         input_dict = {}
         for line in file.readlines():
@@ -337,8 +343,15 @@ def read_configuration(filename):
 
 
 def read_targets_file(filename):
-#This function reads the input file line by line and returns a dictionary.
-#It is designed specifically to read the target list
+    """
+    This function reads the input file line by line and returns a dictionary.
+    It is designed specifically to read the target list.
+    The lines starting with '#' will be ignored. The values preceded by '!' (without spaces) will be also ignored. 
+    
+    :param str filename: absolute or relative path including the file name
+    :return: the dictionary of targets
+    :rtype: dict
+    """
     with open(filename, 'r') as file:
         #check = True
         targets_dict = {}
@@ -428,7 +441,14 @@ def read_targets_file(filename):
 
 
 def check_configuration(input_dict):
-#This function checks and modifies the dictionary obtained from the configuration file and; it returns a boolean value and the updated dictionary
+    """
+    This function checks and modifies the dictionary obtained from the configuration file.
+    It returns a boolean value and the updated dictionary.
+    
+    :param dict input_dict: 
+    :return: a bool value and the updated configuration dictionary
+    :rtype: bool, dict
+    """
     check = True
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
@@ -819,7 +839,13 @@ def check_configuration(input_dict):
 
 
 def get_individual_parameters(input_dict):
-#This function extracts and returns the stellar parameters and target names from the input dictionary
+    """
+    This function extracts and returns the stellar parameters and target names from the input dictionary.
+    
+    :param dict input_dict: 
+    :return: the lists of stellar parameters (effective temperature, log gravity, metallicity) and names to be used for the output files.
+    :rtype: list of float, list of float, list of float, list of str
+    """
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
     #Case: read parameters from targets_file (automatically completed for missing values)
@@ -880,7 +906,13 @@ def get_individual_parameters(input_dict):
 
 
 def stellar_params_from_file_name(file_name):
-#This function extracts and returns the stellar parameters from the file name in the database.
+    """
+    This function extracts and returns the stellar parameters from the file name in the database.
+    
+    :param str file_name: built-in file name
+    :return: a numpy array with the effective temperature, log gravity and metallicity for the input file name.
+    :rtype: np.array
+    """
     params = os.path.basename(file_name).replace('.pickle', '').split('_')
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
@@ -889,7 +921,13 @@ def stellar_params_from_file_name(file_name):
 
 
 def get_grid_parameters(stellar_models_grid):
-#This function reads and returns all the file names in the database and the corresponding stellar parameters
+    """
+    This function gets all the file names in the database and the corresponding stellar parameters.
+    
+    :param str file_name: built-in file name
+    :return: the file names and a numpy array with the corresponding stellar parameters (number of files X 3)
+    :rtype: list of str, np.array
+    """
     files = databases[stellar_models_grid].get_filename_list()
     star_params_grid = np.zeros((len(files),3))
     for i in range(len(files)):
