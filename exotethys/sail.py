@@ -186,7 +186,7 @@ def str2float(s):
     """
     This function converts a string to a float, if the string is a number.
     
-    :param str s
+    :param str s:
     :return: the unmodified string or the number corresponding the string
     :rtype: str or float
     """
@@ -200,8 +200,8 @@ def my_vstack(array1,array2):
     """
     This function is a variant of numpy.vstack that accepts if one of the two arrays is empty.
     
-    :param np.array array1
-    :param np.array array2
+    :param np.array array1:
+    :param np.array array2:
     :return: the array formed by stacking the given arrays
     :rtype: np.array
     """
@@ -217,8 +217,15 @@ def my_vstack(array1,array2):
 
 
 def check_length(vector, min_length=1, max_length=None):
-#This function checks if the length of a vector is within the expected range and returns a boolean value.
-#Default is length>=1.
+    """
+    This function checks if the length of a vector is within the expected range and returns a boolean value.
+    
+    :param listOfObjects vector:
+    :argument int min_length: minimum length for the vector (default is 1)
+    :argument int max_length: maximum length for the vector (default is None)
+    :return: True if len(vector)>=min_length and ( len(vector)<=max_length or max_length is None ), False otherwise
+    :rtype: bool
+    """
     check = True
     if len(vector)<min_length:
         check = False
@@ -228,7 +235,14 @@ def check_length(vector, min_length=1, max_length=None):
     return check
 
 def check_type_in_list(vector, item_type):
-#This function checks that all the elements of a list are of the expected variable type (e.g., string, float, int) and returns a boolean value.
+    """
+    This function checks that all the elements of a list are of the expected variable type and returns a boolean value.
+    
+    :param listOfObjects vector:
+    :param type item_type: e.g., str, float, int
+    :return: True if all the elements in vector are of the required item_type, False otherwise
+    :rtype: bool
+    """
     check = True
     for item in vector:
         if not isinstance(item, item_type):
@@ -236,8 +250,14 @@ def check_type_in_list(vector, item_type):
     return check
 
 def check_integers(vector, min_value=1):
-#This function checks if all the elements of a vector correspond to integer numbers greater than or equal to min_value and returns a boolean value.
-#Default is min_value=1 (positive integers).
+    """
+    This function checks that all the elements of a list are integer numbers greater than or equal to min_value and returns a boolean value.
+    
+    :param listOfObjects vector:
+    :argument int min_value: minimum value for the elements (default is 1)
+    :return: True if all the elements in vector are integer numbers greater than or equal to min_value, False otherwise
+    :rtype: bool
+    """
     check = True
     if np.min(vector)<min_value:
         check = False
@@ -248,10 +268,16 @@ def check_integers(vector, min_value=1):
     return check
 
 def read_as_numpy_array(path_file):
-#This function reads a numpy array from file as numpy.genfromtxt but also checks for the most common errors.
-#It returns a numpy array and a boolean value.
-#If the boolean value is False, the numpy array will be empty.
-#If the error is caused by one or more elements of the array that are not read as numbers, a warning message will inform about the rows where these errors occur.
+    """
+    This function reads a numpy array from file as numpy.genfromtxt but also checks for the most common errors.
+    It returns a numpy array and a boolean value.
+    If the boolean value is False, the numpy array will be empty.
+    If the error is caused by one or more elements of the array that are not read as numbers, a warning message will inform about the rows where these errors occur.
+    
+    :param str path_file: absolute or relative path including the file name
+    :return: the numpy array contained in the file and True, or an empty array and False
+    :rtype: np.array, bool
+    """
     check = True
     try:
         file = np.genfromtxt(path_file)
@@ -273,8 +299,15 @@ def read_as_numpy_array(path_file):
 
 
 def check_2Darray(arr, n_col=None):
-#This function checks that an array has 2 dimensions and returns a boolean value.
-#Optionally, it may also require the exact number of columns. 
+    """
+    This function checks that an array has 2 dimensions and returns a boolean value.
+    Optionally, it may also check the exact number of columns. 
+    
+    :param np.array arr: 2D array
+    :argument int n_col: exact number of columns in arr (default is None)
+    :return: True if arr is 2D and it has n_col columns (or n_col is None), False otherwise
+    :rtype: bool
+    """
     check = True
     if arr.ndim != 2:
         check = False
