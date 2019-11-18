@@ -936,8 +936,13 @@ def get_grid_parameters(stellar_models_grid):
 
 
 def get_subgrid(input_dict):
-#This function reads the file names from a database associated with a stellar_models_grid and extracts the stellar parameters.
-#Considers only the file names and parameters within the (optional) ranges specified in the configuration file.
+    """
+    This function extracts the file names, indices and stellar parameters from the selected database of stellar model-atmospheres within the selected (optional) parameter ranges.
+    
+    :param dict input_dict:
+    :return: the lists of database file names, the associated stellar parameters and file indices with the (optional) user parameter limits. It exits if the list of files is empty.
+    :rtype: list of str, np.array, np.array
+    """
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
     stellar_models_grid = input_dict_local['stellar_models_grid'][0]
@@ -1016,10 +1021,19 @@ def get_subgrid(input_dict):
 
 
 
-
-
 def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_gravity,star_metallicity,star_params_grid,stellar_models_grid):
-#This function searchs for up to 2^n neighbours for a given set of stellar parameters and returns the corresponding indices in the files list.
+    """
+    This function searchs for up to 8 neighbours for a given set of stellar parameters and returns the corresponding indices in the files list (repeated indices are possible).
+    
+    :param str target_name: name associated with the target to compute
+    :param float star_effective_temperature: stellar effective temperature of the target
+    :param float star_log_gravity: stellar log gravity of the target
+    :param float star_metallicity: stellar metallicity of the target
+    :param np.array star_params_grid: 3-column array with stellar effective temperatures, log gravities and metallicities of the database models
+    :params str stellar_models_grid: the name of the chosen stellar database
+    :return: the indices of the (up to) eight nearest neighbour models (the array will contain 8 indices, but repeated indices are possible).
+    :rtype: np.array
+    """
     teff_min = np.min(star_params_grid[:,0])
     teff_max = np.max(star_params_grid[:,0])
     logg_min = np.min(star_params_grid[:,1])
@@ -1129,7 +1143,14 @@ def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_
             
 
 def check_passband_limits(pb, stellar_models_grid):
-#This function checks that the wavelengths read from a passband file are within the limits for the chosen stellar_models_grid.
+    """
+    This function checks that the wavelengths read from a passband file are within the limits for the chosen stellar_models_grid.
+    
+    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
+    :params str stellar_models_grid: the name of the chosen stellar database
+    :return: the spectral response 2D array and a boolean value.
+    :rtype: np.array, bool
+    """
     check = True
     if stellar_models_grid == 'Phoenix_2018':
         minimum_wavelength = 500.0
@@ -1147,13 +1168,19 @@ def check_passband_limits(pb, stellar_models_grid):
         minimum_wavelength = 90.9
         maximum_wavelength = 1600000.0
         if np.min(pb[:,0])<minimum_wavelength or np.max(pb[:,0])>maximum_wavelength:
-            pb = False
+            check = False
         return pb, check
 
 
 def get_passband(passbands_path, passbands_ext, passband, stellar_models_grid):
-#This function extracts the passband from file; first column = wavelengths, second column = response
-#It returns the passband array and a boolean value
+    """
+    This function extracts the passband from file; first column = wavelengths in Angstrom, second column = response in electron/photon or proportional.
+    
+    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
+    :params str stellar_models_grid: the name of the chosen stellar database
+    :return: the spectral response 2D array (empty if not valid) and a boolean value.
+    :rtype: np.array, bool
+    """
     [pb, check] = read_as_numpy_array(passbands_path+passband+passbands_ext)
     if not check:
         print('WARNING: Skipping passband', passband, '.')
@@ -1176,8 +1203,16 @@ def get_passband(passbands_path, passbands_ext, passband, stellar_models_grid):
 
 
 def get_wavelength_bins(wavelength_bins_path, wavelength_bins_file, pb, passband):
-#This function reads the wavelength_bins_file; first column = minimum wavelengths, second column = maximum wavelengths
-#It returns the wavelength bins array and a boolean value
+    """
+    This function reads the wavelength_bins_file; first column = minimum wavelengths, second column = maximum wavelengths.
+    
+    :param str wavelength_bins_path: the path to wavelength bins files (without the file name)
+    :param str wavelength_bins_file: the name of the wavelength bins file or the string no_bins
+    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
+    :params str passband: the passband name
+    :return: the wavelength bins 2D array (empty if not valid) and a boolean value.
+    :rtype: np.array, bool
+    """
     check =  True
     if wavelength_bins_file == 'no_bins':
         check = True
@@ -1205,8 +1240,17 @@ def get_wavelength_bins(wavelength_bins_path, wavelength_bins_file, pb, passband
 
 
 def get_response(passband, model_wavelengths):
-#This function interpolates the passband (response) on the same wavelengths grid of the stellar model.
-#It returns the interpolated response
+    """
+    This function interpolates the passband (response) on the same wavelengths grid of the stellar model.
+    
+    :param str wavelength_bins_path: the path to wavelength bins files (without the file name)
+    :param str wavelength_bins_file: the name of the wavelength bins file or the string no_bins
+    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
+    :params np. array passband: 2D array; first column =  wavelengths in Angstrom, second column =  spectral response in electron/photon or proportional units.
+    :param np.array model_wavelengths: 1D array containing the wavelengths in Angstrom for the pre-calculated stellar model-atmosphere.
+    :return: the interpolated response
+    :rtype: np.array
+    """
     resp = np.zeros(len(model_wavelengths))
     passband_wl = np.array((np.min(passband[:,0]),np.max(passband[:,0])))
     for i in range(len(model_wavelengths)):
@@ -1222,8 +1266,15 @@ def get_response(passband, model_wavelengths):
 
 
 def compute_integrated_intensities(model_wavelengths, model_intensities, response):
-#This function computes the integral of the intensities over the passband (already interpolated on the same wavelengths)
-#It returns the integrated intensities, normalised to 1 at the star's center.
+    """
+    This function computes the integral of the intensities over the passband (already interpolated on the same wavelengths).
+    
+    :param np.array model_wavelengths: 1D array containing wavelengths in Angstrom for the pre-calculated stellar model-atmosphere
+    :param np.array model_intensities: 2D array with specific intensities as a function of wavelength and mu angle
+    :param np.array response: total spectral response interpolated over the model_wavelengths
+    :return: the integrated intensities, normalised to 1 at the star's center
+    :rtype: np.array
+    """
     integ_ints = np.zeros(np.shape(model_intensities)[1])
     #model_intensities = model_intensities/np.mean(model_intensities[:,-1]) #arbitrary normalization
     for i in range(1,len(model_wavelengths)-1):
@@ -1233,8 +1284,15 @@ def compute_integrated_intensities(model_wavelengths, model_intensities, respons
 
 
 def get_integrated_intensities(model_dict, passbands_dict, wavelength_bins_dict):
-#This function calls the calculation of integrated intensities for various passbands.
-#It returns a dictionary with all the passband-integrated intensities and the corresponding mu values.
+    """
+    This function calls the calculation of integrated intensities for various passbands.
+    
+    :param dict model_dict: dictionary containing the model wavelengths in Angstrom and specific intensities
+    :param dict passbands_dict: dictionary with the spectral responses
+    :param dict wavelength_bins_dict: dictionary with the wavelength bins associated with the various passbands
+    :return: dictionary with all the passband-integrated intensities and the corresponding mu values
+    :rtype: dict
+    """
     model_wavelengths = model_dict['wavelengths']
     model_intensities = model_dict['intensities']
     mu = model_dict['mu']
@@ -1257,8 +1315,16 @@ def get_integrated_intensities(model_dict, passbands_dict, wavelength_bins_dict)
 
 
 def rescale_and_weights(mu, intensities, stellar_models_grid):
-#This functions finds the drop-off in the spherical intensity models, removes the values after the drop-off and rescales the other mu/radi values,
-#then applies the quasi-spherical cut-off and compute weights for the intensity model-fit.
+    """
+    This function finds the drop-off in the spherical intensity models, removes the values after the drop-off and rescales the other mu/radi values,
+    then applies the quasi-spherical cut-off and computes weights for the intensity model-fit.
+    
+    :param np.array mu: 1D array with mu values calculated for the model-atmosphere
+    :param np.array intensities: 1D array with passband-integrated intensities
+    :params str stellar_models_grid: the name of the selected stellar database
+    :return: mu values, intensities and weights for the limb-darkening fit
+    :rtype: np.array, np.array, np.array
+    """
     radi = np.sqrt(1.0-mu**2.0)
     if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13']:
         #mu increasing, r decreasing
@@ -1285,8 +1351,17 @@ def rescale_and_weights(mu, intensities, stellar_models_grid):
 
 
 def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders):
-#This function computes the limb-darkening coefficients for the required passbands and limb-darkening laws.
-#It returns a dictionary containing the limb-darkening coefficients and the weighted root mean square of the fitting residuals.
+    """
+    This function computes the limb-darkening coefficients for the required passbands and limb-darkening laws.
+    
+    :param dict integ_dict: dictionary with the mu values and passbands
+    :param list of str limb-darkening laws: list of limb-darkening laws chosen by the user
+    :param str stellar_models_grid: the name of the selected stellar database
+    :param list of int gen_poly_orders: maximum orders of the polynomial limb-darkening laws chosen by the user
+    :param list of int gen_claret_orders: maximum orders of the claret-n limb-darkening laws chosen by the user
+    :return: dictionary containing the limb-darkening coefficients and the weighted root mean square of the fitting residuals
+    :rtype: dict
+    """
     mu = integ_dict['mu']
     passbands = [key for key in list(integ_dict.keys()) if key!='mu']
     ldc_dict = {}
