@@ -21,13 +21,6 @@ import pickle
 from ._1databases import *
 
 
-#list of limb-darkening law functions
-#INPUT:
-#params = limb-darkening coefficients;
-#mucut, intscut, weights = mu values and corresponding intensities (normalised) and weights
-#OUTPUT:
-#weighted root mean square of residuals between the input and parametrised model intensities
-
 def claret4(params, mucut, intscut, weights):
     """
     This function computes the weighted root mean square of residuals
