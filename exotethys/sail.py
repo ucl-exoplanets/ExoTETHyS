@@ -1451,8 +1451,20 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
         
 
 def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_darkening_coefficients):
-#This function interpolates the limb-darkening coefficients from the neighbours by sequential linear interpolation.
-#It returns the interpolated coefficients and weighted root mean square of the fitting residuals.
+    """
+    This function interpolates the limb-darkening coefficients by sequential linear interpolation.
+    
+    :param float teff: stellar effective temperature of the requested model
+    :param float logg: stellar surface log gravity of the requested model
+    :param float mh: stellar metallicity of the requested model
+    :param np.array neigh_indices: indices of the neighbour models in the online database
+    :param str passband: name of the passband (eventually, it includes the wavelength bin limits)
+    :param str law: name of the limb-darkening law
+    :param dict neighbour_limb_darkening_coefficients: dictionary containing the limb-darkening coefficients for the neighbour models
+    
+    :return: the interpolated limb-darkening coefficients and weighted rms for the requested model
+    :rtype: np.array, float
+    """
     coeffs_tgm = np.array([])
     wres_tgm = np.atleast_1d(np.array([]))
     star_params_tgm = np.array([])
@@ -1513,9 +1525,23 @@ def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_dark
 
 
 def process_configuration(input_dict):
-#This function contains the whole process from reading the configuration file to computing the limb-darkening coefficients and saving the output files.
-#NOTE 1: all the input dictionary branches end with a list, even if it contains a single element.
-#NOTE 2: the input dictionary may contain more keywords than those specified in the configuration file, as they can be set to default values by the check_configuration function.
+    """
+    This function executes all the operations from the checked input dictionary to create the requested output files.
+    
+    :param dict: input_dict
+    ..note:: all the input dictionary branches end with a list, even if they contain a single element.
+    ..note:: the input dictionary may contain more keywords than those specified in the configuration file, as they can be set to default values by the check_configuration function.
+    :param float logg: stellar surface log gravity of the requested model
+    :param float mh: stellar metallicity of the requested model
+    :param np.array neigh_indices: indices of the neighbour models in the online database
+    :param str passband: name of the passband (eventually, it includes the wavelength bin limits)
+    :param str law: name of the limb-darkening law
+    :param dict neighbour_limb_darkening_coefficients: dictionary containing the limb-darkening coefficients for the neighbour models
+    
+    :return: two dictionaries with limb-darkening coefficients (basic output file) and model passband-integrated intensities (saved only if user_output = 'complete') 
+    :rtype: dict, dict
+    ..note:: mucut, intscut and weights must have the same size
+    """
     #Reading keywords and eventually adding new default keywords (not added by the check_configuration function).
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
@@ -1647,7 +1673,15 @@ def process_configuration(input_dict):
 
 
 def ldc_calculate(configuration_file):
-#Main function for obtaining the limb-darkening coefficients
+    """
+    This is the main function to run for calculating the limb-darkening coefficients from the input file.
+    It calls the three functions to read, check and process the input file.
+    
+    :param str configuration_file: absolute or relative path including the file name
+    
+    :return:
+    :rtype:
+    """
     input_dict1 = read_configuration(configuration_file) #Reading configuration file
     [check, input_dict] = check_configuration(input_dict1) #Checking configuration file and partial dictionary update
     if check:
