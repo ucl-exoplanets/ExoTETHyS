@@ -18,7 +18,7 @@ from scipy.optimize import minimize
 import copy
 import pickle
 
-from ._1databases import *
+from ._database import databases
 
 
 def claret4(params, mucut, intscut, weights):
