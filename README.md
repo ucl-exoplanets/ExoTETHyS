@@ -11,7 +11,7 @@ If you use this code for your research, please consider citing Morello et al. 20
 ## Dependencies
 
 The code is consistent with python2/3. It makes use of
-- matplotlib, numpy, scipy
+- numpy, scipy
 
 ## Download and installation
 1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository.
