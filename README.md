@@ -8,10 +8,10 @@ ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsin
 
 If you use this code for your research, please consider citing Morello et al. 2019, ... (arXiv:1908.09599)
 
-[//]: # (## Dependencies)
+## Dependencies
 
-[//]: # (The code is consistent with python2/3. It makes use of)
-[//]: # (- numpy, scipy, os, sys, glob, time, shutil, copy, pickle, astropy.io.fits, matplotlib)
+The code is consistent with python2/3. It makes use of
+- matplotlib, numpy, scipy
 
 ## Download and installation
 1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository.
