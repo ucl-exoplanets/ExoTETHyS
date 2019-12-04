@@ -6,7 +6,7 @@ import glob
 name = 'exotethys'
 description = ''
 url = ''
-install_requires = ['matplotlib', 'docopt', 'astropy', 'scipy', 'ephem']
+install_requires = ['matplotlib>=2.0.0', 'docopt>=0.6.2', 'astropy>=2.0', 'scipy>=1.0.0', 'ephem>=3.7.7.0']
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
