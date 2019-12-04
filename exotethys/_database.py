@@ -13,12 +13,12 @@ else:
     from urllib import urlretrieve
     input = raw_input
 
-import matplotlib
-if os.environ.get('DISPLAY', '') == '':
-    print('no display found. Using non-interactive Agg backend')
-    matplotlib.use('Agg')
-else:
-    matplotlib.use('TkAgg')
+#import matplotlib
+#if os.environ.get('DISPLAY', '') == '':
+#    print('no display found. Using non-interactive Agg backend')
+#    matplotlib.use('Agg')
+#else:
+#    matplotlib.use('TkAgg')
 
 import glob
 import time
