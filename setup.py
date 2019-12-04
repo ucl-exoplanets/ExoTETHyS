@@ -6,7 +6,7 @@ import glob
 name = 'exotethys'
 description = ''
 url = ''
-install_requires = ['matplotlib>=2.2.4', 'scipy>=1.2.2', 'numpy>=1.16.5']
+install_requires = ['scipy>=1.2.2', 'numpy>=1.16.5']
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
