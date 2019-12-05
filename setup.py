@@ -44,6 +44,7 @@ setup(
                  'Programming Language :: Python :: 3.7',
                  ],
     packages=find_packages(),
+    install_requires = ['scipy>=1.2.2', 'numpy>=1.16.5'],
     package_data={"exotethys":["*.pickle", "Passbands/*.pass"]},
     scripts=[],
     data_files=[('', ['README.md'])]
