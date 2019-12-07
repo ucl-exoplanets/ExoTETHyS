@@ -142,7 +142,7 @@ def check_1Darray(arr):
     if arr.ndim != 1:
         check = False
     elif len(arr)==0:
-	check = False
+        check = False
     return check
 
 def get_default_value(param):
