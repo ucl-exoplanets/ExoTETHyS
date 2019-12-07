@@ -19,15 +19,28 @@ import pickle
 
 
 def str2float(s): #function in common with SAIL
-#This function converts a string to a float, if the string is a number.
+    """
+    This function converts a string to a float, if the string is a number.
+    
+    :param str s:
+    :return: the unmodified string or the number corresponding the string
+    :rtype: str or float
+    """
     try:
         return float(s)
     except ValueError:
         return s
 
 def check_length(vector, min_length=1, max_length=None): #function in common with SAIL
-#This function checks if the length of a vector is within the expected range and returns a boolean value.
-#Default is length>=1.
+    """
+    This function checks if the length of a vector is within the expected range and returns a boolean value.
+    
+    :param listOfObjects vector:
+    :argument int min_length: minimum length for the vector (default is 1)
+    :argument int max_length: maximum length for the vector (default is None)
+    :return: True if len(vector)>=min_length and ( len(vector)<=max_length or max_length is None ), False otherwise
+    :rtype: bool
+    """
     check = True
     if len(vector)<min_length:
         check = False
@@ -37,7 +50,14 @@ def check_length(vector, min_length=1, max_length=None): #function in common wit
     return check
 
 def check_type_in_list(vector, item_type): #function in common with SAIL
-#This function checks that all the elements of a list are of the expected variable type (e.g., string, float, int) and returns a boolean value.
+    """
+    This function checks that all the elements of a list are of the expected variable type and returns a boolean value.
+    
+    :param listOfObjects vector:
+    :param type item_type: e.g., str, float, int
+    :return: True if all the elements in vector are of the required item_type, False otherwise
+    :rtype: bool
+    """
     check = True
     for item in vector:
         if not isinstance(item, item_type):
@@ -45,8 +65,14 @@ def check_type_in_list(vector, item_type): #function in common with SAIL
     return check
 
 def check_integers(vector, min_value=1): #function in common with SAIL
-#This function checks if all the elements of a vector correspond to integer numbers greater than or equal to min_value and returns a boolean value.
-#Default is min_value=1 (positive integers).
+    """
+    This function checks that all the elements of a list are integer numbers greater than or equal to min_value and returns a boolean value.
+    
+    :param listOfObjects vector:
+    :argument int min_value: minimum value for the elements (default is 1)
+    :return: True if all the elements in vector are integer numbers greater than or equal to min_value, False otherwise
+    :rtype: bool
+    """
     check = True
     if np.min(vector)<min_value:
         check = False
@@ -57,10 +83,16 @@ def check_integers(vector, min_value=1): #function in common with SAIL
     return check
 
 def read_as_numpy_array(path_file): #function in common with SAIL
-#This function reads a numpy array from file as numpy.genfromtxt but also checks for the most common errors.
-#It returns a numpy array and a boolean value.
-#If the boolean value is False, the numpy array will be empty.
-#If the error is caused by one or more elements of the array that are not read as numbers, a warning message will inform about the rows where these errors occur.
+    """
+    This function reads a numpy array from file as numpy.genfromtxt but also checks for the most common errors.
+    It returns a numpy array and a boolean value.
+    If the boolean value is False, the numpy array will be empty.
+    If the error is caused by one or more elements of the array that are not read as numbers, a warning message will inform about the rows where these errors occur.
+    
+    :param str path_file: absolute or relative path including the file name
+    :return: the numpy array contained in the file and True, or an empty array and False
+    :rtype: np.array, bool
+    """
     check = True
     try:
         file = np.genfromtxt(path_file)
@@ -81,8 +113,15 @@ def read_as_numpy_array(path_file): #function in common with SAIL
         return np.array([]), check
 
 def check_2Darray(arr, n_col=None): #function in common with SAIL
-#This function checks that an array has 2 dimensions and returns a boolean value.
-#Optionally, it may also require the exact number of columns. 
+    """
+    This function checks that an array has 2 dimensions and returns a boolean value.
+    Optionally, it may also check the exact number of columns. 
+    
+    :param np.array arr: 2D array
+    :argument int n_col: exact number of columns in arr (default is None)
+    :return: True if arr is 2D and it has n_col columns (or n_col is None), False otherwise
+    :rtype: bool
+    """
     check = True
     if arr.ndim != 2:
         check = False
@@ -92,18 +131,29 @@ def check_2Darray(arr, n_col=None): #function in common with SAIL
     return check
 
 def check_1Darray(arr):
-#This function checks that an array has 1 dimensions and returns a boolean value.
-#Optionally, it may also require the exact number of columns. 
+    """
+    This function checks that an array has 1 dimension, not empty, and returns a boolean value.
+    
+    :param np.array arr: 1D array
+    :return: True if arr is 1D, False otherwise
+    :rtype: bool
+    """
     check = True
     if arr.ndim != 1:
         check = False
+    elif len(arr)==0:
+	check = False
     return check
 
-
-
-
 def get_default_value(param):
-#This function returns the default value for the requested parameter.
+    """
+    This function returns the default value for the requested parameter.
+    
+    :param str param:
+    :return: default value
+    :rtype: str or float or None
+    ..note:: return type depends on the requested parameter
+    """
     if param=='rp_over_rs':
         default_value = None
     if param=='sma_over_rs':
@@ -147,7 +197,13 @@ def get_default_value(param):
 
 
 def get_params_limits(param):
-#This function returns the limits for the requested parameter (used to compute the projected star-planet separation, z_sep), together with an explanatory string.
+    """
+    This function returns the limits for the requested parameter, together with an explanatory string.
+    
+    :param str param:
+    :return: The extreme values that can be accepted for the requested parameter (min/max if the extreme value is included, inf/sup otherwise) and explanatory string.
+    :rtype: float or None, float or None, float or None, float or None, str
+    """
     if param=='sma_over_rs':
         min_value = 1.0
         max_value = None
@@ -194,7 +250,18 @@ def get_params_limits(param):
 
 
 def check_values(vector, min_value=None, max_value=None, inf_value=None, sup_value=None):
-#This function checks that all the elements of a list/array are float within given limits (if any). It returns a boolean value.
+    """
+    This function checks that all the elements of a list/array are float within given limits (if any). It returns a boolean value.
+    
+    :param list of float vector:
+    :argument float min_value: minimum value for any element of the list (default is None)
+    :argument float max_value: maximum value for any element of the list (default is None)
+    :argument float inf_value: lower limit (not included) for any element of the list (default is None)
+    :argument float sup_value: upper limit (not included) for any element of the list (default is None)
+
+    :return: True if all the vector values are within the limits, False otherwise.
+    :rtype: bool
+    """
     check = True
     for item in vector:
         if not isinstance(item, float):
@@ -210,10 +277,16 @@ def check_values(vector, min_value=None, max_value=None, inf_value=None, sup_val
 
 
 
-def read_configuration(filename):
-#This function reads the input file line by line and returns a dictionary.
-#For each line the first word is a keyword, the following are values (either string or float).
-#The lines starting with '#' will be ignored. The values preceded by '!' (without spaces) will be also ignored.
+def read_configuration(filename): #function in common with SAIL
+    """
+    This function reads the input file line by line and returns a dictionary.
+    For each line the first word is a keyword, the following are values (either string or float).
+    The lines starting with '#' will be ignored. The values preceded by '!' (without spaces) will be also ignored. 
+    
+    :param str filename: absolute or relative path including the file name
+    :return: the configuration dictionary
+    :rtype: dict
+    """
     with open(filename, 'r') as file:
         input_dict = {}
         for line in file.readlines():
@@ -230,7 +303,14 @@ def read_configuration(filename):
 
 
 def check_configuration(input_dict):
-#This function checks and modifies the dictionary obtained from the configuration file and; it returns a boolean value and the updated dictionary.
+    """
+    This function checks and modifies the dictionary obtained from the configuration file.
+    It returns a boolean value and the updated dictionary.
+    
+    :param dict input_dict: 
+    :return: a bool value and the updated configuration dictionary
+    :rtype: bool, dict
+    """
     check = True
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
