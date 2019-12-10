@@ -245,7 +245,7 @@ neighbour 5: (-, +, +)
 neighbour 6: (-, +, -)  
 neighbour 7: (-, -, +)  
 neighbour 8: (-, -, -)  
-where "+" and "-" denote a parameter value higher or lower than in the requested point. In this case the code fails to find neighbours with higher effective temperature and lower surface gravity, as they do not exist in the Atlas\_2000 database. If more targets were requested, the code would just skip this target and move to the next one. Given there are no other requested targets, the code print the error message and exits without producing any output.  
+where "+" and "-" denote a parameter value higher or lower than in the requested point. In this case the code fails to find neighbours with higher effective temperature and lower surface gravity, as they do not exist in the Atlas\_2000 database. If more targets were requested, the code would just skip this target and move to the next one. Given there are no other requested targets, the code prints the error message and exits without producing any output.  
 The user can extract the information about all the available models in the grids by typing the following commands:  
 ```
 >>> from exotethys import sail  
