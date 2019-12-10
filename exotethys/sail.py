@@ -14,6 +14,7 @@ import os
 import pkg_resources
 import numpy as np
 from scipy.optimize import minimize
+from collections import OrderedDict
 
 import copy
 import pickle
@@ -555,7 +556,7 @@ def check_configuration(input_dict):
             check = False
         if limb_darkening_laws.count(item)>1:
             print('WARNING:',item,'limb_darkening_laws entered multiple times. Repetitions are ignored.')
-        input_dict_local['limb_darkening_laws'] = list(set(limb_darkening_laws))
+        input_dict_local['limb_darkening_laws'] = list(OrderedDict.fromkeys(limb_darkening_laws))
     #Special case gen_claret: generalization of the claret-4 law defined as 1 minus a linear combination of (1-mu)^(n/2) with n integer number.
     #gen_claret_orders defines the list of maximum n to include in the linear combinations.
     if 'gen_claret' in limb_darkening_laws:
@@ -627,7 +628,7 @@ def check_configuration(input_dict):
     for item in passbands:
         if passbands.count(item)>1:
             print('WARNING:', item, 'entered multiple times in passbands. Repetitions are ignored.')
-        input_dict_local['passbands'] = list(set(passbands))
+        input_dict_local['passbands'] = list(OrderedDict.fromkeys(passbands))
 
 
     #Checking the OPTIONAL wavelength_bins_files to split the selected passbands; by DEFAULT the passbands are not split.
