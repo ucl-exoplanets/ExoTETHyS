@@ -19,15 +19,16 @@ The code is consistent with python2/3. It makes use of
 3. After accessing the ExoTETHyS-master folder from terminal, type ```
 	pip install .``` to install the package.  
 	Alternatively you could import the package without installation, if you run python from the ExoTETHyS-master folder.
-4. To test the installation, you can open a python shell and try the following commands:
+4. To test the installation, you can type:
 
     ```
-    >>> import exotethys  
-    >>> from exotethys import sail  
-    >>> from exotethys import trip  
+    pytest ExoTETHyS-master/exotethys/tests/test_sail.py  
+    pytest ExoTETHyS-master/exotethys/tests/test_trip.py 
     ```
+NOTE: The instructions on how to run the code contained in this tutorial and the example files are written to be launched from a path that contains the cloned directory ExoTETHyS-master. Alternatively, the paths in the examples need to be personalized by the user.
 
 ## List of subpackages
+
 1. SAIL (Stellar Atmosphere Intensity Limb)  
    This subpackage can provide sets of stellar limb-darkening coefficients with
       - continuous ranges of the stellar parameters (effective temperature, surface log gravity, scaled solar metallicity);
@@ -39,7 +40,7 @@ The code is consistent with python2/3. It makes use of
 
     ```
     >>> from exotethys import sail  
-    >>> sail.ldc_calculate('examples/sail_example1.txt')   
+    >>> sail.ldc_calculate('ExoTETHyS-master/examples/sail_example1.txt')   
     ```
 
 2. TRIP (Transit Ring-Integrated Profile)  
@@ -49,7 +50,7 @@ The code is consistent with python2/3. It makes use of
    
     ```
     >>> from exotethys import trip  
-    >>> trip.trip_calculate('examples/trip_example.txt')  
+    >>> trip.trip_calculate('ExoTETHyS-master/examples/trip_example.txt')  
     ```
 
 ## SAIL configuration file
@@ -128,6 +129,7 @@ values: single float value
 **star\_maximum\_metallicity** (only if grid calculation\_type, optional)  
 values: single float value
 
+NOTE: The parameters must be within the parameter space of the selected stellar\_models\_grid. Further information is provided in the "Description of examples". 
 
 ## TRIP configuration file
 The TRIP configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with \# are ignored; keyword values preceded by \! are also ignored. Examples of configuration files can be found in the "examples" folder.
@@ -222,6 +224,15 @@ values: string type (without extension)
 
 **output\_fileext** (OPTIONAL)  
 values: ".pickle" (default) and/or ".txt"
+
+## Description of examples
+sail\_example1: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband.
+
+sail\_example2: This example is to test the complete output, including the stellar intensity profile and coefficients for the neighbour models.
+
+sail\_example3: This example contains stellar parameters just outside the covered parameter space. In particular, the database does not contain models with higher temperature and lower surface gravity, so that the requested point is not within a close volume of the parameter space. If running this example, the code will exit with 2 error messages (one for each neighbour not found).
+
+sail\_example4: This example computes the limb-darkening coefficients for a grid of models.
 
 
 
