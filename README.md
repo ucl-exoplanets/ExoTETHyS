@@ -226,13 +226,44 @@ values: string type (without extension)
 values: ".pickle" (default) and/or ".txt"
 
 ## Description of examples
-sail\_example1: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband.
+**sail\_example1**: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
 
-sail\_example2: This example is to test the complete output, including the stellar intensity profile and coefficients for the neighbour models.
+**sail\_example2**: This example is to test the complete output, including the stellar intensity profile and coefficients for the neighbour models. It creates three files named "teff28300.0_logg4.35_MH-0.23_ldc.pickle", "teff28300.0_logg4.35_MH-0.23_neighbour_ldc.pickle" and "teff28300.0_logg4.35_MH-0.23_neighbour_intensities.pickle".
 
-sail\_example3: This example contains stellar parameters just outside the covered parameter space. In particular, the database does not contain models with higher temperature and lower surface gravity, so that the requested point is not within a close volume of the parameter space. If running this example, the code will exit with 2 error messages (one for each neighbour not found).
+**sail\_example3**: This example contains stellar parameters just outside the covered parameter space. If running this example, the code will exit with 2 warnings (one for each neighbour not found) and one error:
+```
+WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 3 not found for the stellar_models_grid Atlas_2000 .
+WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 4 not found for the stellar_models_grid Atlas_2000 .
+ERROR: No legal targets to calculate.
+```
+In particular, the code searches for the 8 nearest neighbours that defines a volume containing the requested point (28000, 2.6, -0.23 ) in the following order:  
+neighbour 1: (+, +, +)  
+neighbour 2: (+, +, -)  
+neighbour 3: (+, -, +)  
+neighbour 4: (+, -, -)  
+neighbour 5: (-, +, +)  
+neighbour 6: (-, +, -)  
+neighbour 7: (-, -, +)  
+neighbour 8: (-, -, -)  
+where "+" and "-" denote a parameter value higher or lower than in the requested point. In this case the code fails to find neighbours with higher effective temperature and lower surface gravity, as they do not exist in the Atlas\_2000 database. If more targets were requested, the code would just skip this target and move to the next one. Given there are no other requested targets, the code print the error message and exits without producing any output.  
+The user can extract the information about all the available models in the grids by typing the following commands:  
+```
+>>> from exotethys import sail  
+>>> [files_Atlas_2000, params_Atlas_2000] = sail.get_grid_parameters('Atlas_2000') 
+>>> [files_Phoenix_2012_13, params_Phoenix_2012_13] = sail.get_grid_parameters('Phoenix_2012_13') 
+>>> [files_Phoenix_2018, params_Phoenix_2018] = sail.get_grid_parameters('Phoenix_2018') 
+```
+The first variable is the list of file names in the database, the second variable is the 3-column numpy array with the corresponding stellar parameters.
 
-sail\_example4: This example computes the limb-darkening coefficients for a grid of models.
+**sail\_example4**: This example computes the limb-darkening coefficients for a grid of models. It creates a file named "grid_ldc.pickle".
+
+**sail\_example5**: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+**sail\_example6**: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband and for another photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+**sail\_example7**: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
+
+**trip\_example**: This example computes an "exact" transit light-curve based on some auxiliary input files. It creates two files named "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
 
 
 
