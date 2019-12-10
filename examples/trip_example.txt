@@ -1,12 +1,12 @@
-output_path				/Users/pepe/Desktop/exotethys_output/
+#output_path				/Users/pepe/Desktop/exotethys_output/
 output_filename				trip_ld_Teff6100.0_logg4.5_MH0.0_TESS
 output_fileext				.pickle	.txt
 ##INPUT INFO
 input_limb_type				mu	!radi
-input_limb_path				/Users/pepe/Desktop/aux_files/
+input_limb_path				ExoTETHyS-master/aux_files/
 input_limb_file				ld_Teff6100.0_logg4.5_MH0.0_TESS.txt
 input_series_type			!phi	time	!z_sep
-input_series_path			/Users/pepe/Desktop/aux_files/
+input_series_path			ExoTETHyS-master/aux_files/
 input_series_file			time_series.txt
 rp_over_rs				0.12
 ##if not z_sep
