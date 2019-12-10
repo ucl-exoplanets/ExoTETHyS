@@ -710,43 +710,68 @@ def check_configuration(input_dict):
 
 
 def compute_z_sep(phi, inclination, sma_over_rs, eccentricity, arg_pericenter):
-#This function
-	theta = 2.0 * np.pi * phi
-	inclination = inclination * np.pi / 180.0
-	arg_pericenter = arg_pericenter * np.pi / 180.0
+    """
+    This function computes the sky-projected star-planet separation from the orbital phase vector and other parameters.
+    
+    :param np.array phi: 1D array with orbital phases, i.e., time in units of the orbital period, phase is integer at mid-transit
+    :param float inclination: orbital inclination in deg (inclination=90 if edge-on)
+    :param float sma_over_rs: orbital semimajor axis in units of the stellar radius
+    :param float eccentricity: orbital eccentricity
+    :param float arg_pericenter: argument of pericenter
+    :return: sky-projected star-planet separation at the given phase values
+    :rtype: np.array
+    """
+    theta = 2.0 * np.pi * phi
+    inclination = inclination * np.pi / 180.0
+    arg_pericenter = arg_pericenter * np.pi / 180.0
 
-	if eccentricity != 0:
-		n = len(theta)
-		E = np.zeros(n)
-		ecc2 = np.sqrt((1.0+eccentricity)/(1.0-eccentricity))
-		fref = np.pi/2.0 - arg_pericenter #setting reference point for the true anomaly
-		Eref = 2.0 * np.arctan(1.0/ecc2 * np.tan(fref/2.0))
-		if Eref < -np.pi/2.0:
-			Eref = Eref + 2.0*np.pi
-		Mref = Eref - (eccentricity * np.sin(Eref))
-		for i in range(n):
-			Mtmp = theta[i] +  Mref
-			Etmp = Mtmp
-			for j in range(10):
-				Etmp = Etmp + ((Mtmp + eccentricity*np.sin(Etmp) - Etmp) / (1.0-eccentricity*np.cos(Etmp)))
-			E[i] = Etmp
-		#calculating true anomaly
-		f = 2.0*np.arctan(ecc2*np.tan(E/2.0))
-		#calculating distance from true anomaly as fraction
-		r_frac = (1.0-eccentricity**2)/(1.0 + eccentricity*np.cos(f))
-		#computing z
-		z_sep = 1.0 - ((np.sin(inclination)**2.0) * (np.sin(f+arg_pericenter)**2))
-		z_sep = sma_over_rs*r_frac*np.sqrt(z_sep)
+    if eccentricity != 0:
+        n = len(theta)
+        E = np.zeros(n)
+        ecc2 = np.sqrt((1.0+eccentricity)/(1.0-eccentricity))
+        fref = np.pi/2.0 - arg_pericenter #setting reference point for the true anomaly
+        Eref = 2.0 * np.arctan(1.0/ecc2 * np.tan(fref/2.0))
+        if Eref < -np.pi/2.0:
+            Eref = Eref + 2.0*np.pi
+        Mref = Eref - (eccentricity * np.sin(Eref))
+        for i in range(n):
+            Mtmp = theta[i] +  Mref
+            Etmp = Mtmp
+            for j in range(10):
+                Etmp = Etmp + ((Mtmp + eccentricity*np.sin(Etmp) - Etmp) / (1.0-eccentricity*np.cos(Etmp)))
+            E[i] = Etmp
+        #calculating true anomaly
+        f = 2.0*np.arctan(ecc2*np.tan(E/2.0))
+        #calculating distance from true anomaly as fraction
+        r_frac = (1.0-eccentricity**2)/(1.0 + eccentricity*np.cos(f))
+        #computing z
+        z_sep = 1.0 - ((np.sin(inclination)**2.0) * (np.sin(f+arg_pericenter)**2))
+        z_sep = sma_over_rs*r_frac*np.sqrt(z_sep)
 	
-	if eccentricity == 0:
-		z_sep = sma_over_rs * np.sqrt( np.ones(len(theta)) - (np.cos(theta) * np.sin(inclination))**2 )
+        if eccentricity == 0:
+            z_sep = sma_over_rs * np.sqrt( np.ones(len(theta)) - (np.cos(theta) * np.sin(inclination))**2 )
 
-	return z_sep
+    return z_sep
 
 
 
 def get_x_series(input_series_type, input_series_path, input_series_file, sma_over_rs=None, inclination=None, eccentricity=None, arg_pericenter=None, period_orbital=None, epoch_of_transit=None, time_conversion_factor=None):
-#This function
+    """
+    This function returns the sky-projected star-planet separation, and, if possible, the corresponding orbital phase and time series.
+    
+    :param str input_series_type: 'z_sep' or 'phi' or 'time'
+    :param str input_series_path: absolute or relative path for the input series, without the file name
+    :param str input_series_file: the file name for the input series
+    :param float sma_over_rs: orbital semimajor axis in units of the stellar radius (None if not provided)
+    :param float inclination: orbital inclination in deg (None if not provided)
+    :param float eccentricity: orbital eccentricity (None if not provided)
+    :param float arg_pericenter: argument of pericenter (None if not provided)
+    :param float period_orbital: orbital period in arbitrary units (None if not provided)
+    :param float epoch_of_transit: reference time for mid-transit, using the same units of period_orbital (None if not provided)
+    :param float time_conversion_factor: factor to convert the input time series in the same units of period_orbital (None if not provided)
+    :return: the sky-projected star-planet separation (in all cases) + the corresponding orbital phase (if time or phase are given as input) + the corresponding time series (if given as input)
+    :rtype: np.array, np. array, np.array
+    """
     if input_series_type=='z_sep':
         [z_sep, check] = read_as_numpy_array(input_series_path+input_series_file)
         if not check_1Darray(z_sep):
@@ -783,10 +808,17 @@ def get_x_series(input_series_type, input_series_path, input_series_file, sma_ov
         return time, phi, z_sep
 
 
-
-
-
 def get_input_limb_model(input_limb_type,input_limb_path,input_limb_file):
+    """
+    This function reads the 2-column file with mu or radi and the specific intensities, and returns three 1D arrays with mu, radi and specific intensities.
+    
+    :param str input_limb_type: 'mu' or 'radi'
+    :param str input_limb_path: absolute or relative path for the intensity profile, without the file name
+    :param str input_limb_file: the file name for the intensity profile
+    :return: the mu, radi coordinate and specific intensities from the model intensity profile
+    :rtype: np.array, np. array, np.array
+    ..note:: return 1D arrays of the same size
+    """
     [limb_model, check] = read_as_numpy_array(input_limb_path+input_limb_file)
     if not check_2Darray(limb_model, n_col=2):
         print('ERROR: invalid format for input_limb_file', input_limb_path+input_limb_file, '. It must have 2 columns.')
@@ -825,14 +857,31 @@ def get_input_limb_model(input_limb_type,input_limb_path,input_limb_file):
 
 
 def get_max_gradient(muorradi_model,intensity_model):
-#This function
+    """
+    This function computes the mu or radi coordinate at which the gradient of the intensity profile is maximum (inflection point of a spherical model).
+    
+    :param np.array muorradi_model: 1D array with mu or radi values
+    :param np.array intensity_model: 1D array with the corresponding specific intensities
+    :return: the mu or radi coordinate at which the gradient of the intensity profile is maximum
+    :rtype: float
+    """
     dint_dx = np.abs( (intensity_model[1:]-intensity_model[:-1])/(muorradi_model[1:]-muorradi_model[:-1]) )
     muorradi_maxgrad = 0.5*( muorradi_model[np.argmax(dint_dx)+1] + muorradi_model[np.argmax(dint_dx)] )
     return muorradi_maxgrad
 
 
 def limbmodel_cut_and_rescale(radi_model,r0cut,r0res,intensity_model):
-#This function
+    """
+    This function transforms the given intensity profile by truncating and rescaling the radial coordinates.
+    
+    :param np.array radi_model: 1D array with the radi values
+    :param float r0cut: radial coordinate at which the model is truncated (for r>r0cut)
+    :param float r0res: radial coordinate of the unity radius, used to rescale the coordinates
+    :param np.array intensity_model: 1D array with the specific intensities
+    :return: the transformed mu, radi and specific intensities
+    :rtype: np.array, np.array, np.array
+    ..note:: return 1D arrays of the same size
+    """
     radi_model_cut = radi_model[np.where(radi_model<=r0cut)[0]]
     radi_model_cr = radi_model_cut/r0res
     intensity_model_cr = intensity_model[np.where(radi_model<=r0cut)[0]]
@@ -845,7 +894,20 @@ def limbmodel_cut_and_rescale(radi_model,r0cut,r0res,intensity_model):
 
 
 def get_limb_grid(mu_model,radi_model,intensity_model,n_annuli,r0res,interpolation_type,interpolation_variable):
-#This function
+    """
+    This function interpolates the intensity model over a grid of radi with uniform separation.
+    
+    :param np.array mu_model: 1D array with mu values
+    :param np.array radi_model: 1D array with radi values
+    :param np.array intensity_model: 1D array with intensity values
+    :param int n_annuli: number of interpolated radi (or annuli)
+    :param float r0res: rescaling radius (for inverse rescaling)
+    :param str interpolation_type: available kind for scipy.interpolate.interp1d
+    :param str interpolation_variable: 'mu' or 'radi'
+    :return: the interpolated radi and corresponding intensities
+    :rtype: np.array, np.array
+    ..note:: return 1D arrays of the same size (n_annuli)
+    """
     radi_grid = (0.5+np.arange(n_annuli))/n_annuli
     radi_grid_back = radi_grid*r0res
     if interpolation_variable=='mu':
@@ -859,7 +921,15 @@ def get_limb_grid(mu_model,radi_model,intensity_model,n_annuli,r0res,interpolati
 
 
 def get_star_flux(radi_grid, intensity_grid, n_annuli):
-#This function
+    """
+    This function computes the flux for each annulus and the total flux.
+    
+    :param np.array radi_grid: 1D array with radi values
+    :param np.array intensity_grid: 1D array with intensity values
+    :param int n_annuli: number of interpolated radi or annuli
+    :return: the flux for each annulus and the total flux
+    :rtype: np.array, float
+    """
     dr_grid = 1.0/n_annuli
     flux_grid = 2.0*radi_grid*dr_grid*intensity_grid
     flux_sum = np.sum(flux_grid)
@@ -867,7 +937,17 @@ def get_star_flux(radi_grid, intensity_grid, n_annuli):
 
 
 def get_occ_star_flux(radi_grid, flux_grid, rp_over_rs, z_sep):
-#This function
+    """
+    This function computes the occulted stellar flux.
+    
+    :param np.array radi_grid: 1D array with radi values
+    :param np.array flux_grid: 1D array with flux values for each annulus
+    :param float rp_over_rs: planet-to-star radii ratio
+    :param np.array z_sep: 1D array with sky-projected star-planet separation
+    :return: the stellar flux occulted by the planet
+    :rtype: np.array
+    ..note:: all the arrays have the same shape
+    """
     F = np.zeros_like(z_sep)
     radi_grid, z_sep = np.meshgrid(radi_grid, z_sep)
     flux_grid, F = np.meshgrid(flux_grid, F)
@@ -879,7 +959,15 @@ def get_occ_star_flux(radi_grid, flux_grid, rp_over_rs, z_sep):
 
 
 def process_configuration(input_dict):
-#This function
+    """
+    This function executes all the operations from the checked input dictionary to create the requested output files.
+    
+    :param dict: input_dict
+    ..note:: all the input dictionary branches end with a list, even if they contain a single element.
+    ..note:: the input dictionary may contain more keywords than those specified in the configuration file, as they can be set to default values by the check_configuration function.
+    :return: dictionary with the input parameters and calculated light-curves 
+    :rtype: dict
+    """
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
 
@@ -1020,14 +1108,16 @@ def process_configuration(input_dict):
 
     return output_dict
 
-
-
-
-
-
-
 def trip_calculate(configuration_file):
-#Main function for 
+    """
+    This is the main function to run for calculating the requested exact light-curve.
+    It calls the three functions to read, check and process the input file.
+    
+    :param str configuration_file: absolute or relative path including the file name
+    
+    :return:
+    :rtype:
+    """ 
     input_dict1 = read_configuration(configuration_file) #Reading configuration file
     [check, input_dict] = check_configuration(input_dict1) #Checking configuration file and dictionary update
     if check:
