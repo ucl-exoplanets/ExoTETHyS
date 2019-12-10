@@ -748,8 +748,8 @@ def compute_z_sep(phi, inclination, sma_over_rs, eccentricity, arg_pericenter):
         z_sep = 1.0 - ((np.sin(inclination)**2.0) * (np.sin(f+arg_pericenter)**2))
         z_sep = sma_over_rs*r_frac*np.sqrt(z_sep)
 	
-        if eccentricity == 0:
-            z_sep = sma_over_rs * np.sqrt( np.ones(len(theta)) - (np.cos(theta) * np.sin(inclination))**2 )
+    else: #if eccentricity == 0:
+        z_sep = sma_over_rs * np.sqrt( np.ones(len(theta)) - (np.cos(theta) * np.sin(inclination))**2 )
 
     return z_sep
 
