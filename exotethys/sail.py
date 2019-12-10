@@ -1524,16 +1524,8 @@ def process_configuration(input_dict):
     :param dict: input_dict
     ..note:: all the input dictionary branches end with a list, even if they contain a single element.
     ..note:: the input dictionary may contain more keywords than those specified in the configuration file, as they can be set to default values by the check_configuration function.
-    :param float logg: stellar surface log gravity of the requested model
-    :param float mh: stellar metallicity of the requested model
-    :param np.array neigh_indices: indices of the neighbour models in the online database
-    :param str passband: name of the passband (eventually, it includes the wavelength bin limits)
-    :param str law: name of the limb-darkening law
-    :param dict neighbour_limb_darkening_coefficients: dictionary containing the limb-darkening coefficients for the neighbour models
-    
     :return: two dictionaries with limb-darkening coefficients (basic output file) and model passband-integrated intensities (saved only if user_output = 'complete') 
     :rtype: dict, dict
-    ..note:: mucut, intscut and weights must have the same size
     """
     #Reading keywords and eventually adding new default keywords (not added by the check_configuration function).
     input_dict_local = copy.deepcopy(input_dict)
