@@ -14,18 +14,20 @@ The code is consistent with python2/3. It makes use of
 - numpy, scipy
 
 ## Download and installation
-1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository.
-2. Open a terminal window and access the ExoTETHyS-master folder (you may need to unzip first). The exact path and instructions depends on which operating systems you run.
-3. After accessing the ExoTETHyS-master folder from terminal, type ```
-	pip install .``` to install the package.  
-	Alternatively you could import the package without installation, if you run python from the ExoTETHyS-master folder.
+
+# From GitHub  
+1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository. Alternatively type `git clone https://github.com/ucl-exoplanets/ExoTETHyS` in a terminal window. 
+2. Access the root folder from terminal (you may need to unzip first).
+3. After accessing the root folder from terminal, type 
+```pip install .```  
+to install the package. Otherwise, you could import the package without installation, if you run python from the root folder.
 4. To test the installation, you can type:
 
     ```
-    pytest ExoTETHyS-master/exotethys/tests/test_sail.py  
-    pytest ExoTETHyS-master/exotethys/tests/test_trip.py 
+    pytest PATH_TO_ROOT/exotethys/tests/test_sail.py  
+    pytest PATH_TO_ROOT/exotethys/tests/test_trip.py 
     ```
-NOTE: The instructions on how to run the code contained in this tutorial and the example files are written to be launched from a path that contains the cloned directory ExoTETHyS-master. Alternatively, the paths in the examples need to be personalized by the user.
+NOTE: The root folder name depends on the download process. It appears to be "ExoTETHyS-master" if downloaded from the web browser interface, "ExoTETHyS" if git cloned from terminal.  
 
 ## List of subpackages
 
@@ -40,7 +42,7 @@ NOTE: The instructions on how to run the code contained in this tutorial and the
 
     ```
     >>> from exotethys import sail  
-    >>> sail.ldc_calculate('ExoTETHyS-master/examples/sail_example1.txt')   
+    >>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
     ```
 
 2. TRIP (Transit Ring-Integrated Profile)  
@@ -50,8 +52,9 @@ NOTE: The instructions on how to run the code contained in this tutorial and the
    
     ```
     >>> from exotethys import trip  
-    >>> trip.trip_calculate('ExoTETHyS-master/examples/trip_example.txt')  
+    >>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example.txt')  
     ```
+NOTE: The examples are written to be launched from root directory level. Alternatively, the paths in the examples need to be personalized by the user.
 
 ## SAIL configuration file
 The SAIL configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with \# are ignored; keyword values preceded by \! are also ignored. Examples of configuration files can be found in the "examples" folder.
@@ -263,7 +266,8 @@ The first variable is the list of file names in the database, the second variabl
 
 **sail\_example7**: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
 
-**trip\_example**: This example computes an "exact" transit light-curve based on some auxiliary input files. It creates two files named "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
+**trip\_example**: This example computes an "exact" transit light-curve based on some auxiliary input files. It creates two files named "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".  
+WARNING: running this trip\_example will consume a lot of memory (>10 GB), because by default TRIP uses 100000 annuli to compute the integral stellar flux. The user can set a different number of annuli by uncommenting the line with "n\_annuli" in the trip\_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).
 
 
 
