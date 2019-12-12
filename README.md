@@ -54,6 +54,7 @@ NOTE: The root folder name depends on the download process. It appears to be "Ex
     >>> from exotethys import trip  
     >>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example.txt')  
     ```
+WARNING: running this trip\_example will consume a lot of memory (>10 GB), because by default TRIP uses 100000 annuli to compute the integral stellar flux. The user can set a different number of annuli by uncommenting the line with "n\_annuli" in the trip\_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).  
 NOTE: The examples are written to be launched from root directory level. Alternatively, the paths in the examples need to be personalized by the user.
 
 ## SAIL configuration file
@@ -267,7 +268,6 @@ The first variable is the list of file names in the database, the second variabl
 **sail\_example7**: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
 
 **trip\_example**: This example computes an "exact" transit light-curve based on some auxiliary input files. It creates two files named "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".  
-WARNING: running this trip\_example will consume a lot of memory (>10 GB), because by default TRIP uses 100000 annuli to compute the integral stellar flux. The user can set a different number of annuli by uncommenting the line with "n\_annuli" in the trip\_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).
 
 
 
