@@ -1,4 +1,4 @@
-#output_path				/Users/pepe/Desktop/exotethys_output/
+#output_path				/desired_absolute_or_relative_path/
 output_filename				trip_ld_Teff6100.0_logg4.5_MH0.0_TESS
 output_fileext				.pickle	.txt
 ##INPUT INFO
