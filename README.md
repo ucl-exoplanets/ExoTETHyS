@@ -2,7 +2,7 @@
 
 # ![ExoTETHyS logo](https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png)
 
-Version 1.0.1 [![Build Status](https://travis-ci.org/ucl-exoplanets/ExoTETHyS.svg?branch=master)](https://travis-ci.org/ucl-exoplanets/ExoTETHyS)
+Version 1.0.2 [![Build Status](https://travis-ci.org/ucl-exoplanets/ExoTETHyS.svg?branch=master)](https://travis-ci.org/ucl-exoplanets/ExoTETHyS)
 
 ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
 
@@ -14,8 +14,13 @@ The code is consistent with python2/3. It makes use of
 - numpy, scipy
 
 ## Download and installation
+### From Pypi  
+Type on the terminal:
+```pip install exotethys```  
+This command installs the latest stable version of the package.
 
-# From GitHub  
+### From GitHub  
+The most updated version of the package is available on GitHub. As this version is constantly under development, stability is not guaranteed.  
 1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository. Alternatively type `git clone https://github.com/ucl-exoplanets/ExoTETHyS` in a terminal window. 
 2. Access the root folder from terminal (you may need to unzip first).
 3. After accessing the root folder from terminal, type 
@@ -27,7 +32,7 @@ to install the package. Otherwise, you could import the package without installa
     pytest PATH_TO_ROOT/exotethys/tests/test_sail.py  
     pytest PATH_TO_ROOT/exotethys/tests/test_trip.py 
     ```
-NOTE: The root folder name depends on the download process. It appears to be "ExoTETHyS-master" if downloaded from the web browser interface, "ExoTETHyS" if git cloned from terminal.  
+NOTE: The root folder name depends on the download process. It appears to be "ExoTETHyS-master" if downloaded from the web browser interface, "ExoTETHyS" if git cloned from terminal.
 
 ## List of subpackages
 
