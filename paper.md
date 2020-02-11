@@ -39,6 +39,8 @@ aas-doi: 10.3847/1538-3881/ab63dc
 aas-journal: The Astronomical Journal
 ---
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.01834/status.svg)](https://doi.org/10.21105/joss.01834)
+
 # Summary
 
 ExoTETHyS is a Python2/3 package which aims to provide a stand-alone set of tools for modeling spectro-photometric observations of transiting exoplanets. The package is not a mere collection of pre-existing software, but contains algorithms with new features as well as enhancements of existing codes. The first release contains the following subpackages:
