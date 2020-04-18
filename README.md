@@ -4,6 +4,7 @@
 
 Version 1.0.2 [![Build Status](https://travis-ci.org/ucl-exoplanets/ExoTETHyS.svg?branch=master)](https://travis-ci.org/ucl-exoplanets/ExoTETHyS) [![DOI](https://zenodo.org/badge/169268509.svg)](https://zenodo.org/badge/latestdoi/169268509)
 
+NOT UPDATED FOR VERSION 2.x.x - beta
 ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
 
 If you use this code for your research, please consider citing Morello et al. 2019, ... (arXiv:1908.09599)
