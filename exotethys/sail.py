@@ -15,6 +15,9 @@ import pkg_resources
 import numpy as np
 from scipy.optimize import minimize
 from collections import OrderedDict
+from scipy.interpolate import interp1d
+from scipy.integrate import simps
+import astropy.units as u
 
 import copy
 import pickle
@@ -440,7 +443,7 @@ def check_configuration(input_dict):
     It returns a boolean value and the updated dictionary.
     
     :param dict input_dict: 
-    :return: a bool value and the updated configuration dictionary
+    :return: a boolean value and the updated configuration dictionary
     :rtype: bool, dict
     """
     check = True
@@ -464,7 +467,6 @@ def check_configuration(input_dict):
 
 
     #Checking the requested I/O paths (optional).
-    #TO DO: Is it a valid path? This should also be checked.
     passbands_path = ''
     if 'passbands_path' in input_keys:
         passbands_path = input_dict_local['passbands_path']
@@ -544,12 +546,11 @@ def check_configuration(input_dict):
             check = False
 
     #Checking the choice of limb_darkening_laws; at least one law must be specified in the input file (no default).
-    #TO DO: User-defined limb_darkening_laws should be allowed, but this option is not implemented yet.
     limb_darkening_laws = input_dict_local['limb_darkening_laws']
     if not check_length(limb_darkening_laws):
         print('ERROR: invalid length=', len(limb_darkening_laws), 'for limb_darkening_laws. It must have length>=1.')
         check = False
-    allowed_limb_darkening_laws = ['linear', 'quadratic', 'square_root', 'power2', 'claret4', 'gen_claret', 'gen_poly'] #user-defined should be added
+    allowed_limb_darkening_laws = ['linear', 'quadratic', 'square_root', 'power2', 'claret4', 'gen_claret', 'gen_poly']
     for item in limb_darkening_laws:
         if item not in allowed_limb_darkening_laws:
             print('ERROR:',item,'is not a valid limb_darkening_laws.')
@@ -710,7 +711,6 @@ def check_configuration(input_dict):
     #Checking the keywords which are specific to one of the alternative calculation_type.
     if 'targets_file' in input_keys:
         targets_file = input_dict_local['targets_file']
-        #print('get_individual_parameters', targets_file)
         if not check_length(targets_file, max_length=1):
             print('ERROR: invalid length=', len(targets_file), 'for targets_file (optional). It must have length=1.')
             check = False
@@ -848,7 +848,7 @@ def get_individual_parameters(input_dict):
         targets_path = ''
         if 'targets_path' in input_keys:
             targets_path = input_dict_local['targets_path'][0]
-        targets_dict = read_targets_file(targets_path+targets_file)
+        targets_dict = read_targets_file(os.path.join(targets_path,targets_file))
         star_effective_temperature = copy.deepcopy(targets_dict['star_effective_temperature'])
         star_log_gravity = copy.deepcopy(targets_dict['star_log_gravity'])
         star_metallicity = copy.deepcopy(targets_dict['star_metallicity'])
@@ -911,14 +911,14 @@ def stellar_params_from_file_name(file_name):
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
     mh = float(params[2].replace('MH', ''))
-    return np.array((teff, logg, mh))
+    return np.array([teff, logg, mh])
 
 
 def get_grid_parameters(stellar_models_grid):
     """
     This function gets all the file names in the database and the corresponding stellar parameters.
     
-    :param str file_name: built-in file name
+    :param str stellar_models_grid:
     :return: the file names and a numpy array with the corresponding stellar parameters (number of files X 3)
     :rtype: list of str, np.array
     """
@@ -1134,176 +1134,152 @@ def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_
     neigh_indices = np.array([index1tgm, index2tgm, index3tgm, index4tgm, index5tgm, index6tgm, index7tgm, index8tgm])
     return neigh_indices
 
-            
 
-def check_passband_limits(pb, stellar_models_grid):
+def check_passband_limits(pb_waves, stellar_models_grid):
     """
-    This function checks that the wavelengths read from a passband file are within the limits for the chosen stellar_models_grid.
+    This function checks that the wavelengths read from a passband file are within the limits for the chosen stellar_models_grid and returns a boolean value.
     
-    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
+    :param quantity array pb_waves: 1D array of wavelengths read from the passband file
     :params str stellar_models_grid: the name of the chosen stellar database
-    :return: the spectral response 2D array and a boolean value.
-    :rtype: np.array, bool
+    :return: True if the wavelengths are within the limits, False otherwise
+    :rtype: bool
     """
     check = True
     if stellar_models_grid == 'Phoenix_2018':
-        minimum_wavelength = 500.0
-        maximum_wavelength = 25999.0
-        if np.min(pb[:,0])<minimum_wavelength or np.max(pb[:,0])>maximum_wavelength:
+        minimum_wavelength = 500.0 * u.Angstrom
+        maximum_wavelength = 25999.0 * u.Angstrom
+        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
-        return pb, check
     elif stellar_models_grid == 'Phoenix_2012_13':
-        minimum_wavelength = 2500.0
-        maximum_wavelength = 99995.0
-        if np.min(pb[:,0])<minimum_wavelength or np.max(pb[:,0])>maximum_wavelength:
+        minimum_wavelength = 2500.0 * u.Angstrom
+        maximum_wavelength = 99995.0 * u.Angstrom
+        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
-        return pb, check
     elif stellar_models_grid == 'Atlas_2000':
-        minimum_wavelength = 90.9
-        maximum_wavelength = 1600000.0
-        if np.min(pb[:,0])<minimum_wavelength or np.max(pb[:,0])>maximum_wavelength:
+        minimum_wavelength = 90.9 * u.Angstrom
+        maximum_wavelength = 1600000.0 * u.Angstrom
+        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
-        return pb, check
+    return check
 
 
-def get_passband(passbands_path, passbands_ext, passband, stellar_models_grid):
+def read_passband(passbands_path, passbands_ext, passband, stellar_models_grid):
     """
-    This function extracts the passband from file; first column = wavelengths in Angstrom, second column = response in electron/photon or proportional.
+    This function calls another function to read the passband from file and checks its content. It returns the extracted columns and a boolean value.
     
-    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
+    :param str passbands_path:
+    :param str passbands_ext:
+    :param str passband:
+    ..note:: the above params define the file with the passband to read
     :params str stellar_models_grid: the name of the chosen stellar database
-    :return: the spectral response 2D array (empty if not valid) and a boolean value.
-    :rtype: np.array, bool
+    :return: the wavelengths (in Angstrom), the corresponding pce values (in electron/photon), and a boolean value.
+    :rtype: quantity array, quantity array, bool
     """
-    [pb, check] = read_as_numpy_array(passbands_path+passband+passbands_ext)
+    [pb, check] = read_as_numpy_array(os.path.join(passbands_path,passband)+passbands_ext)
     if not check:
         print('WARNING: Skipping passband', passband, '.')
-        return np.array([]), check
+        return np.array([]) * u.Angstrom, np.array([]) * u.electron /u.photon, check
     pb = np.atleast_2d(pb)
     if not check_2Darray(pb, n_col=2):
         print('WARNING: invalid format for', passband, 'passband file. It must have 2 columns. Skipping', passband, 'passband.')
         check = False
-        return np.array([]), check
+        return np.array([]) * u.Angstrom, np.array([]) * u.electron /u.photon, check
     if np.min(pb)<0:
         print('WARNING: negative value found in file', passband, 'passband file. Skipping', passband, 'passband.')
         check = False
-        return np.array([]), check
-    [pb, check] = check_passband_limits(pb, stellar_models_grid)
+        return np.array([]) * u.Angstrom, np.array([]) * u.electron /u.photon, check
+    pb_waves = pb[:,0] * u.Angstrom
+    pb_pce = pb[:,1] * u.electron /u.photon 
+    check = check_passband_limits(pb_waves, stellar_models_grid)
     if not check:
         print('WARNING:', passband, 'passband exceeds wavelength range for the', stellar_models_grid, 'stellar model grid. Skipping', passband, 'passband.')
-        return np.array([]), check
-    return pb, check
+        return np.array([]) * u.Angstrom, np.array([]) * u.electron /u.photon, check
+    return pb_waves, pb_pce, check
 
-
-
-def get_wavelength_bins(wavelength_bins_path, wavelength_bins_file, pb, passband):
+def read_wavelength_bins(wavelength_bins_path, wavelength_bins_file, pb_waves, passband):
     """
-    This function reads the wavelength_bins_file; first column = minimum wavelengths, second column = maximum wavelengths.
+    This function calls another function to read the wavelength bins file and checks its content, unless it is set to no_bins. It returns the extracted array and a boolean value.
     
     :param str wavelength_bins_path: the path to wavelength bins files (without the file name)
     :param str wavelength_bins_file: the name of the wavelength bins file or the string no_bins
-    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
-    :params str passband: the passband name
-    :return: the wavelength bins 2D array (empty if not valid) and a boolean value.
-    :rtype: np.array, bool
+    :param quantity array pb_waves: 1D array of wavelengths (in Angstrom)
+    ..note:: the above params define the file with the passband to read
+    :return: the wavelength bins 2D or empty array (in Angstrom) and a boolean value.
+    :rtype: quantity array, bool
     """
     check =  True
     if wavelength_bins_file == 'no_bins':
         check = True
-        return np.array([]), check
+        return np.array([]) * u.Angstrom, check
     [wb, check] = read_as_numpy_array(wavelength_bins_path+wavelength_bins_file)
     if not check:
         print('WARNING: Ignoring wavelength_bins_file', wavelength_bins_file, '.')
-        return np.array([]), check
+        return np.array([]) * u.Angstrom, check
     wb = np.atleast_2d(wb)
     if not check_2Darray(wb, n_col=2):
         print('WARNING: invalid format for wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, '. It must have 2 columns. Ignoring wavelength_bins_file', wavelength_bins_file, '.')
         check = False
-        return np.array([]), check
+        return np.array([]) * u.Angstrom, check
+    wb *= u.Angstrom
     if (wb[:,0]>=wb[:,1]).any():
         print('WARNING: invalid line in wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, '. The lower limit cannot be greater or equal to the upper limit.')
         check = False
-        return np.array([]), check
-    if np.min(wb)<np.min(pb[:,0]) or np.max(wb)>np.max(pb[:,0]):
-        print('WARNING:wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, 'exceeds wavelength range for the ', passband, 'passband. Ignoring this passband.')
+        return np.array([]) * u.Angstrom, check
+    if np.min(wb)<np.min(pb_waves) or np.max(wb)>np.max(pb_waves):
+        print('WARNING:wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, 'exceeds wavelength range for the ', passband, 'passband. Ignoring this file.')
         check = False
-        return np.array([]), check
+        return np.array([]) * u.Angstrom, check
     return wb, check
 
 
-
-
-def get_response(passband, model_wavelengths):
+def get_waves_fromR(lambda1, lambda2, R):
     """
-    This function interpolates the passband (response) on the same wavelengths grid of the stellar model.
+    This function computes an array of wavelengths with constant spectral resolution, including the minimum and maximum wavelengths.
+    The requested resolution can be automatically increased to guarantee the minimum length of 10 for the array of wavelengths.
     
-    :param str wavelength_bins_path: the path to wavelength bins files (without the file name)
-    :param str wavelength_bins_file: the name of the wavelength bins file or the string no_bins
-    :param np.array pb: total spectral response table for the instrument/passband; the first column reports the wavelength in Angstrom, the second column is the electron/photon conversion factor or something proportional to this factor.
-    :params np. array passband: 2D array; first column =  wavelengths in Angstrom, second column =  spectral response in electron/photon or proportional units.
-    :param np.array model_wavelengths: 1D array containing the wavelengths in Angstrom for the pre-calculated stellar model-atmosphere.
-    :return: the interpolated response
+    :param float lambda1: minimum wavelength
+    :param float lambda2: maximum wavelength
+    :param float R: spectral resolution
+    ..note:: the input params are already checked to avoid errors, if using the boats_calculate_transit or boats_calculate_eclipse functions
+    :return: the 1D array of wavelengths
     :rtype: np.array
     """
-    resp = np.zeros(len(model_wavelengths))
-    passband_wl = np.array((np.min(passband[:,0]),np.max(passband[:,0])))
-    for i in range(len(model_wavelengths)):
-        if model_wavelengths[i] >= passband_wl[0] and model_wavelengths[i] <= passband_wl[1]:
-            prov = np.argmin(np.abs(passband[:,0]-model_wavelengths[i]))
-            if passband[prov,0] == model_wavelengths[i]:
-                resp[i] = passband[prov,1]
-            elif passband[prov,0] < model_wavelengths[i]:
-                resp[i] = ( passband[prov,1]*(passband[prov+1,0]-model_wavelengths[i]) + passband[prov+1,1]*(model_wavelengths[i]-passband[prov,0]) ) / (passband[prov+1,0]-passband[prov,0])
-            elif passband[prov,0] > model_wavelengths[i]:
-                resp[i] = ( passband[prov-1,1]*(passband[prov,0]-model_wavelengths[i]) + passband[prov,1]*(model_wavelengths[i]-passband[prov-1,0]) ) / (passband[prov,0]-passband[prov-1,0])
-    return resp
+    log_lambda1 = np.log(lambda1)
+    log_lambda2 = np.log(lambda2)
+    log_step = np.log( (2*R+1)/(2*R-1) )
+    n_steps = np.ceil( (log_lambda2-log_lambda1)/log_step )
+    n_steps = np.max([10, n_steps])
+    log_waves = np.linspace(log_lambda1, log_lambda2, num=np.int(n_steps))
+    waves = np.exp(log_waves)
+    return waves
 
 
-def compute_integrated_intensities(model_wavelengths, model_intensities, response):
-    """
-    This function computes the integral of the intensities over the passband (already interpolated on the same wavelengths).
-    
-    :param np.array model_wavelengths: 1D array containing wavelengths in Angstrom for the pre-calculated stellar model-atmosphere
-    :param np.array model_intensities: 2D array with specific intensities as a function of wavelength and mu angle
-    :param np.array response: total spectral response interpolated over the model_wavelengths
-    :return: the integrated intensities, normalised to 1 at the star's center
-    :rtype: np.array
-    """
-    integ_ints = np.zeros(np.shape(model_intensities)[1])
-    #model_intensities = model_intensities/np.mean(model_intensities[:,-1]) #arbitrary normalization
-    for i in range(1,len(model_wavelengths)-1):
-        integ_ints += (model_wavelengths[i+1]-model_wavelengths[i-1])*response[i]*model_wavelengths[i]*model_intensities[i,:]
-    integ_ints = integ_ints/np.max(integ_ints)
-    return integ_ints
+def get_passband_intensities(model_dict, passbands_dict):
 
-
-def get_integrated_intensities(model_dict, passbands_dict, wavelength_bins_dict):
     """
     This function calls the calculation of integrated intensities for various passbands.
     
-    :param dict model_dict: dictionary containing the model wavelengths in Angstrom and specific intensities
-    :param dict passbands_dict: dictionary with the spectral responses
-    :param dict wavelength_bins_dict: dictionary with the wavelength bins associated with the various passbands
-    :return: dictionary with all the passband-integrated intensities and the corresponding mu values
+    :param dict model_dict: dictionary containing the model wavelengths, mu values and specific intensities
+    ..note:: dictionary keys are 'mu' (1D numpy array), 'wavelengths' and 'intensities' (quantity array)
+    :param dict passbands_dict: dictionary with the spectral responses to use
+    ..note:: each passband contains a list with 2 quantity arrays reporting wavelengths and the corresponding pce response
+    :return: dictionary with all the passband-integrated normalised intensities and the corresponding mu values
     :rtype: dict
     """
+    passbands = list(passbands_dict.keys())
     model_wavelengths = model_dict['wavelengths']
     model_intensities = model_dict['intensities']
-    mu = model_dict['mu']
-    passbands = list(passbands_dict.keys())
+    model_mu = model_dict['mu']
+    norm_index = np.argmax(model_mu)
     integ_dict = {}
-    integ_dict['mu'] = mu
+    integ_dict['mu'] = copy.deepcopy(model_mu)
     for passband in passbands:
-        response = get_response(passbands_dict[passband], model_wavelengths)
-        wavelength_bins = wavelength_bins_dict[passband]
-        if len(wavelength_bins)==0:
-            integ_dict[os.path.splitext(passband)[0]] = compute_integrated_intensities(model_wavelengths, model_intensities, response)
-        else:
-            for wbin in wavelength_bins:
-                wbin_out_indices = np.concatenate(( np.where(model_wavelengths<wbin[0])[0], np.where(model_wavelengths>wbin[1])[0] ))
-                wbin_response = response.copy()
-                wbin_response[wbin_out_indices] = 0.0
-                integ_dict[os.path.splitext(passband)[0]+'_'+str(wbin[0])+'_'+str(wbin[1])] = compute_integrated_intensities(model_wavelengths, model_intensities, wbin_response)
+        my_waves = passbands_dict[passband][0].to(model_wavelengths.unit)
+        my_pce = passbands_dict[passband][1].value
+        f_interp = interp1d(model_wavelengths.value, model_intensities.value, axis=0, fill_value='extrapolate')
+        my_ints = f_interp(my_waves.value)
+        my_ints_integ = simps(my_ints*my_pce[:,None], my_waves.value, axis=0)
+        integ_dict[passband] = my_ints_integ/my_ints_integ[norm_index]
     return integ_dict
 
 
@@ -1314,7 +1290,7 @@ def rescale_and_weights(mu, intensities, stellar_models_grid):
     then applies the quasi-spherical cut-off and computes weights for the intensity model-fit.
     
     :param np.array mu: 1D array with mu values calculated for the model-atmosphere
-    :param np.array intensities: 1D array with passband-integrated intensities
+    :param np.array intensities: 1D array with passband-integrated normalised intensities
     :params str stellar_models_grid: the name of the selected stellar database
     :return: mu values, intensities and weights for the limb-darkening fit
     :rtype: np.array, np.array, np.array
@@ -1348,7 +1324,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
     """
     This function computes the limb-darkening coefficients for the required passbands and limb-darkening laws.
     
-    :param dict integ_dict: dictionary with the mu values and passbands
+    :param dict integ_dict: dictionary with the mu values and the passband-integrated normalised intensities
     :param list of str limb-darkening laws: list of limb-darkening laws chosen by the user
     :param str stellar_models_grid: the name of the selected stellar database
     :param list of int gen_poly_orders: maximum orders of the polynomial limb-darkening laws chosen by the user
@@ -1363,7 +1339,6 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
     for passband in passbands:
         integ_ints = integ_dict[passband]
         ldc_dict['passbands'][passband] = {}
-        #if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13']:
         [res_mu, res_integ_ints, weights] = rescale_and_weights(mu, integ_ints, stellar_models_grid)
         ldc_dict['passbands'][passband]['rescaled_mu'] = res_mu
         ldc_dict['passbands'][passband]['rescaled_intensities'] = res_integ_ints
@@ -1444,7 +1419,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
     return ldc_dict
         
 
-def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_darkening_coefficients):
+def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_darkening_coefficients, grid_files):
     """
     This function interpolates the limb-darkening coefficients by sequential linear interpolation.
     
@@ -1463,9 +1438,10 @@ def interp_ldc(teff, logg, mh, neigh_indices, passband, law, neighbour_limb_dark
     wres_tgm = np.atleast_1d(np.array([]))
     star_params_tgm = np.array([])
     for i in neigh_indices:
-        coeffs_tgm = my_vstack(coeffs_tgm, neighbour_limb_darkening_coefficients[i]['passbands'][passband]['laws'][law]['coefficients'])
-        wres_tgm = my_vstack(wres_tgm, np.atleast_1d(neighbour_limb_darkening_coefficients[i]['passbands'][passband]['laws'][law]['weighted_rms_res']))
-        star_params_tgm = my_vstack(star_params_tgm, neighbour_limb_darkening_coefficients[i]['star_params'])
+        label = os.path.splitext(grid_files[i])[0]
+        coeffs_tgm = my_vstack(coeffs_tgm, neighbour_limb_darkening_coefficients[label]['passbands'][passband]['laws'][law]['coefficients'])
+        wres_tgm = my_vstack(wres_tgm, np.atleast_1d(neighbour_limb_darkening_coefficients[label]['passbands'][passband]['laws'][law]['weighted_rms_res']))
+        star_params_tgm = my_vstack(star_params_tgm, neighbour_limb_darkening_coefficients[label]['star_params'])
     #star metallicity interpolation
     coeffs_tg = np.array([])
     wres_tg = np.atleast_1d(np.array([]))
@@ -1528,13 +1504,16 @@ def process_configuration(input_dict):
     :return: two dictionaries with limb-darkening coefficients (basic output file) and model passband-integrated intensities (saved only if user_output = 'complete') 
     :rtype: dict, dict
     """
-    #Reading keywords and eventually adding new default keywords (not added by the check_configuration function).
+
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
-    calculation_type = input_dict_local['calculation_type'][0]
+
+    #Getting the output keywords and calculation type
     output_path = input_dict_local['output_path'][0]
     user_output = input_dict_local['user_output'][0]
-    stellar_models_grid = input_dict_local['stellar_models_grid'][0]
+    calculation_type = input_dict_local['calculation_type'][0]
+
+    #Getting the limb-darkening laws
     limb_darkening_laws = input_dict_local['limb_darkening_laws']
     gen_poly_orders = None
     gen_claret_orders = None
@@ -1544,6 +1523,11 @@ def process_configuration(input_dict):
     if 'gen_claret' in limb_darkening_laws:
         gen_claret_orders = input_dict_local['gen_claret_orders']
         gen_claret_orders = np.asarray(gen_claret_orders, dtype=int)
+
+    #Getting the coupled passband+wavelength_bins keywords
+    stellar_models_grid = input_dict_local['stellar_models_grid'][0]
+    passbands_path = input_dict_local['passbands_path'][0]
+    passbands_ext = input_dict_local['passbands_ext'][0]
     passbands = input_dict_local['passbands']
     n_pass = len(passbands)
     if 'wavelength_bins_files' in input_keys:
@@ -1552,19 +1536,23 @@ def process_configuration(input_dict):
     else:
         wavelength_bins_files = ['no_bins',]*n_pass
         wavelength_bins_path = ''
+    #Computing the photon conversion efficiency for each requested passband + wavelength bins and storing into a dictionary
     passbands_dict = {}
-    passbands_path = input_dict_local['passbands_path'][0]
-    passbands_ext = input_dict_local['passbands_ext'][0]
-    wavelength_bins_dict = {}
-    #Reading passbands and wavelength bins files and storing into dictionaries
     for i in range(n_pass):
         check = True
-        [pb, check] = get_passband(passbands_path, passbands_ext, passbands[i], stellar_models_grid)
+        [pb_wavelengths, pb_pce, check] = read_passband(passbands_path, passbands_ext, passbands[i], stellar_models_grid) #user or built-in file
         if check:
-            [wb, check] = get_wavelength_bins(wavelength_bins_path, wavelength_bins_files[i], pb, passbands[i])
+            f_interp = interp1d(pb_wavelengths.value, pb_pce.value, fill_value='extrapolate')
+            my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value), 10000.0) * pb_wavelengths.unit #choice of wavelengths
+            my_pce = f_interp(my_waves.value) * pb_pce.unit
+            passbands_dict[passbands[i]] = [my_waves, my_pce]
+            [wb, check] = read_wavelength_bins(wavelength_bins_path, wavelength_bins_files[i], pb_wavelengths, passbands[i]) #includes no_bins case
             if check:
-                passbands_dict[passbands[i]] = pb
-                wavelength_bins_dict[passbands[i]] = wb
+                for wbin in wb:
+                    my_waves = get_waves_fromR(wbin[0].value, wbin[1].value, 10000.0) * pb_wavelengths.unit #choice of wavelengths
+                    my_pce = f_interp(my_waves.value) * pb_pce.unit
+                    passbands_dict[passbands[i]+'_'+str(wbin[0].value)+'_'+str(wbin[1].value)] = [my_waves, my_pce]
+
     [star_files_grid, star_params_grid] = get_grid_parameters(stellar_models_grid) #Reading file names and stellar parameters from the selected database
     #Individual calculation_type
     if calculation_type=='individual':
@@ -1576,8 +1564,6 @@ def process_configuration(input_dict):
         indices_to_delete = []
         for i in range(n_targets):
             neigh_indices = get_neighbour_files_indices(target_names[i],star_effective_temperature[i],star_log_gravity[i],star_metallicity[i],star_params_grid,stellar_models_grid)
-            #print(neigh_indices)
-            #print(star_params_grid[neigh_indices,:])
             neighbour_files_indices = my_vstack(neighbour_files_indices, neigh_indices)
             if len(neigh_indices)==0:
                 indices_to_delete += [i,]
@@ -1593,21 +1579,22 @@ def process_configuration(input_dict):
             print('ERROR: No legal targets to calculate.')
             exit()
         neighbour_model_intensities = {}
-        neighbour_integrated_intensities = {}
+        neighbour_passband_intensities = {}
         neighbour_limb_darkening_coefficients = {}
         for i in neighbour_files_indices_list:
-            neighbour_model_intensities[i] = databases[stellar_models_grid].get_file_content(dbx_file=star_files_grid[i])
-            neighbour_integrated_intensities[i] = get_integrated_intensities(neighbour_model_intensities[i], passbands_dict, wavelength_bins_dict)
-            neighbour_limb_darkening_coefficients[i] = get_limb_darkening_coefficients(neighbour_integrated_intensities[i], limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders)
-            neighbour_limb_darkening_coefficients[i]['star_params'] = star_params_grid[i]
-        #Creating output dictionary with interpolated limb-darkening coefficients
-        target_limb_darkening_coefficients = {}
-        i0 = neighbour_files_indices_list[0]
-        final_passbands = list(neighbour_limb_darkening_coefficients[i0]['passbands'].keys())
+            label = os.path.splitext(star_files_grid[i])[0]
+            neighbour_model_intensities[label] = databases[stellar_models_grid].get_file_content(dbx_file=star_files_grid[i])
+            neighbour_passband_intensities[label] = get_passband_intensities(neighbour_model_intensities[label], passbands_dict)
+            neighbour_limb_darkening_coefficients[label] = get_limb_darkening_coefficients(neighbour_passband_intensities[label], limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders)
+            neighbour_limb_darkening_coefficients[label]['star_params'] = star_params_grid[i]
+        #Checking that the list of calculated passbands is not empty
+        final_passbands = list(neighbour_limb_darkening_coefficients[label]['passbands'].keys())
         if len(final_passbands)==0:
             print('ERROR: No legal passbands to calculate.')
             exit()
-        final_limb_darkening_laws = list(neighbour_limb_darkening_coefficients[i0]['passbands'][final_passbands[0]]['laws'].keys())
+        #Creating output dictionary with interpolated limb-darkening coefficients
+        target_limb_darkening_coefficients = {}
+        final_limb_darkening_laws = list(neighbour_limb_darkening_coefficients[label]['passbands'][final_passbands[0]]['laws'].keys())
         for i in range(n_targets):
             target_limb_darkening_coefficients[target_names[i]] = {}
             target_limb_darkening_coefficients[target_names[i]]['star_params'] = np.array([star_effective_temperature[i], star_log_gravity[i], star_metallicity[i]])
@@ -1616,7 +1603,7 @@ def process_configuration(input_dict):
                 target_limb_darkening_coefficients[target_names[i]]['passbands'][passband] = {}
                 for law in final_limb_darkening_laws:
                     target_limb_darkening_coefficients[target_names[i]]['passbands'][passband][law] = {}
-                    [coeffs, w_res] = interp_ldc(star_effective_temperature[i], star_log_gravity[i], star_metallicity[i], neighbour_files_indices[i,:], passband, law, neighbour_limb_darkening_coefficients)
+                    [coeffs, w_res] = interp_ldc(star_effective_temperature[i], star_log_gravity[i], star_metallicity[i], neighbour_files_indices[i,:], passband, law, neighbour_limb_darkening_coefficients, star_files_grid)
                     target_limb_darkening_coefficients[target_names[i]]['passbands'][passband][law]['coefficients'] = coeffs
                     target_limb_darkening_coefficients[target_names[i]]['passbands'][passband][law]['weighted_rms_res'] = w_res
         limb_darkening_coefficients = {}
@@ -1632,30 +1619,31 @@ def process_configuration(input_dict):
             with open(os.path.join(output_path, run_name+'_neighbour_ldc.pickle') , 'wb') as out2:
                 pickle.dump(neighbour_limb_darkening_coefficients, out2, protocol=pickle.HIGHEST_PROTOCOL)
             with open(os.path.join(output_path, run_name+'_neighbour_intensities.pickle') , 'wb') as out3:
-                pickle.dump(neighbour_integrated_intensities, out3, protocol=pickle.HIGHEST_PROTOCOL)
-        return limb_darkening_coefficients, neighbour_integrated_intensities
+                pickle.dump(neighbour_passband_intensities, out3, protocol=pickle.HIGHEST_PROTOCOL)
+        return limb_darkening_coefficients, neighbour_passband_intensities
     #Grid calculation_type
     elif calculation_type=='grid':
         #Obtaining star file names, parameters and file indices for the selected database
         [star_files_subgrid, star_params_subgrid, subgrid_indices] = get_subgrid(input_dict_local)
         n_files = len(star_files_subgrid)
         model_intensities = {}
-        integrated_intensities = {}
+        passband_intensities = {}
         limb_darkening_coefficients = {}
         #Calculation limb-darkening and output dictionary
         for i in range(n_files):
-            label = 'teff' + str(star_params_subgrid[i,0]) + '_logg' + str(star_params_subgrid[i,1]) + '_MH' + str(star_params_subgrid[i,2])
+            #label = 'teff' + str(star_params_subgrid[i,0]) + '_logg' + str(star_params_subgrid[i,1]) + '_MH' + str(star_params_subgrid[i,2])
+            label = os.path.splitext(star_files_subgrid[i])[0]
             model_intensities[label] = databases[stellar_models_grid].get_file_content(dbx_file=star_files_grid[subgrid_indices[i]])
-            integrated_intensities[label] = {}
-            integrated_intensities[label] = get_integrated_intensities(model_intensities[label], passbands_dict, wavelength_bins_dict)
-            limb_darkening_coefficients[label] = get_limb_darkening_coefficients(integrated_intensities[label], limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders)
+            passband_intensities[label] = {}
+            passband_intensities[label] = get_passband_intensities(model_intensities[label], passbands_dict)
+            limb_darkening_coefficients[label] = get_limb_darkening_coefficients(passband_intensities[label], limb_darkening_laws, stellar_models_grid, gen_poly_orders, gen_claret_orders)
             limb_darkening_coefficients[label]['star_params'] = star_params_subgrid[i]
         with open(os.path.join(output_path, 'grid_ldc.pickle'), 'wb') as out1:
             pickle.dump(limb_darkening_coefficients, out1, protocol=pickle.HIGHEST_PROTOCOL)
         if user_output == 'complete':
             with open(os.path.join(output_path, 'grid_intensities.pickle'), 'wb') as out2:
-                pickle.dump(integrated_intensities, out2, protocol=pickle.HIGHEST_PROTOCOL)
-        return limb_darkening_coefficients, integrated_intensities
+                pickle.dump(passband_intensities, out2, protocol=pickle.HIGHEST_PROTOCOL)
+        return limb_darkening_coefficients, passband_intensities
 
 
 def ldc_calculate(configuration_file):
