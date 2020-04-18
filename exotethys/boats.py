@@ -721,9 +721,6 @@ def check_configuration(input_dict):
         if check and not os.path.exists(output_path[0]):
             print('ERROR: the chosen output_path does not exists.')
             check = False
-        if check and not output_path[0].endswith('/'):
-            correct_output_path = output_path[0] + '/'
-            input_dict_local['output_path'] = [correct_output_path]
     else:
         input_dict_local['output_path'] = ['']
 
@@ -1051,7 +1048,7 @@ def read_passband(passbands_path, passbands_ext, passband, stellar_models_grid):
     :return: the wavelengths (in Angstrom), the corresponding pce values (in electron/photon), and a boolean value.
     :rtype: quantity array, quantity array, bool
     """
-    [pb, check] = read_as_numpy_array(passbands_path+passband+passbands_ext)
+    [pb, check] = read_as_numpy_array(os.path.join(passbands_path, passband)+passbands_ext)
     if not check:
         print('WARNING: Skipping passband', passband, '.')
         return np.array([]) * u.Angstrom, np.array([]) * u.electron /u.photon, check
@@ -1089,22 +1086,22 @@ def read_wavelength_bins(wavelength_bins_path, wavelength_bins_file, pb_waves, p
     if wavelength_bins_file == 'no_bins':
         check = True
         return np.array([]) * u.Angstrom, check
-    [wb, check] = read_as_numpy_array(wavelength_bins_path+wavelength_bins_file)
+    [wb, check] = read_as_numpy_array(os.path.join(wavelength_bins_path, wavelength_bins_file))
     if not check:
         print('WARNING: Ignoring wavelength_bins_file', wavelength_bins_file, '.')
         return np.array([]) * u.Angstrom, check
     wb = np.atleast_2d(wb)
     if not check_2Darray(wb, n_col=2):
-        print('WARNING: invalid format for wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, '. It must have 2 columns. Ignoring wavelength_bins_file', wavelength_bins_file, '.')
+        print('WARNING: invalid format for wavelength_bins_file', os.path.join(wavelength_bins_path, wavelength_bins_file), '. It must have 2 columns. Ignoring wavelength_bins_file', wavelength_bins_file, '.')
         check = False
         return np.array([]) * u.Angstrom, check
     wb *= u.Angstrom
     if (wb[:,0]>=wb[:,1]).any():
-        print('WARNING: invalid line in wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, '. The lower limit cannot be greater or equal to the upper limit.')
+        print('WARNING: invalid line in wavelength_bins_file', os.path.join(wavelength_bins_path, wavelength_bins_file), '. The lower limit cannot be greater or equal to the upper limit.')
         check = False
         return np.array([]) * u.Angstrom, check
     if np.min(wb)<np.min(pb_waves) or np.max(wb)>np.max(pb_waves):
-        print('WARNING:wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, 'exceeds wavelength range for the ', passband, 'passband. Ignoring this file.')
+        print('WARNING:wavelength_bins_file', os.path.join(wavelength_bins_path, wavelength_bins_file), 'exceeds wavelength range for the ', passband, 'passband. Ignoring this file.')
         check = False
         return np.array([]) * u.Angstrom, check
     return wb, check
@@ -1339,7 +1336,7 @@ def process_configuration_transit(input_dict):
     star_radius = input_dict_local['star_radius'][0]
     telescope_area = input_dict_local['telescope_area'][0]
     if stellar_models_grid=='Userfile':
-        file_to_read = input_dict_local['star_model_path'][0] + input_dict_local['star_model_file'][0]
+        file_to_read = os.path.join(input_dict_local['star_model_path'][0], input_dict_local['star_model_file'][0])
         [star_model_wavelengths, star_model_fluxes] = get_model_spectrum(stellar_models_grid, file_to_read=file_to_read)
         if input_dict_local['rescale_star_flux'][0] == 'Yes': #case of emergent flux to be rescaled
                 system_distance = input_dict_local['system_distance'][0]
@@ -1372,8 +1369,8 @@ def process_configuration_transit(input_dict):
     labels = input_dict_local['planet_configuration_labels']
     n_conf = len(labels)
     if planet_models_grid=='Userfile':
-        day_file_to_read = input_dict_local['planet_day_model_path'][0] + input_dict_local['planet_day_model_file'][0]
-        night_file_to_read = input_dict_local['planet_night_model_path'][0] + input_dict_local['planet_night_model_file'][0]
+        day_file_to_read = os.path.join(input_dict_local['planet_day_model_path'][0], input_dict_local['planet_day_model_file'][0])
+        night_file_to_read = os.path.join(input_dict_local['planet_night_model_path'][0], input_dict_local['planet_night_model_file'][0])
         for i in range(n_conf):
             label = labels[i]
             [planet_day_model_wavelengths, planet_day_model_fluxes] = get_model_spectrum(planet_models_grid, file_to_read=day_file_to_read)
@@ -1571,8 +1568,8 @@ def process_configuration_eclipse(input_dict):
     labels = input_dict_local['planet_configuration_labels']
     n_conf = len(labels)
     if planet_models_grid=='Userfile':
-        day_file_to_read = input_dict_local['planet_day_model_path'][0] + input_dict_local['planet_day_model_file'][0]
-        night_file_to_read = input_dict_local['planet_night_model_path'][0] + input_dict_local['planet_night_model_file'][0]
+        day_file_to_read = os.path.join(input_dict_local['planet_day_model_path'][0], input_dict_local['planet_day_model_file'][0])
+        night_file_to_read = os.path.join(input_dict_local['planet_night_model_path'][0], input_dict_local['planet_night_model_file'][0])
         for i in range(n_conf):
             label = labels[i]
             [planet_day_model_wavelengths, planet_day_model_fluxes] = get_model_spectrum(planet_models_grid, file_to_read=day_file_to_read)
