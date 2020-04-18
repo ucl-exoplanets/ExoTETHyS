@@ -1,6 +1,7 @@
 import pytest
 from exotethys import sail
 import numpy as np
+import astropy.units as u
 
 
 testdata = [
@@ -18,21 +19,6 @@ def test_str2float(toread, reference):
 
 #############################
 
-testdata = [
-    ('ciao', 'ciao'),
-    ('5*5', '5*5'),
-    ('25', 25.0),
-    ('-3.14', -3.14),
-]
-
-@pytest.mark.parametrize('toread,reference', testdata)
-def test_str2float(toread, reference):
-    result = sail.str2float(toread)
-    np.testing.assert_equal(result, reference)
-
-
-
-#############################
 
 testdata = [
     (np.array([]), np.arange(5), np.arange(5)),
@@ -156,4 +142,42 @@ def test_get_grid_parameters(stellar_models_grid, reference):
     np.testing.assert_equal(np.shape(star_params_grid)[1], 3)
     limits = [np.min(star_params_grid[:,0]), np.max(star_params_grid[:,0]), np.min(star_params_grid[:,1]), np.max(star_params_grid[:,1]), np.min(star_params_grid[:,2]), np.max(star_params_grid[:,2])]
     np.testing.assert_equal(limits, reference)
+
+
+#############################
+
+
+testdata = [
+    (np.arange(10000, 99996) * u.Angstrom, 'Phoenix_2012_13',  True),
+    (np.arange(10000, 99996) * u.Angstrom, 'Phoenix_2018',  False),
+    (np.arange(10000, 99996) * u.Angstrom, 'Atlas_2000',  True),
+    (np.arange(500, 1000) * u.Angstrom, 'Phoenix_2012_13',  False),
+    (np.arange(500, 1000) * u.Angstrom, 'Phoenix_2018',  True),
+    (np.arange(500, 1000) * u.Angstrom, 'Atlas_2000',  True),
+]
+
+@pytest.mark.parametrize('vector,grid,reference', testdata)
+def test_check_passband_limits(vector, grid, reference):
+    result = sail.check_passband_limits(vector, grid)
+    np.testing.assert_equal(result, reference)
+
+
+#############################
+
+
+testdata = [
+    (1.0, 2000000.0, 10000.0, [1.0, 2000000.0, 145087]),
+    (55000.0, 60000.0, 10000.0, [55000.0, 60000.0, 871]),
+    (55000.0, 60000.0, 1.0, [55000.0, 60000.0, 10]),
+]
+
+@pytest.mark.parametrize('lambda1,lambda2,R,reference', testdata)
+def test_get_waves_fromR(lambda1, lambda2, R, reference):
+    vector = sail.get_waves_fromR(lambda1, lambda2, R)
+    np.testing.assert_almost_equal([np.min(vector), np.max(vector), len(vector)], reference, decimal=8)
+
+
+#############################
+
+
 
