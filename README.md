@@ -2,7 +2,7 @@
 
 # ![ExoTETHyS logo](https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png)
 
-Version 1.0.2 [![Build Status](https://travis-ci.org/ucl-exoplanets/ExoTETHyS.svg?branch=master)](https://travis-ci.org/ucl-exoplanets/ExoTETHyS) [![DOI](https://zenodo.org/badge/169268509.svg)](https://zenodo.org/badge/latestdoi/169268509)
+Version 2.x.x [![Build Status](https://travis-ci.org/ucl-exoplanets/ExoTETHyS.svg?branch=master)](https://travis-ci.org/ucl-exoplanets/ExoTETHyS) [![DOI](https://zenodo.org/badge/169268509.svg)](https://zenodo.org/badge/latestdoi/169268509)
 
 TO BE COMPLETED  
 ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
@@ -40,14 +40,14 @@ NOTE: The root folder name depends on the download process. It appears to be "Ex
 If this is the first time that you are using ExoTETHyS, you can skip this subsection.  
 If you had already installed/used an older version of ExoTETHyS, you should delete the old database folder to avoid incompatibility issues. If a file from the old database is mistakenly used with this new version, the run will fail raising an error message.  
 The database folder is named ".exotethys" and should be located in your home. You should be able locate, then remove this folder.  
-This operation can also be performed by using the manage_database subpackage of ExoTETHyS, as follows:  
-WARNING: The following operation is irreversible. It is highly recommended that you read more about the manage_database subpackage before deciding to perform this operation.  
+This operation can also be performed by using the manage_database subpackage of ExoTETHyS, as follows.  
+WARNING: The following operation is irreversible. It is highly recommended that you read more about the manage_database subpackage before deciding to perform this operation:
 
-    ```
-    >>> from exotethys import manage_database as mdb 
-    >>> mdb.rm_database() 
-    Are you sure that you want to delete the directory /Users/pepe/.exotethys? [y/N]: y 
-    ```
+```
+>>> from exotethys import manage_database as mdb 
+>>> mdb.rm_database() 
+Are you sure that you want to delete the directory /Users/pepe/.exotethys? [y/N]: y 
+```
 
 
 
