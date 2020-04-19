@@ -51,6 +51,7 @@ Are you sure that you want to delete the directory /Users/pepe/.exotethys? [y/N]
 
 
 ## List of subpackages
+### Scientific subpackages
 
 1. SAIL (Stellar Atmosphere Intensity Limb)  
    This subpackage can provide sets of stellar limb-darkening coefficients with
@@ -88,6 +89,8 @@ WARNING: running this trip\_example will consume a lot of memory (>10 GB), becau
     >>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
     ```
 NOTE: The examples are written to be launched from root directory level. Alternatively, the paths in the examples need to be personalized by the user.
+
+### Data management subpackage
 
 4. manage_database  
    This subpackage can be used to manage the folder ".exotethys" that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the content of this folder.
@@ -147,13 +150,13 @@ values: positive integer numbers
 values: positive integer numbers
 
 **passbands\_path** (OPTIONAL)  
-values: path to user passbands (it should end with /)
+values: path to user passbands
 
 **passbands** (MANDATORY)  
-values: built-in passband names if not passbands\_path ("Kepler", "TESS", "WFC3\_G141", "STIS\_G430L", "STIS\_G750L", "irac1subarray", "irac2subarray", "irac3subarray", "irac4subarray", "uniform\_phoenix\_2012\_13", "uniform\_phoenix\_2018", "uniform\_atlas\_2000") or user file names
+values: built-in passband names if not passbands_path ("MIRI_LRS", "TESS", "Kepler", "WFC3_G141", "STIS_G430L", "STIS_G750L", "irac1subarray", "irac2subarray", "irac3subarray", "irac4subarray", "uniform_phoenix_2012_13", "uniform_phoenix_2018", "uniform_atlas_2000") or user file names
 
 **wavelength\_bins\_path** (OPTIONAL)  
-values: path to wavelength bins files (it should end with /)
+values: path to wavelength bins files
 
 **wavelength\_bins\_files** (OPTIONAL)  
 values: user file names or "no\_bins"  
@@ -175,14 +178,14 @@ This refers to a text file with up to 4 columns. The first row contains the keyw
 **target\_names** (only if individual calculation\_type, if not targets\_file, optional)  
 values: string type for target names
 
-**star\_effective\_temperature** (only if individual calculation\_type, if not targets\_file, mandatory)  
-values: float type for stellar temperatures
+**star\_effective\_temperature** (MANDATORY)  
+values: float type (depending on the stellar\_models\_grid)
 
-**star\_log\_gravity** (only if individual calculation\_type, if not targets\_file, optional)  
-values: float type for stellar log(g) (default is 4.5)
+**star\_log\_gravity** (only if stellar\_models\_grid is one of the database grids, optional)  
+values: float type (depending on the stellar\_models\_grid, default is 4.5)
 
-**star\_metallicity** (only if individual calculation\_type, if not targets\_file, optional)  
-values: float type for stellar \[M/H\] (default is 0.0)
+**star\_metallicity** (only if stellar\_models\_grid is one of the database grids, optional)  
+values: float type (depending on the stellar\_models\_grid, default is 0.0)
 
 **star\_minimum\_effective\_temperature** (only if grid calculation\_type, optional)  
 values: single float value
@@ -229,50 +232,50 @@ values: path to input timeseries file (it should end with /)
 values: user file name (examples are in the "aux\_files" folder)  
 This refers to a text file with 1 column reporting the points at which to compute the light-curve.
 
-**rp\_over\_rs** (MANDATORY)
+**rp\_over\_rs** (MANDATORY)  
 values: float type (non-negative)
 
-**sma\_over\_rs** (only if phi or time input\_series\_type, mandatory)
+**sma\_over\_rs** (only if phi or time input\_series\_type, mandatory)  
 values: float type (sma\_over\_rs >= 1)
 
-**inclination** (only if phi or time input\_series\_type, mandatory)
+**inclination** (only if phi or time input\_series\_type, mandatory)  
 values: float type (0 <= inclination <= 90)
 
-**eccentricity** (only if phi or time input\_series\_type, optional)
+**eccentricity** (only if phi or time input\_series\_type, optional)  
 values: float type (0 <= eccentricity < 1.0, default is 0.0)
 
-**arg\_pericenter** (only if phi or time input\_series\_type, optional)
+**arg\_pericenter** (only if phi or time input\_series\_type, optional)  
 values: float type (-180.0 < arg\_pericenter < 360.0, default is 0.0)
 
-**period\_orbital** (only if time input\_series\_type, mandatory)
+**period\_orbital** (only if time input\_series\_type, mandatory)  
 values: float type (positive)
 
-**epoch\_of\_transit** (only if time input\_series\_type, mandatory)
+**epoch\_of\_transit** (only if time input\_series\_type, mandatory)  
 values: float type  
 It must be in the same units of the input timeseries.
 
-**time\_conversion\_factor** (only if time input\_series\_type, optional)
+**time\_conversion\_factor** (only if time input\_series\_type, optional)  
 values: float type (positive, default is 1)  
 It is the ratio between timeseries and orbital period units (e.g., time\_conversion\_factor = 1.157407407407407e-05 if timeseries in seconds and orbital period in days).
 
-**n\_annuli** (OPTIONAL)
+**n\_annuli** (OPTIONAL)  
 values: positive integer number (default is 100000)
 
-**interpolation\_type** (OPTIONAL)
+**interpolation\_type** (OPTIONAL)  
 values: "linear" (default), "nearest", "zero", "slinear", "quadratic", "cubic", "previous" or "next"  
 Check scipy.interpolate.interp1d function for details.
 
-**interpolation\_variable** (OPTIONAL)
+**interpolation\_variable** (OPTIONAL)  
 values: "mu" (default) or "radi"
 
 **cutting\_limb** (OPTIONAL)
 values: "no\_cut" (default), "radi\_gradient", "mu\_gradient" or "user\_cut"  
 Different options for truncating the input limb-darkening model.
 
-**user\_cut\_mu** (only if user\_cut cutting\_limb and no user\_cut\_radi, mandatory)
+**user\_cut\_mu** (only if user\_cut cutting\_limb and no user\_cut\_radi, mandatory)  
 values: float number (0 < user\_cut\_mu < 1)
 
-**user\_cut\_radi** (only if user\_cut cutting\_limb and no user\_cut\_mu, mandatory)
+**user\_cut\_radi** (only if user\_cut cutting\_limb and no user\_cut\_mu, mandatory)  
 values: float number (0 < user\_cut\_radi < 1)
 
 **rescaling\_limb** (OPTIONAL)
@@ -290,13 +293,141 @@ values: "no" (default) or "yes"
 If yes, the rp\_over\_rs and sma\_over\_rs values are divided by the rescaling radius.
 
 **output\_path** (OPTIONAL)  
-values: path to where to store the results (it should end with /)
+values: path to where to store the results
 
 **output\_filename** (OPTIONAL)  
 values: string type (without extension)
 
 **output\_fileext** (OPTIONAL)  
 values: ".pickle" (default) and/or ".txt"
+
+## BOATS configuration file
+The BOATS configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with \# are ignored; keyword values preceded by \! are also ignored. Examples of configuration files can be found in the "examples" folder.
+
+Below I describe the available keywords:
+
+**stellar\_models\_grid** (MANDATORY)  
+values: "Phoenix\_2018", "Phoenix\_2012\_13", "Atlas\_2000", "Blackbody" or "Userfile" (choose only one of them)
+
+**planet\_models\_grid** (MANDATORY)  
+values: "Blackbody" or "Userfile" (choose only one of them)
+
+Blackbody models the star/planet spectra using the class astropy.modeling
+Userfile enables reading the spectra from user files with the same format of the stored database files
+
+**star\_model\_path** (only if stellar\_models\_grid = 'Userfile', optional)  
+values: path to the user file with the star spectrum (default is local)
+
+**star\_model\_file** (only if stellar\_models\_grid = 'Userfile', mandatory)  
+values: name of the user file with the star spectrum
+
+**rescale\_star\_flux** (only if stellar\_models\_grid = 'Userfile', mandatory)  
+values: "Yes" or "No"  
+If Yes, the scaling factor (star\_radius/system\_distance)^2 is applied to the user spectrum
+
+**planet\_day\_model\_path** (only if planet\_models\_grid = 'Userfile', optional)  
+values: path to the user file with the planet dayside spectrum (default is local)
+
+**planet\_day\_model\_file** (only if planet\_models\_grid = 'Userfile', mandatory)  
+values: name of the user file with the planet dayside spectrum
+
+**planet\_night\_model\_path** (only if planet\_models\_grid = 'Userfile', optional)  
+values: path to the user file with the planet nightside spectrum (default is local)
+
+**planet\_night\_model\_file** (only if planet\_models\_grid = 'Userfile', mandatory)  
+values: name of the user file with the planet nightside spectrum
+
+**rescale\_planet\_flux** (only if planet\_models\_grid = 'Userfile', mandatory)  
+values: "Yes" or "No"  
+If Yes, the scaling factor (planet\_radius/system\_distance)^2 is applied to the user spectra
+
+**passbands\_path** (OPTIONAL)  
+values: path to user passbands
+
+**passbands** (MANDATORY)  
+values: built-in passband names if not passbands_path ("MIRI_LRS", "TESS", "Kepler", "WFC3_G141", "STIS_G430L", "STIS_G750L", "irac1subarray", "irac2subarray", "irac3subarray", "irac4subarray", "uniform_phoenix_2012_13", "uniform_phoenix_2018", "uniform_atlas_2000") or user file names
+
+**wavelength\_bins\_path** (OPTIONAL)  
+values: path to wavelength bins files
+
+**wavelength\_bins\_files** (OPTIONAL)  
+values: user file names or "no\_bins"  
+This refers to a text file with 2 columns reporting the lower and upper limits of the desired wavelength bins (each row defines a wavelength bin).
+
+**telescope\_area** (MANDATORY)  
+values: float type (positive)  
+This parameter affects the estimated flux and parameter error bars, but not the absolute bias in transit/eclipse depths
+
+**telescope\_area\_unit** (MANDATORY)  
+values: string to be interpreted as unit of area by the class astropy.units
+
+**observing\_duration** (MANDATORY)  
+values: float type (positive)  
+
+**observing\_duration\_unit** (MANDATORY)  
+values: "T\_14" or string to be interpreted as unit of time by the class astropy.units  
+T\_14 denotes the total transit duration (between the external contact points)
+
+**star\_effective\_temperature** (MANDATORY)  
+values: float type (depending on the stellar\_models\_grid)
+
+**star\_log\_gravity** (only if stellar\_models\_grid is one of the database grids, optional)  
+values: float type (depending on the stellar\_models\_grid, default is 4.5)
+
+**star\_metallicity** (only if stellar\_models\_grid is one of the database grids, optional)  
+values: float type (depending on the stellar\_models\_grid, default is 0.0)
+
+**star\_radius** (MANDATORY)  
+values: float type (positive)
+
+**star\_radius\_unit** (MANDATORY)  
+values: string to be interpreted as unit of length by the class astropy.units
+
+**orbital\_semimajor\_axis** (MANDATORY)  
+values: float type (positive)
+
+**orbital\_semimajor\_axis\_unit** (MANDATORY)  
+values: "star\_radius" or string to be interpreted as unit of length by the class astropy.units
+
+**orbital\_inclination** (MANDATORY)  
+values: float type
+
+**orbital\_inclination\_unit** (MANDATORY)  
+values: string to be interpreted as unit of angle by the class astropy.units
+
+**orbital\_period** (MANDATORY)  
+values: float type (positive)
+
+**orbital\_period\_unit** (MANDATORY)  
+values: string to be interpreted as unit of time by the class astropy.units
+
+**planet\_bond\_albedo** (OPTIONAL)  
+values: float type (0.0 <= planet\_bond\_albedo <= 1, default is 0.0)
+
+**planet\_circulation\_efficiency** (only if planet\_models\_grid = 'Blackbody')  
+values: float type (0.0 <= planet\_circulation\_efficiency <= 1)  
+The planet\_circulation\_efficiency is only used to compute the planet\_day\_temperature and planet\_night\_temperature, if these are not provided by the user
+
+**planet\_day\_temperature** (only if planet\_models\_grid = 'Blackbody')  
+values: float type (positive)
+
+**planet\_night\_temperature** (only if planet\_models\_grid = 'Blackbody')  
+values: float type (positive)
+
+The user can provide the planet\_circulation\_efficiency to calculate the planet\_day\_temperature and planet\_night\_temperature, or directly the two temperatures without the circulation efficiency.
+
+**planet\_radius** (MANDATORY)  
+values: float type (positive)
+
+**planet\_radius\_unit** (MANDATORY)  
+values: "star\_radius" or string to be interpreted as unit of length by the class astropy.units
+
+**system\_distance** (MANDATORY)  
+values: float type (positive)
+
+**system\_distance\_unit** (MANDATORY)  
+values: string to be interpreted as unit of length by the class astropy.units
+
 
 ## Description of examples
 **sail\_example1**: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
