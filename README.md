@@ -38,7 +38,8 @@ NOTE: The root folder name depends on the download process. It appears to be "Ex
 
 ### Before using  
 If this is the first time that you are using ExoTETHyS, you can skip this subsection.  
-If you had already installed/used an older version of ExoTETHyS, you should delete the old database folder to avoid incompatibility issues. If a file from the old database is mistakenly used with this new version, the run will fail raising an error message. The database folder is named ".exotethys" and should be located in your home. You should be able locate, then remove this folder. This operation can also be performed by using the manage_database subpackage of ExoTETHyS, as follows:  
+If you had already installed/used an older version of ExoTETHyS, you should delete the old database folder to avoid incompatibility issues. If a file from the old database is mistakenly used with this new version, the run will fail raising an error message. The database folder is named ".exotethys" and should be located in your home. You should be able locate, then remove this folder.  
+This operation can also be performed by using the manage_database subpackage of ExoTETHyS, as follows:  
 WARNING: The following operation is irreversible. It is highly recommended that you read more about the manage_database subpackage before deciding to perform this operation.
 
 ```
