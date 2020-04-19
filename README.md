@@ -4,7 +4,7 @@
 
 Version 1.0.2 [![Build Status](https://travis-ci.org/ucl-exoplanets/ExoTETHyS.svg?branch=master)](https://travis-ci.org/ucl-exoplanets/ExoTETHyS) [![DOI](https://zenodo.org/badge/169268509.svg)](https://zenodo.org/badge/latestdoi/169268509)
 
-NOT UPDATED FOR VERSION 2.x.x - beta
+TO BE COMPLETED  
 ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
 
 If you use this code for your research, please consider citing Morello et al. 2019, ... (arXiv:1908.09599)
@@ -15,14 +15,14 @@ The code is consistent with python2/3. It makes use of
 - numpy, scipy
 
 ## Download and installation
-### From Pypi  
+### From Pypi  (NOT YET FOR THIS VERSION)
 Type on the terminal:
 ```pip install exotethys```  
 This command installs the latest stable version of the package.
 
 ### From GitHub  
 The most updated version of the package is available on GitHub. As this version is constantly under development, stability is not guaranteed.  
-1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository. Alternatively type `git clone https://github.com/ucl-exoplanets/ExoTETHyS` in a terminal window. 
+1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/tree/v2-beta> and click the green button "Clone or download", then click "Download ZIP" to download the whole repository. Alternatively type `git clone --single-branch --branch v2-beta https://github.com/ucl-exoplanets/ExoTETHyS` in a terminal window. /
 2. Access the root folder from terminal (you may need to unzip first).
 3. After accessing the root folder from terminal, type 
 ```pip install .```  
@@ -32,8 +32,24 @@ to install the package. Otherwise, you could import the package without installa
     ```
     pytest PATH_TO_ROOT/exotethys/tests/test_sail.py  
     pytest PATH_TO_ROOT/exotethys/tests/test_trip.py 
+    pytest PATH_TO_ROOT/exotethys/tests/boats_trip.py 
     ```
-NOTE: The root folder name depends on the download process. It appears to be "ExoTETHyS-master" if downloaded from the web browser interface, "ExoTETHyS" if git cloned from terminal.
+NOTE: The root folder name depends on the download process. It appears to be "ExoTETHyS-2-beta" if downloaded from the web browser interface, "ExoTETHyS" if git cloned from terminal.
+
+### Before using  
+If this is the first time that you are using ExoTETHyS, you can skip this subsection.  
+If you had already installed/used an older version of ExoTETHyS, you should delete the old database folder to avoid incompatibility issues. If a file from the old database is mistakenly used with this new version, the run will fail raising an error message.  
+The database folder is named ".exotethys" and should be located in your home. You should be able locate, then remove this folder.  
+This operation can also be performed by using the manage_database subpackage of ExoTETHyS, as follows:  
+WARNING: The following operation is irreversible. It is highly recommended that you read more about the manage_database subpackage before deciding to perform this operation.  
+
+    ```
+    >>> from exotethys import manage_database as mdb 
+    >>> mdb.rm_database() 
+    Are you sure that you want to delete the directory /Users/pepe/.exotethys? [y/N]: y 
+    ```
+
+
 
 ## List of subpackages
 
@@ -60,8 +76,56 @@ NOTE: The root folder name depends on the download process. It appears to be "Ex
     >>> from exotethys import trip  
     >>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example.txt')  
     ```
-WARNING: running this trip\_example will consume a lot of memory (>10 GB), because by default TRIP uses 100000 annuli to compute the integral stellar flux. The user can set a different number of annuli by uncommenting the line with "n\_annuli" in the trip\_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).  
+WARNING: running this trip\_example will consume a lot of memory (>10 GB), because by default TRIP uses 100000 annuli to compute the integral stellar flux. The user can set a different number of annuli by uncommenting the line with "n\_annuli" in the trip\_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).
+
+3. BOATS (Bias in the Occultation Analysis of Transiting Systems)  
+   This subpackage can compute the potential bias in transit/eclipse depth due to neglecting the exoplanetary flux and/or its variation with the orbital phase (common approximations), along with the photon noise limited error bars. It can also be used as a general Exposure Time Calculator. 
+   
+   How to run:
+   
+    ```
+    >>> from exotethys import boats  
+    >>> boats.boats_calculate_transit('PATH_TO_ROOT/examples/boats_example4.txt')  
+    >>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
+    ```
 NOTE: The examples are written to be launched from root directory level. Alternatively, the paths in the examples need to be personalized by the user.
+
+4. manage_database  
+   This subpackage can be used to manage the folder ".exotethys" that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the content of this folder.
+   
+   How to run:
+   
+    ```
+    >>> from exotethys import manage_database as mdb  
+    
+    >>> path, content = mdb.ls_database()  
+    #path should be '/your_home/.exotethys'  
+    #content is the list of folders that are inside, e.g.,  ['Atlas_2000', 'Phoenix_2012_13', 'Phoenix_2018']  
+    >>> path, filenames = mdb.ls_database(grid='Atlas_2000')  
+    #path should be '/your_home/.exotethys/Atlas_2000'  
+    #filenames is the list of filenames in this folder, e.g.,  
+    #['teff04500_logg4.5_MH0.0.pickle', 'teff04750_logg4.5_MH0.0.pickle', 'teff05000_logg4.0_MH1.0.pickle']  
+    >>> path, filenames = mdb.ls_database(grid='Atlas_2000', starts='teff04', ends='.pickle', contains=['logg4.', 'MH0.0'])  
+    #path should be '/your_home/.exotethys/Atlas_2000'  
+    #filenames is the list of filenames in this folder starting, ending and containing the specified strings
+    
+    >>> mdb.cp_database('all', final_path)
+    #This command copies all the folders contained in .exotethys to final_path/ExoTETHyS_database/  
+    >>> mdb.cp_database('Atlas_2000', final_path)  
+    #This command copies the folder Atlas_2000 to final_path (the entire folder is copied, not just the files in it)  
+    >>> mdb.cp_database('Atlas_2000', final_path, files=filenames)
+    #This command copies the files in the filenames list from the Atlas_2000 folder to final_path 
+    #(no new Atlas_2000 folder is created at the final_path)  
+    
+    >>> mdb.rm_database()
+    #This command will remove the whole database (irreversible). Yes/No confirmation will be asked to proceed.  
+    >>> mdb.rm_database(grid='Atlas_2000')  
+    #This command will remove the Atlas_2000 folder from the database (irreversible).  
+    #Yes/No confirmation will be asked to proceed. 
+    >>> mdb.rm_database(grid='Atlas_2000', files=filenames)  
+    #This command will remove the files in the filenames list from the Atlas_2000 folder (irreversible).  
+    #Yes/No confirmation will be asked to remove each file. 
+    ```
 
 ## SAIL configuration file
 The SAIL configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with \# are ignored; keyword values preceded by \! are also ignored. Examples of configuration files can be found in the "examples" folder.
