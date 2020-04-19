@@ -405,10 +405,10 @@ def check_configuration(input_dict):
         input_dict_local['passbands_path'] = ['']
 
     #Eliminating repeated passbands
-    for item in passbands:
-        if passbands.count(item)>1:
-            print('WARNING:', item, 'entered multiple times in passbands. Repetitions are ignored.')
-        input_dict_local['passbands'] = list(OrderedDict.fromkeys(passbands))
+    #for item in passbands:
+    #    if passbands.count(item)>1:
+    #        print('WARNING:', item, 'entered multiple times in passbands. Repetitions are ignored.')
+    #    input_dict_local['passbands'] = list(OrderedDict.fromkeys(passbands))
 
     #Checking the wavelength_bins_files to split the selected passbands (OPTIONAL, by DEFAULT the passbands are not split).
     #If wavelength_bins_files is activated, the corresponding line in the input file must contain the wavelength bins file names or the string 'no_bins' (one string per passband).
@@ -838,7 +838,15 @@ def check_configuration(input_dict):
 
 
 def create_new_dict(input_dict):
-    #DOCSTRING TO DO
+    """
+    This function checks and modifies the input dictionary returned by the function check_configuration.
+    It returns a boolean value and the updated dictionary.
+    
+    :param dict input_dict: 
+    :return: a bool value and the updated configuration dictionary
+    :rtype: bool, dict
+    """
+
     check = True
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
