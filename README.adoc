@@ -1,0 +1,139 @@
+
+= ExoTETHyS:
+
+*Tools for Exoplanetary Transits around Host Stars*
+
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: left
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
+
+image::logo.png[width=40%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+TO BE COMPLETED
+
+ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
+
+== Getting started
+
+IMPORTANT: This branch version is still under development.
+
+These instructions will get you to have a version of the package on your computer up and running. TO MODIFY
+
+=== Requirements
+The code is consistent with python2/3. +
+The required python libraries are specified in the file requirements.txt.
+
+=== Download and installation
+
+==== From Pypi (NOT YET FOR THIS VERSION)
+
+Type on the terminal: `` pip install exotethys `` +
+This command installs the latest stable version of the package.
+
+==== From Github
+
+The most updated version of the package is available on GitHub. As this version is constantly under development, stability is not guaranteed.
+
+1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/tree/v2-beta>, +
+then click the green button *Clone or download*, +
+then click *Download ZIP* to download the whole repository. +
++
+_Alternatively_ type on the terminal +
+`git clone --single-branch --branch v2-beta https://github.com/ucl-exoplanets/ExoTETHyS`.
+
+2. Access the root folder from terminal (you may need to unzip first).
+
+3. After accessing the root folder from terminal, type `pip install .` to install the package. +
++
+_Otherwise_, you could import the package without installation, if you run python from the root folder.
+
+4. To test the installation, you can type:
+[source, bash]
+```
+pytest PATH_TO_ROOT/exotethys/tests/test_sail.py  
+pytest PATH_TO_ROOT/exotethys/tests/test_trip.py 
+pytest PATH_TO_ROOT/exotethys/tests/boats_trip.py 
+```
+
+NOTE: The root folder name depends on the download process. It appears to be *ExoTETHyS-2-beta* if downloaded from the web browser interface, *ExoTETHyS* if git cloned from terminal.
+
+==== Before using
+
+TIP: If this is the first time that you are using ExoTETHyS, you can skip this subsection.
+
+If you had already installed/used an older version of ExoTETHyS, you should delete the old database folder to avoid incompatibility issues.
+
+NOTE: If a file from the old database is mistakenly used with this new version, *the run will fail* raising an error message. There is *no risk* to obtain wrong results.
+
+The database folder should be located in your home: `/PATH_HOME/.exotethys`.
+You could locate and remove this folder. +
+This operation can also be performed by using the manage_database subpackage of ExoTETHyS, as follows:
+
+[source, bash]
+```
+>>> from exotethys import manage_database as mdb 
+>>> mdb.rm_database() 
+Are you sure that you want to delete the directory /Users/pepe/.exotethys? [y/N]: y 
+```
+
+WARNING: *The above operation is irreversible.* It is highly recommended that you read more about the manage_database subpackage before deciding to perform this operation.
+
+
+=== Quick how to run the subpackages
+
+==== Scientific subpackages
+
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
+
+1. *SAIL -- Stellar Atmosphere Intensity Limb* +
+This subpackage can compute the stellar limb-darkening coefficients for requested targets.
++
+[source, bash]
+```
+>>> from exotethys import sail  
+>>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
+```
+
+2. *TRIP -- Transit Ring-Integrated Profile* +
+This subpackage can compute transit light-curves by using stellar specific intensities rather than (approximate) limb-darkening coefficients.
++
+[source, bash]
+```
+>>> from exotethys import trip  
+>>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example.txt')  
+```
++
+WARNING: Running this example will consume a lot of memory (>10 GB), because by default TRIP uses 100000 annuli to compute the integral stellar flux. +
+The user can set a different number of annuli by uncommenting the line with "n_annuli" in the trip_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).
+
+3. *BOATS -- Bias in the Occultation Analysis of Transiting Systems* +  
+   This subpackage can compute the potential bias in transit/eclipse depth due to neglecting the exoplanetary flux and/or its variation with the orbital phase (common approximations). +
+   It also provides the predicted transit/eclipse depth values with the photon noise limited error bars. 
+   +
+[source, bash]
+```
+>>> from exotethys import boats  
+>>> boats.boats_calculate_transit('PATH_TO_ROOT/examples/boats_example4.txt')  
+>>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
+```
+
+==== Data management subpackage
+
+4. *manage_database* +
+   This subpackage can be used to manage the folder ".exotethys" that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the content of this folder.
+   
