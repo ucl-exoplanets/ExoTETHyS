@@ -95,8 +95,6 @@ WARNING: *The above operation is irreversible.* It is highly recommended that yo
 
 === Quick how to run the subpackages
 
-==== Scientific subpackages
-
 NOTE: The following example files are written to be launched from root directory level. +
 Alternatively, the paths in the examples need to be personalized by the user.
 
@@ -132,8 +130,46 @@ The user can set a different number of annuli by uncommenting the line with "n_a
 >>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
 ```
 
-==== Data management subpackage
-
 4. *manage_database* +
-   This subpackage can be used to manage the folder ".exotethys" that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the content of this folder.
-   
+   This subpackage can be used to manage the `.exotethys` folder that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the items in this folder.
+
+== License
+
+This package is an open source project under GNU General Public License v3.
+
+== References
+
+If you use this package for your research, please consider citing some of the following references:
+
+- Morello, G., Claret, A., Martin-Lagarde, M., Cossou, C., Tsiaras, A., & Lagage, P.-O. 2020, _The ExoTETHyS package: Tools for Exoplanetary Transits around Host Stars_, AJ, 159, 75 +
+(Pivotal paper for the SAIL and TRIP subpackages)
+
+- Morello, G., Claret, A., Martin-Lagarde, M., Cossou, C., Tsiaras, A., & Lagage, P.-O. 2020, _ExoTETHyS: Tools for Exoplanetary Transits around Host Stars_, JOSS, 5, 1834 +
+(First official software release)
+
+- Martin-Lagarde, M., Morello, G., Lagage, P.-O., Gastaud, R., & Cossou, C. 2020, _Phase-curve pollution of exoplanet transit depths_, subm. +
+(First use of the BOATS subpackage)
+
+== Contributors
+
+Developer and corresponding author
+
+- *Giuseppe Morello* (CEA-Saclay, France), giuseppe.morello@cea.fr, giuseppe.morello.11@ucl.ac.uk
+
+Python support, revision and useful comments
+
+- *Christophe Cossou* (CEA-Saclay, France)
+- *Marine Martin-Lagarde* (CEA-Saclay)
+- *Rene Gastaud* (CEA-Saclay)
+- *Pierre Olivier-Lagage* (CEA-Saclay)
+- *Angelos Tsiaras* (University College London, UK)
+
+Database of stellar models
+
+- *Antonio Claret* (Instituto de Astrofisica de Andalucia, Spain)
+
+Peer-reviewers
+
+- *Arfon Smith* (JOSS editor)
+- *Steven Murray* (Arizona State University, USA)
+- *William James Handley* (University of Cambridge, UK)
