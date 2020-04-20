@@ -1,7 +1,7 @@
 
 = ExoTETHyS:
 
-*Tools for Exoplanetary Transits around Host Stars*
+[big]#*Tools for Exoplanetary Transits around Host Stars*#
 
 :author: Giuseppe Morello
 :sectnums:
