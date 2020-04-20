@@ -120,14 +120,15 @@ WARNING: Running this example will consume a lot of memory (>10 GB), because by 
 The user can set a different number of annuli by uncommenting the line with "n_annuli" in the trip_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).
 
 3. *BOATS -- Bias in the Occultation Analysis of Transiting Systems* +  
-   This subpackage can compute the potential bias in transit/eclipse depth due to neglecting the exoplanetary flux and/or its variation with the orbital phase (common approximations). +
-   It also provides the predicted transit/eclipse depth values with the photon noise limited error bars. +
+   This subpackage can compute the potential bias in transit/eclipse depth due to neglecting the exoplanetary flux and/or its variation with the orbital phase (common approximations). It also provides the predicted transit/eclipse depth values with the photon noise limited error bars. +
 [source, bash]
 ```
 >>> from exotethys import boats  
 >>> boats.boats_calculate_transit('PATH_TO_ROOT/examples/boats_example4.txt')  
 >>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
-```4. *manage_database* +
+```
+
+4. *manage_database* +
    This subpackage can be used to manage the `.exotethys` folder that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the items in this folder.
 
 == License
