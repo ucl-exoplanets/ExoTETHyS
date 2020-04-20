@@ -1,0 +1,118 @@
+= ExoTETHyS.SAIL User Manual
+
+[big]#*Stellar Atmosphere Intensity Limb*#
+
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: left
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
+
+image::logo.png[width=10%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients that covers:
+
+- wide and continuous ranges of the stellar parameters (T~eff~, log(g), [M/H]);
+- built-in or user-defined passbands at UV to IR wavelengths;
+- choice among the most common limb-darkening laws and their generalizations.
+
+It relies on pre-calculated grids of stellar atmosphere models providing the emergent intensities at several positions on the projected disk.
+
+TIP: The main advantage over other existing stellar limb-darkening calculators is the use of a novel fitting algorithm, specifically optimised for modeling the exoplanetary transits. +
+The coefficients obtained with this method enable computing the transit light-curve with precision down to <10 parts per million (ppm).
+
+I refer to the https://arxiv.org/pdf/1908.09599.pdf[main article] for detailed descriptions of the core algorithms, their performances and comparisons with other similar codes.
+
+== User instructions
+
+Here bla bla
+
+=== SAIL configuration file
+The SAIL configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with \# are ignored; keyword values preceded by \! are also ignored. Examples of configuration files can be found in the "examples" folder.
+
+Below I describe the available keywords:
+
+**calculation\_type** (MANDATORY)  
+values: "individual" (for specific targets) or "grid" (for database models)
+
+**stellar\_models\_grid** (MANDATORY)  
+values: "Phoenix\_2018", "Phoenix\_2012\_13" or "Atlas\_2000" (choose only one of them)
+
+**limb\_darkening\_laws** (MANDATORY)  
+values: "claret4", "power2", "square_root", "quadratic", "linear", "gen\_claret" and/or "gen\_poly"
+
+**gen\_claret\_orders** (only if gen\_claret, mandatory)  
+values: positive integer numbers
+
+**gen\_poly\_orders** (only if gen\_poly, mandatory)  
+values: positive integer numbers
+
+**passbands\_path** (OPTIONAL)  
+values: path to user passbands
+
+**passbands** (MANDATORY)  
+values: built-in passband names if not passbands_path ("MIRI_LRS", "TESS", "Kepler", "WFC3_G141", "STIS_G430L", "STIS_G750L", "irac1subarray", "irac2subarray", "irac3subarray", "irac4subarray", "uniform_phoenix_2012_13", "uniform_phoenix_2018", "uniform_atlas_2000") or user file names
+
+**wavelength\_bins\_path** (OPTIONAL)  
+values: path to wavelength bins files
+
+**wavelength\_bins\_files** (OPTIONAL)  
+values: user file names or "no\_bins"  
+This refers to a text file with 2 columns reporting the lower and upper limits of the desired wavelength bins (each row defines a wavelength bin).
+
+**user\_output** (OPTIONAL)  
+values: "basic" (default) or "complete"
+
+**output\_path** (OPTIONAL)  
+values: path to where to store the results (it should end with /)
+
+**targets\_path** (only if individual calculation\_type, optional)  
+values: path to target file (it should end with /)
+
+**targets\_file** (only if individual calculation\_type, optional)  
+values: user file name (examples are in the "target\_list" folder)  
+This refers to a text file with up to 4 columns. The first row contains the keywords in arbitrary order: target\_names (optional), star\_effective\_temperature (mandatory), star\_log\_gravity (optional) and star\_metallicity (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available, it should be reported as "X", so that all rows have the same number of elements.
+
+**target\_names** (only if individual calculation\_type, if not targets\_file, optional)  
+values: string type for target names
+
+**star\_effective\_temperature** (MANDATORY)  
+values: float type (depending on the stellar\_models\_grid)
+
+**star\_log\_gravity** (only if stellar\_models\_grid is one of the database grids, optional)  
+values: float type (depending on the stellar\_models\_grid, default is 4.5)
+
+**star\_metallicity** (only if stellar\_models\_grid is one of the database grids, optional)  
+values: float type (depending on the stellar\_models\_grid, default is 0.0)
+
+**star\_minimum\_effective\_temperature** (only if grid calculation\_type, optional)  
+values: single float value
+
+**star\_maximum\_effective\_temperature** (only if grid calculation\_type, optional)  
+values: single float value
+
+**star\_minimum\_log\_gravity** (only if grid calculation\_type, optional)  
+values: single float value
+
+**star\_maximum\_log\_gravity** (only if grid calculation\_type, optional)  
+values: single float value
+
+**star\_minimum\_metallicity** (only if grid calculation\_type, optional)  
+values: single float value
+
+**star\_maximum\_metallicity** (only if grid calculation\_type, optional)  
+values: single float value
+
+NOTE: The parameters must be within the parameter space of the selected stellar\_models\_grid. Further information is provided in the "Description of examples". 
