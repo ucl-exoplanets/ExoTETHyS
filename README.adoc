@@ -139,16 +139,30 @@ This package is an open source project under GNU General Public License v3.
 
 == References
 
-If you use this package for your research, please consider citing some of the following references:
+If you use this package for your research, please consider citing the following references:
 
 - Morello, G., Claret, A., Martin-Lagarde, M., Cossou, C., Tsiaras, A., & Lagage, P.-O. 2020, _The ExoTETHyS package: Tools for Exoplanetary Transits around Host Stars_, AJ, 159, 75 +
 (Pivotal paper for the SAIL and TRIP subpackages)
-
 - Morello, G., Claret, A., Martin-Lagarde, M., Cossou, C., Tsiaras, A., & Lagage, P.-O. 2020, _ExoTETHyS: Tools for Exoplanetary Transits around Host Stars_, JOSS, 5, 1834 +
 (First official software release)
-
 - Martin-Lagarde, M., Morello, G., Lagage, P.-O., Gastaud, R., & Cossou, C. 2020, _Phase-curve pollution of exoplanet transit depths_, subm. +
 (First use of the BOATS subpackage)
+
+If you adopt the built-in stellar model grids, please cite the relevant references:
+
+Atlas_2000
+
+- Claret, A. 2000, A&A, 363, 1081
+
+Phoenix_2012_13
+
+- Claret, A., Hauschildt, P. H., & Witte, S. 2012, A&A, 546, A14
+- Claret, A., Hauschildt, P. H., & Witte, S. 2013, A&A, 552, A16
+
+Phoenix_2018
+
+- Claret, A. 2018, A&A, 618, A20
+
 
 == Contributors
 
