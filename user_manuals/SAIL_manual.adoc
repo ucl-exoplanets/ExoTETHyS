@@ -11,7 +11,7 @@
 :experimental:
 :xrefstyle: short
 
-image::logo.png[width=10%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
 *version: 2.x.x - beta*
 
 ifdef::env-github[]
