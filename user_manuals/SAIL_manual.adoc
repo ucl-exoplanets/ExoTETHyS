@@ -38,10 +38,11 @@ I refer to the https://arxiv.org/pdf/1908.09599.pdf[main article] for detailed d
 == User instructions
 
 To calculate LDCs you just need to import this subpackage and run the ldc_calculate function with a configuration file:
- ```
- >>> from exotethys import sail  
- >>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
- ```
+[source, bash]
+```
+>>> from exotethys import sail  
+>>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
+```
 In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
 
 === SAIL configuration file
@@ -246,7 +247,34 @@ array([ 0.75847829, -0.72942376,  1.2762258 , -0.96893835,  0.20306674,
 array([8.72190271e-06])
 ```
 
-==Database files
+== Database files
+Some stellar model files will be needed during a SAIL run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.SAIL, as they are only needed to perform other calculations. +
+However, the database files contain valuable information even outside the ExoTETHyS framework. Therefore, I explain how to read the database files.
+
+The manage_database subpackage (link[manual]) can be used to find out the path and names of the database files:
+[source, bash]
+```
+>>> from exotethys import manage_database as mdb
+>>> path, filenames = mdb.ls_database(grid='Phoenix_2012_13')
+>>> path
+'/Users/pepe/.exotethys/Phoenix_2012_13'
+>>> filenames
+['teff03000_logg5.50_MH0.0.pickle', 'teff05700_logg4.5_MH0.0.pickle', 'teff05800_logg4.5_MH0.0.pickle', 'teff06100_logg4.5_MH0.0.pickle']
+```
+Note that the database files have _pickle_ format and contain _python_ dictionaries. Let's now read one of these files:
+[source, bash]
+```
+>>> import os, pickle
+>>> chosen_file_path = os.path.join(path, 'teff05800_logg4.5_MH0.0.pickle')
+>>> content = pickle.load(open(chosen_file_path,'rb'),encoding='latin1')
+>>> content.keys()
+dict_keys(['mu', 'wavelengths', 'star_params', 'intensities', 'fluxes'])
+```
+- The "star_params" branch contains a numpy array with the stellar parameters. +
+- The "wavelengths" branch contains a https://docs.astropy.org/en/stable/units/[quantity array] with the model wavelengths. +
+- The "mu" branch contains a numpy array of positions on the stellar disk. +
+- The "intensities" branch contains a 2D numpy array with the model intensities at the tabulated mu and wavelengths. +
+- The "fluxes" branch contains the disk-integrated flux at the stellar surface.
 
 
 
