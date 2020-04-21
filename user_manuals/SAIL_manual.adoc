@@ -6,6 +6,7 @@
 :sectnums:
 :sectnumlevels: 2
 :toc:
+:toc-position: preamble
 :toclevels: 4
 :source-language: python
 :experimental:
@@ -278,6 +279,3 @@ dict_keys(['mu', 'wavelengths', 'star_params', 'intensities', 'fluxes'])
 - The "fluxes" branch contains the disk-integrated flux at the stellar surface.
 
 
-
-[index]
-== Index
