@@ -5,7 +5,7 @@
 :author: Giuseppe Morello
 :sectnums:
 :sectnumlevels: 2
-:toc: left
+:toc:
 :toclevels: 4
 :source-language: python
 :experimental:
@@ -22,6 +22,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+[.lead]
 The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients (LDCs) that covers:
 
 - wide and continuous ranges of the stellar parameters (T~eff~, log(g), [M/H]);
@@ -278,3 +279,5 @@ dict_keys(['mu', 'wavelengths', 'star_params', 'intensities', 'fluxes'])
 
 
 
+[index]
+== Index
