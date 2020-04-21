@@ -1,16 +1,15 @@
 
 = ExoTETHyS:
-
-[big]#*Tools for Exoplanetary Transits around Host Stars*#
-
 :author: Giuseppe Morello
 :sectnums:
 :sectnumlevels: 2
-:toc: left
+:toc: preamble
 :toclevels: 4
 :source-language: python
 :experimental:
 :xrefstyle: short
+
+#*Tools for Exoplanetary Transits around Host Stars*#
 
 image::logo.png[width=40%]
 *version: 2.x.x - beta*
@@ -31,7 +30,7 @@ ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsin
 
 IMPORTANT: This branch version is still under development.
 
-These instructions will get you to have a version of the package on your computer up and running. TO MODIFY
+These instructions will get you to have a version of the package on your computer up and running.
 
 === Requirements
 The code is consistent with python2/3. +
@@ -106,6 +105,7 @@ This subpackage can compute the stellar limb-darkening coefficients for requeste
 >>> from exotethys import sail  
 >>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
 ```
+Consult the link:user_manuals/SAIL_manual.adoc[SAIL manual].
 
 2. *TRIP -- Transit Ring-Integrated Profile* +
 This subpackage can compute transit light-curves by using stellar specific intensities rather than (approximate) limb-darkening coefficients.
