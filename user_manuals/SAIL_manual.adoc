@@ -22,7 +22,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients that covers:
+The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients (LDCs) that covers:
 
 - wide and continuous ranges of the stellar parameters (T~eff~, log(g), [M/H]);
 - built-in or user-defined passbands at UV to IR wavelengths;
@@ -44,75 +44,81 @@ The SAIL configuration file is a text file in which each line begins with a keyw
 
 Below I describe the available keywords:
 
-**calculation\_type** (MANDATORY)  
-values: "individual" (for specific targets) or "grid" (for database models)
+*calculation_type* (MANDATORY) +
+values: _individual_ or _grid_ +
+_individual_ is to compute LDCs for specific targets with stellar parameters provided by the user +
+_grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
 
-**stellar\_models\_grid** (MANDATORY)  
-values: "Phoenix\_2018", "Phoenix\_2012\_13" or "Atlas\_2000" (choose only one of them)
+*stellar_models_grid* (MANDATORY)  
+values: _Phoenix_2018_, _Phoenix_2012_13_ or _Atlas_2000_ +
+only one choice per run (i.e., configuration file) is allowed
 
-**limb\_darkening\_laws** (MANDATORY)  
-values: "claret4", "power2", "square_root", "quadratic", "linear", "gen\_claret" and/or "gen\_poly"
+*limb_darkening_laws* (MANDATORY) +
+values: _claret4_, _power2_, _square_root_, _quadratic_, _linear_, _gen_claret_ and/or _gen_poly_
 
-**gen\_claret\_orders** (only if gen\_claret, mandatory)  
+*gen_claret_orders* (only if _gen_claret_, mandatory) +
 values: positive integer numbers
 
-**gen\_poly\_orders** (only if gen\_poly, mandatory)  
+*gen_poly_orders* (only if _gen_poly_, mandatory) +
 values: positive integer numbers
 
-**passbands\_path** (OPTIONAL)  
+*passbands_path* (OPTIONAL) +
 values: path to user passbands
 
-**passbands** (MANDATORY)  
-values: built-in passband names if not passbands_path ("MIRI_LRS", "TESS", "Kepler", "WFC3_G141", "STIS_G430L", "STIS_G750L", "irac1subarray", "irac2subarray", "irac3subarray", "irac4subarray", "uniform_phoenix_2012_13", "uniform_phoenix_2018", "uniform_atlas_2000") or user file names
+*passbands* (MANDATORY) +
+values: built-in passband names if not passbands_path (_MIRI_LRS_, _TESS_, _Kepler_, _WFC3_G141_, _STIS_G430L_, _STIS_G750L_, _irac1subarray_, _irac2subarray_, _irac3subarray_, _irac4subarray_, _uniform_phoenix_2012_13_, _uniform_phoenix_2018_, _uniform_atlas_2000_) or user file names
 
-**wavelength\_bins\_path** (OPTIONAL)  
+*wavelength_bins_path* (OPTIONAL) +
 values: path to wavelength bins files
 
-**wavelength\_bins\_files** (OPTIONAL)  
-values: user file names or "no\_bins"  
-This refers to a text file with 2 columns reporting the lower and upper limits of the desired wavelength bins (each row defines a wavelength bin).
+*wavelength_bins_files* (OPTIONAL) +
+values: user file names or _no_bins_ (if given, one entry per passband) +
+The user files must be text files with 2 columns reporting the lower and upper limits of the desired wavelength bins within the corresponding passband (each row defines a wavelength bin).
 
-**user\_output** (OPTIONAL)  
-values: "basic" (default) or "complete"
+*user_output* (OPTIONAL) +
+values: _basic_ (default) or _complete_ +
+if _basic_, the output files will contain only the requested LDCs and the corresponding quality of fits (weighted-r RMS) +
+if _complete_, the output files also include the passband-integrated profiles, LDCs and quality of fits for the neighbour models in the grid that are used to compute the requested LDCs
 
-**output\_path** (OPTIONAL)  
-values: path to where to store the results (it should end with /)
+*output_path* (OPTIONAL) +
+values: path to where to store the results
 
-**targets\_path** (only if individual calculation\_type, optional)  
-values: path to target file (it should end with /)
+*targets_path* (only if _individual_ calculation_type, optional) +
+values: path to target file
 
-**targets\_file** (only if individual calculation\_type, optional)  
-values: user file name (examples are in the "target\_list" folder)  
-This refers to a text file with up to 4 columns. The first row contains the keywords in arbitrary order: target\_names (optional), star\_effective\_temperature (mandatory), star\_log\_gravity (optional) and star\_metallicity (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available, it should be reported as "X", so that all rows have the same number of elements.
+*targets_file* (only if _individual_ calculation_type, optional) +
+values: user file name +
+The user file must be a text file with up to 4 columns. The first row contains the keywords in arbitrary order: _target_names_ (optional), _star_effective_temperature_ (mandatory), _star_log_gravity_ (optional) and _star_metallicity_ (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available for one target, write _X_ in its place to guarantee that each value is matched with the correct parameter keyword. Example files are available in the target_list folder.
 
-**target\_names** (only if individual calculation\_type, if not targets\_file, optional)  
-values: string type for target names
+*target_names* (only if _individual_ calculation_type, if not targets_file, optional) +
+values: str type +
+If given, the output files will be target_name_ldc.pickle, and in case of _complete_ user_output, target_name_neighbour_ldc.pickle and target_name_neighbour_intensities.pickle. +
+If not given, the default target names will be obtained from the stellar parameters values.
 
-**star\_effective\_temperature** (MANDATORY)  
-values: float type (depending on the stellar\_models\_grid)
+*star_effective_temperature* (only if _individual_ calculation_type, if not targets_file, mandatory) +
+values: float type (range depending on the stellar_models_grid)
 
-**star\_log\_gravity** (only if stellar\_models\_grid is one of the database grids, optional)  
-values: float type (depending on the stellar\_models\_grid, default is 4.5)
+*star_log_gravity* (only if _individual_ calculation_type, if not targets_file,  optional)  
+values: float type (range depending on the stellar_models_grid, default is 4.5)
 
-**star\_metallicity** (only if stellar\_models\_grid is one of the database grids, optional)  
-values: float type (depending on the stellar\_models\_grid, default is 0.0)
+*star_metallicity* (only if _individual_ calculation_type, if not targets_file, optional)  
+values: float type (range depending on the stellar_models_grid, default is 0.0)
 
-**star\_minimum\_effective\_temperature** (only if grid calculation\_type, optional)  
-values: single float value
+*star_minimum_effective_temperature* (only if _grid_ calculation_type, optional)  
+values: float value
 
-**star\_maximum\_effective\_temperature** (only if grid calculation\_type, optional)  
-values: single float value
+*star_maximum_effective_temperature* (only if _grid_ calculation_type, optional)  
+values: float value
 
-**star\_minimum\_log\_gravity** (only if grid calculation\_type, optional)  
-values: single float value
+*star_minimum_log_gravity* (only if _grid_ calculation_type, optional)  
+values: float value
 
-**star\_maximum\_log\_gravity** (only if grid calculation\_type, optional)  
-values: single float value
+*star_maximum_log_gravity* (only if _grid_ calculation_type, optional)  
+values: float value
 
-**star\_minimum\_metallicity** (only if grid calculation\_type, optional)  
-values: single float value
+*star_minimum_metallicity* (only if _grid_ calculation_type, optional)  
+values: float value
 
-**star\_maximum\_metallicity** (only if grid calculation\_type, optional)  
-values: single float value
+*star_maximum_metallicity* (only if _grid_ calculation_type, optional)  
+values: float value
 
-NOTE: The parameters must be within the parameter space of the selected stellar\_models\_grid. Further information is provided in the "Description of examples". 
