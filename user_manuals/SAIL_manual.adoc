@@ -23,8 +23,6 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-[preamble]
-== Prova
 The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients (LDCs) that covers:
 
 - wide and continuous ranges of the stellar parameters (T~eff~, log(g), [M/H]);
