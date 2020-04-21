@@ -78,7 +78,7 @@ The user files must be text files with 2 columns reporting the lower and upper l
 *user_output* (OPTIONAL) +
 values: _basic_ (default) or _complete_ +
 if _basic_, the output files will contain only the requested LDCs and the corresponding quality of fits (weighted-r RMS) +
-if _complete_, the output files also include the passband-integrated profiles, LDCs and quality of fits for the neighbour models in the grid that are used to compute the requested LDCs
+if _complete_, the output files also include the passband-integrated profiles, LDCs and quality of fits for the neighbour models in the grid that are used to compute the requested LDCs.
 
 *output_path* (OPTIONAL) +
 values: path to where to store the results
@@ -98,27 +98,71 @@ If not given, the default target names will be obtained from the stellar paramet
 *star_effective_temperature* (only if _individual_ calculation_type, if not targets_file, mandatory) +
 values: float type (range depending on the stellar_models_grid)
 
-*star_log_gravity* (only if _individual_ calculation_type, if not targets_file,  optional)  
+*star_log_gravity* (only if _individual_ calculation_type, if not targets_file,  optional) +
 values: float type (range depending on the stellar_models_grid, default is 4.5)
 
-*star_metallicity* (only if _individual_ calculation_type, if not targets_file, optional)  
+*star_metallicity* (only if _individual_ calculation_type, if not targets_file, optional) +
 values: float type (range depending on the stellar_models_grid, default is 0.0)
 
-*star_minimum_effective_temperature* (only if _grid_ calculation_type, optional)  
+*star_minimum_effective_temperature* (only if _grid_ calculation_type, optional) +
 values: float value
 
-*star_maximum_effective_temperature* (only if _grid_ calculation_type, optional)  
+*star_maximum_effective_temperature* (only if _grid_ calculation_type, optional) +
 values: float value
 
-*star_minimum_log_gravity* (only if _grid_ calculation_type, optional)  
+*star_minimum_log_gravity* (only if _grid_ calculation_type, optional) +
 values: float value
 
-*star_maximum_log_gravity* (only if _grid_ calculation_type, optional)  
+*star_maximum_log_gravity* (only if _grid_ calculation_type, optional) +
 values: float value
 
-*star_minimum_metallicity* (only if _grid_ calculation_type, optional)  
+*star_minimum_metallicity* (only if _grid_ calculation_type, optional) +
 values: float value
 
-*star_maximum_metallicity* (only if _grid_ calculation_type, optional)  
+*star_maximum_metallicity* (only if _grid_ calculation_type, optional) +
 values: float value
+
+
+=== Description of examples
+
+*sail_example1*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+*sail_example2*: This example is to test the complete output, including the stellar intensity profile and coefficients for the neighbour models. It creates three files named "teff28300.0_logg4.35_MH-0.23_ldc.pickle", "teff28300.0_logg4.35_MH-0.23_neighbour_ldc.pickle" and "teff28300.0_logg4.35_MH-0.23_neighbour_intensities.pickle".
+
+*sail_example3*: This example contains stellar parameters just outside the covered parameter space. If running this example, the code will exit with 2 warnings (one for each neighbour not found) and one error:
+[source, bash]
+```
+WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 3 not found for the stellar_models_grid Atlas_2000 .
+WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 4 not found for the stellar_models_grid Atlas_2000 .
+ERROR: No legal targets to calculate.
+```
+In particular, the code searches for the 8 nearest neighbours that defines a volume containing the requested point (28000, 2.6, -0.23 ) in the following order:  
+neighbour 1: (+, +, +)  
+neighbour 2: (+, +, -)  
+neighbour 3: (+, -, +)  
+neighbour 4: (+, -, -)  
+neighbour 5: (-, +, +)  
+neighbour 6: (-, +, -)  
+neighbour 7: (-, -, +)  
+neighbour 8: (-, -, -)  
+where "+" and "-" denote a parameter value higher or lower than in the requested point. In this case the code fails to find neighbours with higher effective temperature and lower surface gravity, as they do not exist in the _Atlas_2000_ grid. If more targets were requested, the code would just skip this target and move to the next one. Given there are no other requested targets, the code prints the error message and exits without producing any output.  
+The user can extract the information about all the available models in the grids by typing the following commands:
+[source, bash]
+```
+>>> from exotethys import sail  
+>>> [files_Atlas_2000, params_Atlas_2000] = sail.get_grid_parameters('Atlas_2000') 
+>>> [files_Phoenix_2012_13, params_Phoenix_2012_13] = sail.get_grid_parameters('Phoenix_2012_13') 
+>>> [files_Phoenix_2018, params_Phoenix_2018] = sail.get_grid_parameters('Phoenix_2018') 
+```
+The first variable is the list of file names in the database, the second variable is the 3-column numpy array with the corresponding stellar parameters.
+
+*sail_example4*: This example computes the limb-darkening coefficients for a grid of models. It creates a file named "grid_ldc.pickle".
+
+*sail_example5*: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+*sail_example6*: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband and for another photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+*sail_example7*: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
+
+*sail_example8*: This example computes the limb-darkening coefficients for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle".
 
