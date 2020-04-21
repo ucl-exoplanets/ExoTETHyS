@@ -37,10 +37,15 @@ I refer to the https://arxiv.org/pdf/1908.09599.pdf[main article] for detailed d
 
 == User instructions
 
-Here bla bla
+To calculate LDCs you just need to import this subpackage and run the ldc_calculate function with a configuration file:
+ ```
+ >>> from exotethys import sail  
+ >>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
+ ```
+In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
 
 === SAIL configuration file
-The SAIL configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with \# are ignored; keyword values preceded by \! are also ignored. Examples of configuration files can be found in the "examples" folder.
+The SAIL configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with # are ignored; keyword values preceded by ! are also ignored. Examples of configuration files can be found in the "examples" folder.
 
 Below I describe the available keywords:
 
@@ -136,15 +141,15 @@ WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 3 not found
 WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 4 not found for the stellar_models_grid Atlas_2000 .
 ERROR: No legal targets to calculate.
 ```
-In particular, the code searches for the 8 nearest neighbours that defines a volume containing the requested point (28000, 2.6, -0.23 ) in the following order:  
-neighbour 1: (+, +, +)  
-neighbour 2: (+, +, -)  
-neighbour 3: (+, -, +)  
-neighbour 4: (+, -, -)  
-neighbour 5: (-, +, +)  
-neighbour 6: (-, +, -)  
-neighbour 7: (-, -, +)  
-neighbour 8: (-, -, -)  
+In particular, the code searches for the 8 nearest neighbours that defines a volume containing the requested point (28000, 2.6, -0.23 ) in the following order: +
+neighbour 1: (+, +, +) +
+neighbour 2: (+, +, -) +
+neighbour 3: (+, -, +) +
+neighbour 4: (+, -, -) +
+neighbour 5: (-, +, +) +
+neighbour 6: (-, +, -) +
+neighbour 7: (-, -, +) +
+neighbour 8: (-, -, -) +
 where "+" and "-" denote a parameter value higher or lower than in the requested point. In this case the code fails to find neighbours with higher effective temperature and lower surface gravity, as they do not exist in the _Atlas_2000_ grid. If more targets were requested, the code would just skip this target and move to the next one. Given there are no other requested targets, the code prints the error message and exits without producing any output.  
 The user can extract the information about all the available models in the grids by typing the following commands:
 [source, bash]
@@ -165,4 +170,83 @@ The first variable is the list of file names in the database, the second variabl
 *sail_example7*: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
 
 *sail_example8*: This example computes the limb-darkening coefficients for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle".
+
+
+=== SAIL output files
+When running the main function of SAIL (ldc_calculate), the results are stored in files with the extension _.pickle_.
+The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
+The objects created with SAIL.ldc_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries].
+
+Here I show how to read such files through some examples.
+
+Let's open the file "Sun_ldc.pickle" that has been created by running the sail_example8:
+[source, bash]
+```
+>>> import pickle
+>>> sun_ldc_file = pickle.load(open('Sun_ldc.pickle','rb'),encoding='latin1')
+```
+We already know that it contains a dictionary, therefore we can ask for its keys:
+[source, bash]
+```
+>>> sun_ldc_file.keys()
+dict_keys(['star_params', 'passbands'])
+```
+The "star_params" branch ends with a numpy array containing the stellar parameters of this target:
+[source, bash]
+```
+>>> sun_ldc_file['star_params']
+array([5.78e+03, 4.50e+00, 0.00e+00])
+```
+The "passbands" branch contains other keys for the requested passbands:
+[source, bash]
+```
+>>> sun_ldc_file['passbands'].keys()
+dict_keys(['uniform_phoenix_2012_13', 'uniform_phoenix_2012_13_10880.0_16800.0', 'uniform_phoenix_2012_13_11108.0_16432.0', 'uniform_phoenix_2012_13_11108.0_11416.0', 'uniform_phoenix_2012_13_11416.0_11709.0', 'uniform_phoenix_2012_13_11709.0_11988.0', 'uniform_phoenix_2012_13_11988.0_12257.0', 'uniform_phoenix_2012_13_12257.0_12522.0', 'uniform_phoenix_2012_13_12522.0_12791.0', 'uniform_phoenix_2012_13_12791.0_13058.0', 'uniform_phoenix_2012_13_13058.0_13321.0', 'uniform_phoenix_2012_13_13321.0_13586.0', 'uniform_phoenix_2012_13_13586.0_13860.0', 'uniform_phoenix_2012_13_13860.0_14140.0', 'uniform_phoenix_2012_13_14140.0_14425.0', 'uniform_phoenix_2012_13_14425.0_14719.0', 'uniform_phoenix_2012_13_14719.0_15027.0', 'uniform_phoenix_2012_13_15027.0_15345.0', 'uniform_phoenix_2012_13_15345.0_15682.0', 'uniform_phoenix_2012_13_15682.0_16042.0', 'uniform_phoenix_2012_13_16042.0_16432.0'])
+```
+The passband keys include:
+- 'uniform_phoenix_2012_13', i.e., the requested passband; +
+- 'uniform_phoenix_2012_13_lambda1_lambda2', where lambda1 and lambda2 are the lower and upper limits of the requested wavelength bins (in Angstrom).
+
+Let's now explore what is inside one of these passband keys:
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0'].keys()
+dict_keys(['claret4', 'gen_claret1', 'gen_claret2', 'gen_claret3', 'gen_claret4', 'gen_claret5', 'gen_claret6'])
+```
+The new keys correspond to the requested limb-darkening laws. The number after 'gen_claret' denote the order. +
+We look inside 'claret4':
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4'].keys()
+dict_keys(['coefficients', 'weighted_rms_res'])
+```
+These are the last keys, containing the limb-darkening coefficients for this choice of star+passband+law and the quality of the fit:
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['coefficients']
+array([ 0.44698865,  0.24165047, -0.15304592,  0.00109902])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['weighted_rms_res']
+array([5.65135996e-05])
+```
+We have a quick look at the other laws to show that _gen_claret4_ is equivalent to _claret4_ and that the quality of the fit is lower/higher when using less/more coefficients (in this particular case, lower order laws are subsets of the higher order ones):
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['coefficients']
+array([ 0.44698864,  0.2416505 , -0.15304595,  0.00109903])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['weighted_rms_res']
+array([5.65135996e-05])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['coefficients']
+array([ 0.67889856, -0.0919313 ])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['weighted_rms_res']
+array([0.00084823])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['coefficients']
+array([ 0.75847829, -0.72942376,  1.2762258 , -0.96893835,  0.20306674,
+        0.03513167])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['weighted_rms_res']
+array([8.72190271e-06])
+```
+
+==Database files
+
+
 
