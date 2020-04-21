@@ -1,16 +1,14 @@
 = ExoTETHyS.SAIL User Manual
-
-[big]#*Stellar Atmosphere Intensity Limb*#
-
 :author: Giuseppe Morello
 :sectnums:
 :sectnumlevels: 2
-:toc:
-:toc-position: preamble
+:toc: preamble
 :toclevels: 4
 :source-language: python
 :experimental:
 :xrefstyle: short
+
+[big]#*Stellar Atmosphere Intensity Limb*#
 
 image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
 *version: 2.x.x - beta*
@@ -23,6 +21,8 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+[preamble]
+== Introduction
 The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients (LDCs) that covers:
 
 - wide and continuous ranges of the stellar parameters (T~eff~, log(g), [M/H]);
