@@ -1278,7 +1278,7 @@ def get_passband_intensities(model_dict, passbands_dict):
         my_pce = passbands_dict[passband][1].value
         f_interp = interp1d(model_wavelengths.value, model_intensities.value, axis=0, fill_value='extrapolate')
         my_ints = f_interp(my_waves.value)
-        my_ints_integ = simps(my_ints*my_pce[:,None], my_waves.value, axis=0)
+        my_ints_integ = simps(my_ints*my_pce[:,None]*my_waves.value[:,None], my_waves.value, axis=0)
         integ_dict[passband] = my_ints_integ/my_ints_integ[norm_index]
     return integ_dict
 
