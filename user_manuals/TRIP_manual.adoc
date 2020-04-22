@@ -1,0 +1,47 @@
+= ExoTETHyS.TRIP User Manual
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: preamble
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
+
+[big]#*Transit Ring-Integrated Profile*#
+
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[preamble]
+== Introduction
+The TRIP subpackage is designed to generate the _exact_ exoplanet transit light-curves with spherically-symmetric stellar limb-darkening.
+
+It makes use of a table with the specific intensities instead of the limb-darkening coefficients.
+The radiative transfer codes for stellar atmospheres automatically provide intensity tables.
+The limb-darkening coefficients provide approximate intensity profiles to speed-up the calculations.
+
+TIP: The aim of this code is to calculate _benchmark_ transit light-curves, that can be compared with the _approximated_ light-curves obtained from https://github.com/ucl-exoplanets/pylightcurve[faster tools]. +
+This comparison offers a way to test and improve the treatment of stellar limb-darkening in the analysis of transit light-curves with photometric precision down to <10 parts per million (ppm).
+
+I refer to the https://arxiv.org/pdf/1908.09599.pdf[main article] for a detailed description of the algorithm and the results achieved so far.
+
+== User instructions
+
+To generate a transit light-curve you have to import this subpackage and run the trip_calculate function with a configuration file:
+[source, bash]
+```
+>>> from exotethys import trip  
+>>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example.txt')   
+```
+In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
+
+=== TRIP configuration file
