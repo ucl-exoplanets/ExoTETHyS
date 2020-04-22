@@ -25,8 +25,9 @@ endif::[]
 == Introduction
 The TRIP subpackage is designed to generate the _exact_ exoplanet transit light-curves with spherically-symmetric stellar limb-darkening.
 
-It makes use of a table with the specific intensities instead of the limb-darkening coefficients.
-The radiative transfer codes for stellar atmospheres automatically provide intensity tables.
+It makes use of a table with the specific intensities instead of the limb-darkening coefficients. The user must provide the model intensities in a text file. The SAIL subpackage can also be used to obtain the normalised model intensities (consult the link:SAIL_manual.adoc[SAIL manual]).
+
+NOTE: The radiative transfer codes for stellar atmospheres automatically provide intensity tables. +
 The limb-darkening coefficients provide approximate intensity profiles to speed-up the calculations.
 
 TIP: The aim of this code is to calculate _benchmark_ transit light-curves, that can be compared with the _approximated_ light-curves obtained from https://github.com/ucl-exoplanets/pylightcurve[faster tools]. +
@@ -49,3 +50,112 @@ The user can set a different number of annuli by uncommenting the line with "n_a
 In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
 
 === TRIP configuration file
+The TRIP configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with # are ignored; keyword values preceded by ! are also ignored. Examples of configuration files can be found in the "examples" folder.
+
+Below I describe the available keywords:
+
+*input_limb_type* (MANDATORY) +
+values: _mu_ or _radi_ +
+The type of coordinate adopted in the input limb-darkening file.
+
+*input_limb_path* (OPTIONAL) +
+values: path to input limb-darkening file
+
+*input_limb_file* (MANDATORY) +
+values: user file name +
+The input limb-darkening file must be a text file with 2 columns. The first column reports the _mu_ or _radi_ coordinates at which the intensities are calculated (0 <= mu, radi <= 1). The second column reports the specific intensities (the calculation is insensitive to a uniform scaling factor for the intensities). Examples are in the "aux_files" folder.
+
+*input_series_type* (MANDATORY) +
+values: _phi_, _time_ or _z_sep_ +
+_phi_ stands for the orbital phase (mid-transit times occur at integer values of _phi_) +
+_time_ can denote Julian Dates or any other time stamps +
+_z_sep_ denotes the sky-projected star-planet separations in units of the the stellar radius
+
+*input_series_path* (OPTIONAL) +
+values: path to input timeseries file
+
+*input_series_file* (MANDATORY) +
+values: user file name +
+This refers to a text file with 1 column reporting the points (_phi_, _time_ or _z_sep_) at which to compute the light-curve.
+Examples are in the "aux_files" folder.  
+
+*rp_over_rs* (MANDATORY) +
+values: float type (non-negative) +
+Ratio between the planet and star radii
+
+*sma_over_rs** (only if _phi_ or _time_ input_series_type, mandatory) +
+values: float type (sma_over_rs >= 1) +
+Orbital semimajor axis in units of the star radius
+
+*inclination* (only if _phi_ or _time_ input_series_type, mandatory) +
+values: float type (0 <= inclination <= 90) +
+Angle between the normal to the orbital plane and the observer's line of sight
+
+*eccentricity* (only if _phi_ or _time_ input_series_type, optional) +
+values: float type (0 <= eccentricity < 1.0, default is 0.0)
+
+*arg_pericenter* (only if _phi_ or _time_ input_series_type, optional) +
+values: float type (-180.0 < arg_pericenter < 360.0, default is 0.0)
+
+*period_orbital* (only if _time_ input_series_type, mandatory) +
+values: float type (positive)
+
+*epoch_of_transit* (only if _time_ input_series_type, mandatory) +
+values: float type +
+Reference time for mid-transit. It must be in the same units of the input timeseries.
+
+*time_conversion_factor* (only if _time_ input_series_type, optional) +
+values: float type (positive, default is 1) +
+It is the ratio between timeseries and orbital period units (e.g., time_conversion_factor = 1.157407407407407e-05 if timeseries in seconds and orbital period in days).
+
+*n_annuli* (OPTIONAL) +
+values: positive integer number (default is 100000)
+
+*interpolation_type* (OPTIONAL) +
+values: _linear_ (default), _nearest_, _zero_, _slinear_, _quadratic_, _cubic_, _previous_ or _next_ +
+Check https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html[scipy.interpolate.interp1d] function for details.
+
+*interpolation_variable* (OPTIONAL) +
+values: _mu_ (default) or _radi_
+
+*cutting_limb* (OPTIONAL) +
+values: _no_cut_ (default), _radi_gradient_, _mu_gradient_ or _user_cut_ +
+Different options for truncating the input limb-darkening model: +
+If _radi_gradient_, the limit radius is given by the maximum of the intensity gradient vs. _radi_; +
+If _mu_gradient_, the limit radius is given by the maximum of the intensity gradient vs. _mu_; +
+If _user_cut_, the limit radius is set by the user.
+
+*user_cut_mu* (only if _user_cut_ cutting_limb and no user_cut_radi, mandatory) +
+values: float type (0 < _user_cut_mu_ < 1) +
+The limit radius for truncating the input limb-darkening model, expressed in terms of _mu_.
+
+*user_cut_radi* (only if _user_cut_ cutting_limb and no user_cut_mu, mandatory)  
+values: float number (0 < user_cut_radi < 1) +
+The limit radius for truncating the input limb-darkening model, expressed in terms of _radi_.
+
+*rescaling_limb* (OPTIONAL) +
+values: _as_cut_ (default), _no_rescale_ or _user_rescale_ +
+Different options for rescaling the _mu_ or _radi_ coordinates of the input limb-darkening model. +
+If _as_cut_, these are rescaled such that _mu_=0 (i.e., _radi_=1) at the truncation radius; +
+If _user_rescale_, the rescaling radius is set by the user.
+
+*user_rescale_mu* (only if _user_rescale_ rescaling_limb and no user_rescale_radi, mandatory) +
+values: float number (0 < user_rescale_mu < 1) +
+The original _mu_ value that corresponds to _mu_=0 after rescaling.
+
+*user_rescale_radi* (only if _user_rescale_ rescaling_limb and no user_rescale_mu, mandatory) +
+values: float number (0 < user_rescale_radi < 1) +
+The original _radi_ value that corresponds to _radi_=1 after rescaling.
+
+*rescaling_input_params* (OPTIONAL) +
+values: _no_ (default) or _yes_ + 
+If _yes_, the rp_over_rs and sma_over_rs values are divided by the rescaling radius.
+
+*output_path* (OPTIONAL) +
+values: path to where to store the results
+
+*output_filename* (OPTIONAL) +
+values: string type (without extension)
+
+*output_fileext* (OPTIONAL) +
+values: _.pickle_ (default) and/or _.txt_
