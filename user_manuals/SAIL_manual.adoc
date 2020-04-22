@@ -56,7 +56,7 @@ values: _individual_ or _grid_ +
 _individual_ is to compute LDCs for specific targets with stellar parameters provided by the user +
 _grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
 
-*stellar_models_grid* (MANDATORY)  
+*stellar_models_grid* (MANDATORY) +
 values: _Phoenix_2018_, _Phoenix_2012_13_ or _Atlas_2000_ +
 only one choice per run (i.e., configuration file) is allowed
 
