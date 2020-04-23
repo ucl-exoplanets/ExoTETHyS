@@ -24,6 +24,37 @@ import pickle
 
 from ._database import Database, databases, sys, urlretrieve, glob, time, shutil
 
+def get_intensities_from_ldcs(mu, coefficients, law):
+    """
+    This function computes the model intensities given the limb-darkening coefficients
+    
+    :param np.array mu: 1D array with mu values
+    :param np.array coefficients: 1D array with the limb-darkening coefficients
+    :param str law: name of the limb-darkening law
+    :return: the intensities at the given mu values
+    :rtype: np.array
+    """
+
+    if law=='claret4':
+        model = 1.0 - coefficients[0]*(1.0-mu**0.5) - coefficients[1]*(1.0-mu) - coefficients[2]*(1.0-mu**1.5) - coefficients[3]*(1.0-mu**2.0)
+    elif law=='power2':
+        model = 1.0 - coefficients[0]*(1.0-mu**coefficients[1])
+    elif law=='square_root':
+        model = 1.0 - coefficients[0]*(1.0-mu**0.5) - coefficients[1]*(1.0-mu)
+    elif law=='quadratic':
+        model = 1.0 - coefficients[0]*(1.0-mu) - coefficients[1]*(1.0-mu)**2.0
+    elif law=='linear':
+        model = 1.0 - coefficients[0]*(1.0-mu)
+    elif law=='gen_poly':
+        model = 1.0
+        for n in range(len(coefficients)):
+            model -= coefficients[n]*(1.0-mucut**(n+1.0))
+    elif law=='gen_claret':
+        model = 1.0
+        for n in range(len(coefficients)):
+            model -= coefficients[n]*(1.0-mucut**((n+1.0)/2))
+    return  model
+
 
 def claret4(params, mucut, intscut, weights):
     """
@@ -46,7 +77,6 @@ def claret4(params, mucut, intscut, weights):
     c4 = params[3]
     model = 1.0 - c1*(1.0-mucut**0.5) - c2*(1.0-mucut) - c3*(1.0-mucut**1.5) - c4*(1.0-mucut**2.0)
     return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
-
 
 def power2(params, mucut, intscut, weights):
     """
