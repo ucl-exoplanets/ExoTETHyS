@@ -318,6 +318,7 @@ image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/fig
 
 NOTE: These profiles can be used as input for generating the transit light-curves with the TRIP subpackage (link:TRIP_manual.adoc[TRIP manual]).
 
+NOTE: If you are interested to the intensity profiles rather than limb-darkening coefficients, you should choose the _grid_ calculation_type and _complete_ user output. The intensity profiles can be provided only for the models in the database; these are not interpolated to obtain the intensity profiles of stars with different sets of parameter values.
 
 == Database files
 Some stellar model files will be needed during a SAIL run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.SAIL, as they are only needed to perform other calculations. +
