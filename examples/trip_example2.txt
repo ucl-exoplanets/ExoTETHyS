@@ -1,5 +1,5 @@
 #output_path				/desired_absolute_or_relative_path/
-output_filename				trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n10000
+output_filename				trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000
 output_fileext				.pickle	.txt
 ##INPUT INFO
 input_limb_type				mu	!radi
@@ -19,7 +19,7 @@ period_orbital				3.52474859
 epoch_of_transit			0.0
 time_conversion_factor			1.1574074074074073e-05
 ##CALCULATION SETTINGS
-n_annuli				10000
+n_annuli				50000
 #interpolation_type			linear	!quadratic	!cubic
 #interpolation_variable			mu	!radi
 #cutting_limb				no_cut	!radi_gradient	!mu_gradient	!user_cut

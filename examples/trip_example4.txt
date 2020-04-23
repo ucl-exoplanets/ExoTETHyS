@@ -1,5 +1,5 @@
 #output_path				/desired_absolute_or_relative_path/
-output_filename				trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS
+output_filename				trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi_resparams
 output_fileext				.pickle	.txt
 ##INPUT INFO
 input_limb_type				mu	!radi
@@ -22,10 +22,10 @@ time_conversion_factor			1.1574074074074073e-05
 #n_annuli				20000
 #interpolation_type			linear	!quadratic	!cubic
 #interpolation_variable			mu	!radi
-#cutting_limb				no_cut	!radi_gradient	!mu_gradient	!user_cut
+cutting_limb				!no_cut	radi_gradient	!mu_gradient	!user_cut
 #user_cut_mu				0.0
 #user_cut_radi				1.0
-#rescaling_limb				as_cut	!no_rescale	!user_rescale
+rescaling_limb				as_cut	!no_rescale	!user_rescale
 #user_rescale_mu			0.0
 #user_rescale_radi			0.0
-#rescaling_input_params			no	!yes
+rescaling_input_params			!no	yes
