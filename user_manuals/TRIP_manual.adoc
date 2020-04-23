@@ -159,3 +159,8 @@ values: string type (without extension)
 
 *output_fileext* (OPTIONAL) +
 values: _.pickle_ (default) and/or _.txt_
+
+
+=== Description of examples
+
+*trip_example*: This example computes an _exact_ transit light-curve based on some auxiliary input files. It creates two files named "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
