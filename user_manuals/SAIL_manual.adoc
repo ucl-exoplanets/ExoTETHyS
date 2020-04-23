@@ -134,7 +134,7 @@ values: float value
 
 *sail_example1*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
 
-*sail_example2*: This example is to test the complete output, including the stellar intensity profile and coefficients for the neighbour models. It creates three files named "teff28300.0_logg4.35_MH-0.23_ldc.pickle", "teff28300.0_logg4.35_MH-0.23_neighbour_ldc.pickle" and "teff28300.0_logg4.35_MH-0.23_neighbour_intensities.pickle".
+*sail_example2*: This example is to test the _complete_ user_output, including the stellar intensity profile and coefficients for the neighbour models. It creates three files named "teff28300.0_logg4.35_MH-0.23_ldc.pickle", "teff28300.0_logg4.35_MH-0.23_neighbour_ldc.pickle" and "teff28300.0_logg4.35_MH-0.23_neighbour_intensities.pickle".
 
 *sail_example3*: This example contains stellar parameters just outside the covered parameter space. If running this example, the code will exit with 2 warnings (one for each neighbour not found) and one error:
 [source, bash]
@@ -171,7 +171,7 @@ The user can extract the information about all the available models in the grids
 ```
 The first variable is the list of file names in the database, the second variable is the 3-column numpy array with the corresponding stellar parameters.
 
-*sail_example4*: This example computes the limb-darkening coefficients for a grid of models. It creates a file named "grid_ldc.pickle".
+*sail_example4*: This example computes the limb-darkening coefficients for a grid of models with _complete_ user_output. It creates two files named "grid_ldc.pickle" and "grid_intensities.pickle".
 
 *sail_example5*: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
 
@@ -179,7 +179,7 @@ The first variable is the list of file names in the database, the second variabl
 
 *sail_example7*: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
 
-*sail_example8*: This example computes the limb-darkening coefficients for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle".
+*sail_example8*: This example computes the _complete_ user_output for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three _basic_ files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle", and other two files named "HD209458bSunCool_neighbour_ldc.pickle" and "HD209458bSunCool_neighbour_intensities.pickle".
 
 
 === SAIL output files
