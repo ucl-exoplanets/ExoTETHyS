@@ -189,6 +189,7 @@ The objects created with SAIL.ldc_calculate are _python_ https://docs.python.org
 
 Here I show how to read such files through some examples.
 
+==== Basic individual
 Let's open the file "Sun_ldc.pickle" that has been created by running the sail_example8:
 [source, bash]
 ```
@@ -234,27 +235,56 @@ These are the last keys, containing the limb-darkening coefficients for this cho
 [source, bash]
 ```
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['coefficients']
-array([ 0.44698865,  0.24165047, -0.15304592,  0.00109902])
+array([ 0.44803605,  0.25590171, -0.18203445,  0.01312166])
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['weighted_rms_res']
-array([5.65135996e-05])
+array([5.62612442e-05])
 ```
 We have a quick look at the other laws to show that _gen_claret4_ is equivalent to _claret4_ and that the quality of the fit is lower/higher when using less/more coefficients (in this particular case, lower order laws are subsets of the higher order ones):
 [source, bash]
 ```
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['coefficients']
-array([ 0.44698864,  0.2416505 , -0.15304595,  0.00109903])
+array([ 0.44803605,  0.2559017 , -0.18203444,  0.01312165])
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['weighted_rms_res']
-array([5.65135996e-05])
+array([5.62612442e-05])
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['coefficients']
-array([ 0.67889856, -0.0919313 ])
+array([ 0.68720911, -0.10129642])
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['weighted_rms_res']
-array([0.00084823])
+array([0.00081957])
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['coefficients']
-array([ 0.75847829, -0.72942376,  1.2762258 , -0.96893835,  0.20306674,
-        0.03513167])
+array([ 0.62487639, -0.17728853,  0.13867818,  0.29065234, -0.52615743,
+        0.20857673])
 >>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['weighted_rms_res']
-array([8.72190271e-06])
+array([1.46248395e-05])
 ```
+
+==== Complete individual
+Let's now explore the other two output files that has been created by running the sail_example8, because of the request of the _complete_ user_output:
+[source, bash]
+```
+>>> sun_neighbour_ldc_file = pickle.load(open('HD209458bSunCool_neighbour_ldc.pickle','rb'),encoding='latin1')
+>>> sun_neighbour_ints_file = pickle.load(open('HD209458bSunCool_neighbour_intensities.pickle','rb'),encoding='latin1')
+>>> sun_neighbour_ldc_file.keys()
+dict_keys(['teff03000_logg5.50_MH0.0', 'teff05700_logg4.5_MH0.0', 'teff05800_logg4.5_MH0.0', 'teff06100_logg4.5_MH0.0'])
+>>> sun_neighbour_ints_file.keys()
+dict_keys(['teff03000_logg5.50_MH0.0', 'teff05700_logg4.5_MH0.0', 'teff05800_logg4.5_MH0.0', 'teff06100_logg4.5_MH0.0'])
+```
+The first level of keys is identical for the two files, as it contains the labels associated with the neighbour models that have been used to compute the requested targets in the sail_example8. +
+For the neighbour ldc file, the structure of the next level dictionaries is similar to that of the basic output, but with more information. For example, after selecting one specific passbands, you get the following keys:
+[source, bash]
+```
+>>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0'].keys()
+dict_keys(['rescaled_mu', 'rescaled_intensities', 'weights', 'laws'])
+```
+The 'laws' contains the information about the limb-darkening coefficients and quality of the fit for the selected neighbour model and passband. For example:
+[source, bash]
+```
+>>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['coefficients']
+array([ 0.40234082,  0.28553471, -0.19583254,  0.01317074])
+>>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['weighted_rms_res']
+6.696820777468198e-05
+```
+The other three keys contains the information about the processed intensity profile and weights adopted in the corresponding fit, each key containing a 1D numpy array of the same size. 
+
 
 == Database files
 Some stellar model files will be needed during a SAIL run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.SAIL, as they are only needed to perform other calculations. +
