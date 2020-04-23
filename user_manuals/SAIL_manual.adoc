@@ -311,8 +311,7 @@ The neighbout intensities file contains the original mu values and the correspon
 [<matplotlib.lines.Line2D object at 0x1820a29590>]
 ```
 [.float-group]
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/rescaled_vs_claret4_intensities.png[width=40%]
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/rescaled_vs_original_intensities.png[width=40%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/[width=40%] image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/rescaled_vs_original_intensities.png[width=40%]
 
 
 
