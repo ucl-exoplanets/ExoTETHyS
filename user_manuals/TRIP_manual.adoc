@@ -43,9 +43,6 @@ To generate a transit light-curve you have to import this subpackage and run the
 >>> from exotethys import trip  
 >>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example.txt')  
 ```
-+
-WARNING: Running this example will consume a lot of memory (>10 GB), because by default TRIP uses 100000 annuli to compute the integral stellar flux. +
-The user can set a different number of annuli by uncommenting the line with "n_annuli" in the trip_example.txt and changing the relevant number (5000-10000 should be sufficient to get a nice looking light-curve, but the absolute precision is not guaranteed).
 
 In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
 
@@ -109,7 +106,7 @@ values: float type (positive, default is 1) +
 It is the ratio between timeseries and orbital period units (e.g., time_conversion_factor = 1.157407407407407e-05 if timeseries in seconds and orbital period in days).
 
 *n_annuli* (OPTIONAL) +
-values: positive integer number (default is 100000)
+values: positive integer number (default is 20000, before it was 100000)
 
 *interpolation_type* (OPTIONAL) +
 values: _linear_ (default), _nearest_, _zero_, _slinear_, _quadratic_, _cubic_, _previous_ or _next_ +
@@ -163,4 +160,84 @@ values: _.pickle_ (default) and/or _.txt_
 
 === Description of examples
 
-*trip_example*: This example computes an _exact_ transit light-curve based on some auxiliary input files. It creates two files named "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
+*trip_example1*: This example computes an _exact_ transit light-curve based on some auxiliary input files. The limb-darkening profile was calculated with the SAIL subpackage (). It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
+
+*trip_example2*: This example differs from trip_example1 for the number of interpolation annuli that is set to 50000 instead of the default value of 20000. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.txt".
+
+*trip_example3*: This example differs from trip_example1 because cutting_limb is set to _radi_gradient_ instead of the default value _no_cut_. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi.txt".
+
+*trip_example4*: This example differs from trip_example3 because rescaling_input_params is set to _yes_ instead of the default value _no_. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi_resparams.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi_resparams.txt".
+
+
+=== TRIP output files
+When running the main function of TRIP (trip_calculate), the results can be stored in files with the extension _.txt_ and/or _.pickle_.
+
+The _txt_ files are easy to read. They contain at least two columns:
+- _z_sep_, i.e., the series of projected star-planet separation in units of the star radius (that is necessary to compute the occulted flux);
+- _flux_norm_, i.e., the series of normalised flux values (with respect to the stellar flux).
+
+They can also contain other two columns:
+- _phi_, i.e., the orbital phase (if _phi_ or _time_ input_series_type);
+- _time_ (if _time_ input_series_type).
+
+The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
+The objects created with TRIP.trip_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. These files contain more information than the respective _txt_ file.
+
+Let's open the file "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" that has been created by running the trip_example1:
+[source, bash]
+```
+>>> import pickle
+>>> hj_file = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle','rb'),encoding='latin1')
+```
+We already know that it contains a dictionary, therefore we can ask for its keys:
+[source, bash]
+```
+>>> hj_file.keys()
+dict_keys(['configuration_file', 'limb_model_original', 'limb_model_final', 'cut_and_rescale', 'rescaled_params', 'time_series'])
+```
+The "time_series" branch contains the 4 time series corresponding to the 4 columns of the _txt_ file:
+[source, bash]
+```
+>>> hj_file['time_series'].keys()
+dict_keys(['z_sep', 'flux_norm', 'time', 'phi'])
+```
+We can plot the transit light-curve as follows:
+[source, bash]
+```
+>>> import matplotlib.pyplot as plt
+>>> plt.plot(hj_file['time_series']['phi'], hj_file['time_series']['flux_norm'],'b')
+[<matplotlib.lines.Line2D object at 0x181bf20690>]
+```
+The "configuration_file" branch contains all the keywords from the file "trip_example1.txt", including those not given which are then set to the default values. This offers a way to check all the calculation options that led to the results in "time_series".
+
+The "limb_model_original" branch contains the limb-darkening profile read from the input_limb_file:
+[source, bash]
+```
+>>> hj_file['limb_model_original'].keys()
+dict_keys(['mu', 'radi', 'intensity'])
+```
+Similarly, the "limb_model_final" branch contains the processed limb-darkening profile. In this case, the limb-darkening profile has not been modified:
+[source, bash]
+```
+>>> np.max(np.abs(hj_file['limb_model_original']['mu'] - hj_file['limb_model_final']['mu']))
+2.508410146262463e-15
+>>> np.max(np.abs(hj_file['limb_model_original']['radi'] - hj_file['limb_model_final']['radi']))
+0.0
+>>> np.max(np.abs(hj_file['limb_model_original']['intensity'] - hj_file['limb_model_final']['intensity']))
+0.0
+```
+The "cut_and_rescale" branch reports the coordinates of the radii adopted for cutting and rescaling, which correspond to _mu_=0 and _radi_=1 if these operations were not performed:
+[source, bash]
+```
+>>> hj_file['cut_and_rescale']
+{'mu0cut': 0.0, 'r0cut': 1.0, 'mu0res': 0.0, 'r0res': 1.0}
+```
+The "rescaled_params" branch report the transit parameters adopted for the calculation:
+>>> hj_file['rescaled_params']
+{'rp_over_rs': 0.16, 'sma_over_rs': 8.78, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+You can check that these values correspond to those reported in the configuration file.
+
+
+
+
+
