@@ -299,9 +299,20 @@ We can visually compare the rescaled model intensities with the corresponding va
 [<matplotlib.lines.Line2D object at 0x182077bd90>]
 ```
 After some restyling you could obtain this figure:
-image:/figures/rescaled_vs_claret4_intensities.png[width=50%]
-
 image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/rescaled_vs_claret4_intensities.png[width=50%]
+
+The neighbout intensities file contains the original mu values and the corresponding passband intensities:
+[source, bash]
+```
+>>> original_mu = sun_neighbour_ints_file['teff06100_logg4.5_MH0.0']['mu']
+>>> original_intensities = sun_neighbour_ints_file['teff06100_logg4.5_MH0.0']['uniform_phoenix_2012_13_10880.0_16800.0']
+>>> plt.plot(original_mu, original_intensities, 'k.',label='original')
+[<matplotlib.lines.Line2D object at 0x18207e4690>]
+>>> plt.plot(rescaled_mu, rescaled_intensities, 'b.',label='rescaled')
+[<matplotlib.lines.Line2D object at 0x1820a29590>]
+```
+
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/rescaled_vs_original_intensities.png[width=50%]
 
 
 == Database files
