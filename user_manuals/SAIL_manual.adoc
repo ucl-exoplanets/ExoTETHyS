@@ -215,7 +215,9 @@ The "passbands" branch contains other keys for the requested passbands:
 dict_keys(['uniform_phoenix_2012_13', 'uniform_phoenix_2012_13_10880.0_16800.0', 'uniform_phoenix_2012_13_11108.0_16432.0', 'uniform_phoenix_2012_13_11108.0_11416.0', 'uniform_phoenix_2012_13_11416.0_11709.0', 'uniform_phoenix_2012_13_11709.0_11988.0', 'uniform_phoenix_2012_13_11988.0_12257.0', 'uniform_phoenix_2012_13_12257.0_12522.0', 'uniform_phoenix_2012_13_12522.0_12791.0', 'uniform_phoenix_2012_13_12791.0_13058.0', 'uniform_phoenix_2012_13_13058.0_13321.0', 'uniform_phoenix_2012_13_13321.0_13586.0', 'uniform_phoenix_2012_13_13586.0_13860.0', 'uniform_phoenix_2012_13_13860.0_14140.0', 'uniform_phoenix_2012_13_14140.0_14425.0', 'uniform_phoenix_2012_13_14425.0_14719.0', 'uniform_phoenix_2012_13_14719.0_15027.0', 'uniform_phoenix_2012_13_15027.0_15345.0', 'uniform_phoenix_2012_13_15345.0_15682.0', 'uniform_phoenix_2012_13_15682.0_16042.0', 'uniform_phoenix_2012_13_16042.0_16432.0'])
 ```
 The passband keys include:
-- 'uniform_phoenix_2012_13', i.e., the requested passband; +
+
+- 'uniform_phoenix_2012_13', i.e., the requested passband;
+
 - 'uniform_phoenix_2012_13_lambda1_lambda2', where lambda1 and lambda2 are the lower and upper limits of the requested wavelength bins (in Angstrom).
 
 Let's now explore what is inside one of these passband keys:
