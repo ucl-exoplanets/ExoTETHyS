@@ -85,11 +85,11 @@ values: float type (sma_over_rs >= 1) +
 Orbital semimajor axis in units of the star radius
 
 *inclination* (only if _phi_ or _time_ input_series_type, mandatory) +
-values: float type (0 <= inclination <= 90) +
+values: float type (0 < = inclination < = 90) +
 Angle between the normal to the orbital plane and the observer's line of sight
 
 *eccentricity* (only if _phi_ or _time_ input_series_type, optional) +
-values: float type (0 <= eccentricity < 1.0, default is 0.0)
+values: float type (0 < = eccentricity < 1.0, default is 0.0)
 
 *arg_pericenter* (only if _phi_ or _time_ input_series_type, optional) +
 values: float type (-180.0 < arg_pericenter < 360.0, default is 0.0)
@@ -173,29 +173,38 @@ values: _.pickle_ (default) and/or _.txt_
 When running the main function of TRIP (trip_calculate), the results can be stored in files with the extension _.txt_ and/or _.pickle_.
 
 The _txt_ files are easy to read. They contain at least two columns:
+
 - _z_sep_, i.e., the series of projected star-planet separation in units of the star radius (that is necessary to compute the occulted flux);
+
 - _flux_norm_, i.e., the series of normalised flux values (with respect to the stellar flux).
 
 They can also contain other two columns:
+
 - _phi_, i.e., the orbital phase (if _phi_ or _time_ input_series_type);
+
 - _time_ (if _time_ input_series_type).
 
 The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
 The objects created with TRIP.trip_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. These files contain more information than the respective _txt_ file.
 
-Let's open the file "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" that has been created by running the trip_example1:
+Let's open the _pickle_ files that have been created with the examples:
 [source, bash]
 ```
 >>> import pickle
 >>> hj_file = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle','rb'),encoding='latin1')
+>>> hj_file_n50000 = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.pickle','rb'),encoding='latin1')
+>>> hj_file_cutradi = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi.pickle','rb'),encoding='latin1')
+>>> hj_file_cutradi_resparams = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi_resparams.pickle','rb'),encoding='latin1')
 ```
-We already know that it contains a dictionary, therefore we can ask for its keys:
+They contain a dictionary, the structure of the dictionary is identical for all the files. We can print the keys:
 [source, bash]
 ```
 >>> hj_file.keys()
 dict_keys(['configuration_file', 'limb_model_original', 'limb_model_final', 'cut_and_rescale', 'rescaled_params', 'time_series'])
 ```
-The "time_series" branch contains the 4 time series corresponding to the 4 columns of the _txt_ file:
+The "configuration_file" branch contains all the keywords from the file "trip_example1.txt", including those not given which are then set to the default values. This offers a way to check all the calculation options that led to the results in "time_series". 
+
+The "time_series" branch contains the 4 time series corresponding to the 4 columns of the output _txt_ file:
 [source, bash]
 ```
 >>> hj_file['time_series'].keys()
@@ -208,7 +217,23 @@ We can plot the transit light-curve as follows:
 >>> plt.plot(hj_file['time_series']['phi'], hj_file['time_series']['flux_norm'],'b')
 [<matplotlib.lines.Line2D object at 0x181bf20690>]
 ```
-The "configuration_file" branch contains all the keywords from the file "trip_example1.txt", including those not given which are then set to the default values. This offers a way to check all the calculation options that led to the results in "time_series".
+The light-curves from the other files are very similar, as they represent essentially the same transit calculated with slightly different options. Therefore we plot their differences:
+[source, bash]
+```
+>>> plt.plot(hj_file['time_series']['phi'], hj_file_n50000['time_series']['flux_norm'] - hj_file['time_series']['flux_norm'], color='dodgerblue', label='n5000 - ref')
+[<matplotlib.lines.Line2D object at 0x181ca92d90>]
+>>> plt.plot(hj_file['time_series']['phi'], hj_file_cutradi['time_series']['flux_norm'] - hj_file['time_series']['flux_norm'], color='green', label='cutradi - ref')
+[<matplotlib.lines.Line2D object at 0x181bf95490>]
+>>> plt.plot(hj_file['time_series']['phi'], hj_file_cutradi_resparams['time_series']['flux_norm'] - hj_file['time_series']['flux_norm'], color='red', label='cutradi_resparams - ref')
+[<matplotlib.lines.Line2D object at 0x181c180ad0>]
+```
+
+[[Comparisons]]
+.Left panel: Reference ransit light-curve. Middle panel: Differences between the light-curves calculated with different options and the reference light-curve. Right panel: Effective intensity profiles adopted in the examples.
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merged_trip_figures.png[width=100%]
+
+Increasing the number of annuli from 20000 (default value) to 50000 has a very small effect, the maximum difference between the two curves being smaller than 6e-8, i.e., less than 0.06 ppm (dodgerblue). The differences in the other two cases will be better understood from the following discussion.
+
 
 The "limb_model_original" branch contains the limb-darkening profile read from the input_limb_file:
 [source, bash]
@@ -216,7 +241,7 @@ The "limb_model_original" branch contains the limb-darkening profile read from t
 >>> hj_file['limb_model_original'].keys()
 dict_keys(['mu', 'radi', 'intensity'])
 ```
-Similarly, the "limb_model_final" branch contains the processed limb-darkening profile. In this case, the limb-darkening profile has not been modified:
+Similarly, the "limb_model_final" branch contains the processed limb-darkening profile. In the first and second examples, the limb-darkening profile has not been modified:
 [source, bash]
 ```
 >>> np.max(np.abs(hj_file['limb_model_original']['mu'] - hj_file['limb_model_final']['mu']))
@@ -226,16 +251,31 @@ Similarly, the "limb_model_final" branch contains the processed limb-darkening p
 >>> np.max(np.abs(hj_file['limb_model_original']['intensity'] - hj_file['limb_model_final']['intensity']))
 0.0
 ```
-The "cut_and_rescale" branch reports the coordinates of the radii adopted for cutting and rescaling, which correspond to _mu_=0 and _radi_=1 if these operations were not performed:
+This fact is confirmed by looking at the "cut_and_rescale" branch, that reports the coordinates of the cutting and rescaling radii:
 [source, bash]
 ```
 >>> hj_file['cut_and_rescale']
 {'mu0cut': 0.0, 'r0cut': 1.0, 'mu0res': 0.0, 'r0res': 1.0}
+>>> hj_file_n50000['cut_and_rescale']
+{'mu0cut': 0.0, 'r0cut': 1.0, 'mu0res': 0.0, 'r0res': 1.0}
+>>> hj_file_cutradi['cut_and_rescale']
+{'mu0cut': 0.03843316889382515, 'r0cut': 0.999261172831597, 'mu0res': 0.03843316889382515, 'r0res': 0.999261172831597}
+>>> hj_file_cutradi_resparams['cut_and_rescale']
+{'mu0cut': 0.03843316889382515, 'r0cut': 0.999261172831597, 'mu0res': 0.03843316889382515, 'r0res': 0.999261172831597}
 ```
-The "rescaled_params" branch report the transit parameters adopted for the calculation:
+These values indicate that the limb-darkening profile was not trasformed in the first two examples, while it underwent the same operations in the other two examples. This transformation affects significantly the transit light-curve (difference in green), unless the transit parameters are properly rescaled (difference in red, maximum difference < 2 ppm):
+[source, bash]
+```
 >>> hj_file['rescaled_params']
 {'rp_over_rs': 0.16, 'sma_over_rs': 8.78, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
-You can check that these values correspond to those reported in the configuration file.
+>>> hj_file_n50000['rescaled_params']
+{'rp_over_rs': 0.16, 'sma_over_rs': 8.78, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+>>> hj_file_cutradi['rescaled_params']
+{'rp_over_rs': 0.16, 'sma_over_rs': 8.78, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+>>> hj_file_cutradi_resparams['rescaled_params']
+{'rp_over_rs': 0.1601182997500138, 'sma_over_rs': 8.786491698782006, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+```
+
 
 
 
