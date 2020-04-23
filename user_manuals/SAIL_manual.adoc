@@ -285,6 +285,22 @@ array([ 0.40234082,  0.28553471, -0.19583254,  0.01317074])
 ```
 The other three keys contains the information about the processed intensity profile and weights adopted in the corresponding fit, each key containing a 1D numpy array of the same size. 
 
+We can visually compare the rescaled model intensities with the corresponding values obtained with the claret4 coefficients:
+[source, bash]
+```
+>>> rescaled_mu = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['rescaled_mu']
+>>> rescaled_intensities = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['rescaled_intensities']
+>>> claret4_coefficients = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['coefficients']
+>>> claret4_intensities = sail.get_intensities_from_ldcs(rescaled_mu, claret4_coefficients, 'claret4')
+>>> import matplotlib.pyplot as plt
+>>> plt.plot(rescaled_mu, rescaled_intensities, 'b.', label='intensities')
+[<matplotlib.lines.Line2D object at 0x18156288d0>]
+>>> plt.plot(rescaled_mu, claret4_intensities, 'r', label='claret4')
+[<matplotlib.lines.Line2D object at 0x182077bd90>]
+```
+After some restyling you could obtain this figure:
+image::figures/rescaled_vs_claret4_intensities.eps[width=50%]
+
 
 == Database files
 Some stellar model files will be needed during a SAIL run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.SAIL, as they are only needed to perform other calculations. +
