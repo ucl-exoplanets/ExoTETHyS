@@ -10,7 +10,7 @@ gen_claret_orders			1 2 3 4 5 6
 passbands				uniform_phoenix_2012_13
 wavelength_bins_path			Wavelength_bins_files/
 wavelength_bins_files			WFC3_G141_bins_Tsiaras2018_low.txt
-user_output				basic		!complete
+user_output				!basic		complete
 #
 ##for INDIVIDUAL calculation_type
 targets_path				target_list/
