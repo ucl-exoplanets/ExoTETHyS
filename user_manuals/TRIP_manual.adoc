@@ -232,6 +232,7 @@ The light-curves from the other files are very similar, as they represent essent
 .Left panel: Reference ransit light-curve. Middle panel: Differences between the light-curves calculated with different options and the reference light-curve. Right panel: Effective intensity profiles adopted in the examples.
 image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merged_trip_figures.png[width=100%]
 
++
 Increasing the number of annuli from 20000 (default value) to 50000 has a very small effect, the maximum difference between the two curves being smaller than 6e-8, i.e., less than 0.06 ppm (dodgerblue). The differences in the other two cases will be better understood from the following discussion.
 
 
@@ -275,6 +276,7 @@ These values indicate that the limb-darkening profile was not trasformed in the 
 >>> hj_file_cutradi_resparams['rescaled_params']
 {'rp_over_rs': 0.1601182997500138, 'sma_over_rs': 8.786491698782006, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
 ```
+I refer to the https://arxiv.org/pdf/1908.09599.pdf[reference paper] for the scientific motivation of this study, along with more general results.
 
 
 
