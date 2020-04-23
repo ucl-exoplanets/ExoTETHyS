@@ -298,9 +298,9 @@ We can visually compare the rescaled model intensities with the corresponding va
 >>> plt.plot(rescaled_mu, claret4_intensities, 'r', label='claret4')
 [<matplotlib.lines.Line2D object at 0x182077bd90>]
 ```
-After some restyling you could obtain this figure:
+After some restyling, you could obtain the left panel of the figure below. 
 
-The neighbout intensities file contains the original mu values and the corresponding passband intensities:
+The neighbour intensities file contains the original mu values and the corresponding passband intensities, that we can compare with the rescaled ones:
 [source, bash]
 ```
 >>> original_mu = sun_neighbour_ints_file['teff06100_logg4.5_MH0.0']['mu']
@@ -310,8 +310,9 @@ The neighbout intensities file contains the original mu values and the correspon
 >>> plt.plot(rescaled_mu, rescaled_intensities, 'b.',label='rescaled')
 [<matplotlib.lines.Line2D object at 0x1820a29590>]
 ```
+After some restyling, you could obtain the right panel of the figure below. 
 
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merge_rescaled_vs_claret4_et_original_intensities.png[width=40%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merge_rescaled_vs_claret4_et_original_intensities.png[width=100%]
 
 
 
