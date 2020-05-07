@@ -194,8 +194,7 @@ def read_configuration(filename): #function in common with SAIL
 
 def get_transit_duration_T14(rp_over_rs, sma_over_rs, inclination, period):
     """
-    This function checks and modifies the dictionary obtained from the configuration file.
-    It returns a boolean value and the updated dictionary.
+    This function computes and returns the transit duration between the external contact points.
     
     :param quantity rp_over_rs: ratio of planet and star radii (dimensionless)
     :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
@@ -210,7 +209,16 @@ def get_transit_duration_T14(rp_over_rs, sma_over_rs, inclination, period):
     return T14
 
 def get_planet_temperatures(star_effective_temperature, sma_over_rs, albedo, efficiency):
-    #DOCSTRING TO DO
+    """
+    This function computes and returns the exoplanet day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
+    
+    :param quantity star_effective_temperature: the effective temperature of the star (in Kelvin)
+    :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
+    :param quantity albedo: the bond albedo of the exoplanet atmosphere (dimensionless, 0<=albedo<=1)
+    :param quantity efficiency: the circulation efficiency of the exoplanet atmosphere (dimensionless, 0<=efficiency<=1)
+    :return: the exoplanet day and nightside temperatures and an associated string
+    :rtype: quantity
+    """
     irradiation_temperature = star_effective_temperature/np.sqrt(sma_over_rs)
     Tday = irradiation_temperature * (1-albedo)**0.25 * ((2.0/3.0) - (5.0/12.0)*efficiency)**0.25
     Tnight = irradiation_temperature * (1-albedo)**0.25 * (efficiency/4.0)**0.25
