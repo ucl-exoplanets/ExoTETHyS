@@ -73,7 +73,7 @@ values: positive integer numbers
 values: path to user passbands
 
 *passbands* (MANDATORY) +
-values: built-in passband names if not passbands_path (_MIRI_LRS_, _TESS_, _Kepler_, _WFC3_G141_, _STIS_G430L_, _STIS_G750L_, _irac1subarray_, _irac2subarray_, _irac3subarray_, _irac4subarray_, _uniform_phoenix_2012_13_, _uniform_phoenix_2018_, _uniform_atlas_2000_) or user file names
+values: built-in passband names if not passbands_path (various instrumental passbands, plus uniform passbands compatible with each stellar_models_grid) or user file names
 
 *wavelength_bins_path* (OPTIONAL) +
 values: path to wavelength bins files
