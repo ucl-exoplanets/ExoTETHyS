@@ -47,6 +47,11 @@ This command installs the latest stable version of the package.
 
 The most updated version of the package is available on GitHub. As this version is constantly under development, stability is not guaranteed.
 
+To download and install with a single command, type on the terminal +
+`pip install git+git://github.com/ucl-exoplanets/ExoTETHyS@v2-beta`.
+
+To download, then (optionally) install:
+
 1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/tree/v2-beta>, +
 then click the green button *Clone or download*, +
 then click *Download ZIP* to download the whole repository. +
