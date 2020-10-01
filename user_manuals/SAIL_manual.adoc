@@ -73,7 +73,7 @@ values: positive integer numbers
 values: path to user passbands
 
 *passbands* (MANDATORY) +
-values: built-in passband names if not passbands_path (various instrumental passbands, plus uniform passbands compatible with each stellar_models_grid) or user file names
+values: built-in passband names if not passbands_path (same of file names at PATH_TO_ROOT/exotethys/Passbands/, without the .pass extension) or user file names including extension
 
 *wavelength_bins_path* (OPTIONAL) +
 values: path to wavelength bins files
