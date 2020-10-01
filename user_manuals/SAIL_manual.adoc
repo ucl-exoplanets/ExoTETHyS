@@ -341,9 +341,9 @@ For example:
     :return: the intensities at the given mu values
     :rtype: np.array
 ```
-The function sail.get_intensities_from_ldcs has been added to enable quick visualization of the intensity profile from the calculated LDCs, but it is not used during the LDCs calculation.
+The function "sail.get_intensities_from_ldcs" has been added to enable quick visualization of the intensity profile from the calculated LDCs, but it is not used during the LDCs calculation.
 
-The function sail.get_grid_parameters can be used to know the range and sampling of stellar parameter space covered by the grids in the database, and it is also used during the LDCs calculation.
+The function "sail.get_grid_parameters" can be used to know the range and sampling of stellar parameter space covered by the grids in the database, and it is also used during the LDCs calculation.
 
 In the future we might add/hightlight here other functions, depending on the users feedback.
 
