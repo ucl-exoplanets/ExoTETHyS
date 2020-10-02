@@ -292,7 +292,7 @@ array([ 0.40234082,  0.28553471, -0.19583254,  0.01317074])
 >>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['weighted_rms_res']
 6.696820777468198e-05
 ```
-The other three keys contains the information about the processed intensity profile and weights adopted in the corresponding fit, each key containing a 1D numpy array of the same size. 
+The other three keys contain the information about the processed intensity profile and weights adopted in the corresponding fit, each key containing a 1D numpy array of the same size. 
 
 We can visually compare the rescaled model intensities with the corresponding values obtained with the claret4 coefficients:
 [source, bash]
