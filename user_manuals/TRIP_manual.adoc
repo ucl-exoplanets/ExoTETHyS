@@ -41,7 +41,7 @@ To generate a transit light-curve you have to import this subpackage and run the
 [source, bash]
 ```
 >>> from exotethys import trip  
->>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example.txt')  
+>>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example1.txt')  
 ```
 
 In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
