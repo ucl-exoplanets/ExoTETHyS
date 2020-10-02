@@ -61,7 +61,7 @@ _individual_ is to compute LDCs for specific targets with stellar parameters pro
 _grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
 
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_ or _Atlas_2000_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Atlas_2000_ or _Stagger_2015_ +
 only one choice per run (i.e., configuration file) is allowed
 
 *limb_darkening_laws* (MANDATORY) +
@@ -172,6 +172,7 @@ The user can extract the information about all the available models in the grids
 >>> [files_Atlas_2000, params_Atlas_2000] = sail.get_grid_parameters('Atlas_2000') 
 >>> [files_Phoenix_2012_13, params_Phoenix_2012_13] = sail.get_grid_parameters('Phoenix_2012_13') 
 >>> [files_Phoenix_2018, params_Phoenix_2018] = sail.get_grid_parameters('Phoenix_2018') 
+>>> [files_Stagger_2015, params_Stagger_2015] = sail.get_grid_parameters('Stagger_2015') 
 ```
 The first variable is the list of file names in the database, the second variable is the 3-column numpy array with the corresponding stellar parameters.
 
