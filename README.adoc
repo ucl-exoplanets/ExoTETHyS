@@ -150,7 +150,7 @@ If you use this package for your research, please consider citing the following 
 (Pivotal paper for the SAIL and TRIP subpackages)
 - Morello, G., Claret, A., Martin-Lagarde, M., Cossou, C., Tsiaras, A., & Lagage, P.-O. 2020, _ExoTETHyS: Tools for Exoplanetary Transits around Host Stars_, JOSS, 5, 1834 +
 (First official software release)
-- Martin-Lagarde, M., Morello, G., Lagage, P.-O., Gastaud, R., & Cossou, C. 2020, _Phase-curve pollution of exoplanet transit depths_, subm. +
+- Martin-Lagarde, M., Morello, G., Lagage, P.-O., Gastaud, R., & Cossou, C. 2020, _Phase-curve pollution of exoplanet transit depths_, in press +
 (First use of the BOATS subpackage)
 
 If you adopt the built-in stellar model grids, please cite the relevant references:
@@ -167,6 +167,13 @@ Phoenix_2012_13
 Phoenix_2018
 
 - Claret, A. 2018, A&A, 618, A20
+
+Stagger_2015
+
+- Chiavassa, A., et al. 2018, A&A, 611, A11 *[3D Spectra, available publicly on POLLUX database]*
+- Magic, Z., et al. 2015, A&A, 573, A90
+- Magic, Z., et al. 2015, A&A, 557, A26
+
 
 
 == Contributors
@@ -186,6 +193,7 @@ Python support, revision and useful comments
 Database of stellar models
 
 - *Antonio Claret* (Instituto de Astrofisica de Andalucia, Spain)
+- *Andrea Chiavassa* (Observatoire de la Côte d'Azur)
 
 Peer-reviewers
 
