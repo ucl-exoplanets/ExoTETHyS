@@ -7,7 +7,7 @@ limb_darkening_laws			claret4		!power2		!square_root	!quadratic	!linear		!gen_cl
 #gen_claret_orders			1 2 3 4 5 6
 #gen_poly_orders				1 2 3 4 5 6
 #passbands_path				/absolute_or_relative_path_to_user_passbands/
-passbands				WFC3_G141
+passbands				HST_WFC3_G141
 wavelength_bins_path			Aux_files/Wavelength_bins_files/
 wavelength_bins_files			WFC3_G141_bins_Tsiaras2018_low.txt
 user_output				basic		!complete
