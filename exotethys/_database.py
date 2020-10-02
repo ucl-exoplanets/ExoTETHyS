@@ -111,5 +111,5 @@ class Database:
 
 databases = {
 "Phoenix_2012_13":Database('Phoenix_2012_13', date_to_update='200412', vital=True),
-"Phoenix_2018":Database('Phoenix_2018', date_to_update='200412', vital=True), "Atlas_2000":Database('Atlas_2000', date_to_update='200403', vital=True)
+"Phoenix_2018":Database('Phoenix_2018', date_to_update='200412', vital=True), "Atlas_2000":Database('Atlas_2000', date_to_update='200403', vital=True), "Stagger_2015":Database('Stagger_2015', date_to_update='201001', vital=True)
 }
