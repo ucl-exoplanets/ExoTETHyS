@@ -1,4 +1,0 @@
-star_effective_temperature
-6100	
-5780	
-3000	
