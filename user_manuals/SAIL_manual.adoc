@@ -267,7 +267,7 @@ array([1.46248395e-05])
 ```
 
 ==== Complete individual
-Let's now explore the other two output files that has been created by running the sail_example8, because of the request of the _complete_ user_output:
+Let's now explore the other two output files that have been created by running the sail_example8, because of the request of the _complete_ user_output:
 [source, bash]
 ```
 >>> sun_neighbour_ldc_file = pickle.load(open('HD209458bSunCool_neighbour_ldc.pickle','rb'),encoding='latin1')
