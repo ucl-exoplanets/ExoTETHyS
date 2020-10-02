@@ -60,7 +60,7 @@ values: path to input limb-darkening file
 
 *input_limb_file* (MANDATORY) +
 values: user file name +
-The input limb-darkening file must be a text file with 2 columns. The first column reports the _mu_ or _radi_ coordinates at which the intensities are calculated (0 <= mu, radi <= 1). The second column reports the specific intensities (the calculation is insensitive to a uniform scaling factor for the intensities). Examples are in the "aux_files" folder.
+The input limb-darkening file must be a text file with 2 columns. The first column reports the _mu_ or _radi_ coordinates at which the intensities are calculated (0 < = mu, radi < = 1). The second column reports the specific intensities (the calculation is insensitive to a uniform scaling factor for the intensities). Examples are in the "aux_files" folder.
 
 *input_series_type* (MANDATORY) +
 values: _phi_, _time_ or _z_sep_ +
@@ -81,7 +81,7 @@ values: float type (non-negative) +
 Ratio between the planet and star radii
 
 *sma_over_rs** (only if _phi_ or _time_ input_series_type, mandatory) +
-values: float type (sma_over_rs >= 1) +
+values: float type (sma_over_rs > = 1) +
 Orbital semimajor axis in units of the star radius
 
 *inclination* (only if _phi_ or _time_ input_series_type, mandatory) +
