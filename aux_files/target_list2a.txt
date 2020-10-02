@@ -1,0 +1,4 @@
+target_names	star_effective_temperature	star_log_gravity	star_metallicity
+HD209458b	6100	4.5	0.0
+Sun		5780	X	X
+Cool		3000	5.5	X
