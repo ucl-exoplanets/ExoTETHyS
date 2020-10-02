@@ -186,6 +186,8 @@ The first variable is the list of file names in the database, the second variabl
 
 *sail_example8*: This example computes the _complete_ user_output for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three _basic_ files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle", and other two files named "HD209458bSunCool_neighbour_ldc.pickle" and "HD209458bSunCool_neighbour_intensities.pickle".
 
+*sail_example9*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "stagger_example_ldc.pickle".
+
 
 === SAIL output files
 When running the main function of SAIL (ldc_calculate), the results are stored in files with the extension _.pickle_.
