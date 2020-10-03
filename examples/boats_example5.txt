@@ -35,8 +35,8 @@ orbital_period				0.813475
 orbital_period_unit			d
 planet_bond_albedo			0.23
 #planet_circulation_efficiency		0.0 0.5 1.0
-planet_day_temperature			1600.0
-planet_night_temperature		850.0
+#planet_day_temperature			1600.0
+#planet_night_temperature		850.0
 planet_radius				0.93
 planet_radius_unit			Rjup
 system_distance				86.9633
