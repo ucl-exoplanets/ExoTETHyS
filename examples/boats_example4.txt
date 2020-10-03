@@ -15,7 +15,7 @@ planet_night_model_file			WASP43b_emission_ace_T850.pickle
 rescale_planet_flux			!Yes	!No	Star
 #passbands_path				/absolute_or_relative_path_to_user_passbands/
 passbands				JWST_MIRI_LRS
-wavelength_bins_path			aux_files/avelength_bins_files/
+wavelength_bins_path			aux_files/wavelength_bins_files/
 wavelength_bins_files			MIRI_LRS_bins.txt
 telescope_area				25.0
 telescope_area_unit		        m2
