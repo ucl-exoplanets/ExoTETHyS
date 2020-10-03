@@ -194,7 +194,7 @@ def read_configuration(filename): #function in common with SAIL
 
 def get_transit_duration_T14(rp_over_rs, sma_over_rs, inclination, period):
     """
-    This function computes and returns the transit duration between the external contact points.
+    This function computes the transit duration between the external contact points.
     
     :param quantity rp_over_rs: ratio of planet and star radii (dimensionless)
     :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
@@ -208,9 +208,10 @@ def get_transit_duration_T14(rp_over_rs, sma_over_rs, inclination, period):
     T14 *= period/(np.pi * u.rad)
     return T14
 
+
 def get_planet_temperatures(star_effective_temperature, sma_over_rs, albedo, efficiency):
     """
-    This function computes and returns the exoplanet day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
+    This function computes the exoplanet day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
     
     :param quantity star_effective_temperature: the effective temperature of the star (in Kelvin)
     :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
@@ -224,7 +225,29 @@ def get_planet_temperatures(star_effective_temperature, sma_over_rs, albedo, eff
     Tnight = irradiation_temperature * (1-albedo)**0.25 * (efficiency/4.0)**0.25
     label = 'albedo' + str(albedo) + '_efficiency' + str(efficiency)
     return Tday, Tnight, label
+
+
+def get_planet_albedo_and_efficiency(planet_day_temperature, planet_night_temperature, star_effective_temperature, orbital_semimajor_axis, star_radius):
+    """
+    This function computes the exoplanet albedo and circulation efficiency from their day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
     
+    :param quantity planet_day_temperature: (in Kelvin)
+    :param quantity planet_night_temperature: (in Kelvin)
+    :param quantity star_effective_temperature: the effective temperature of the star (in Kelvin)
+    :param quantity orbital_semimajor_axis:
+    :param quantity star_radius:
+    :return: the exoplanet albedo and circulation efficiency
+    :rtype: quantity
+    """
+    sma_over_rs = (orbital_semimajor_axis/star_radius).decompose()
+    irradiation_temperature = star_effective_temperature/np.sqrt(sma_over_rs)
+    Tdn_ratio_4 = (planet_day_temperature/planet_night_temperature)**4.0
+    efficiency = 8.0 / (3*Tdn_ratio_4 + 5.0)
+    Tni_ratio_4 = (planet_night_temperature/irradiation_temperature)**4.0
+    albedo = 1 - Tni_ratio_4 * (4.0/efficiency)
+    return albedo, efficiency
+
+
 
 def check_configuration(input_dict):
     """
@@ -260,10 +283,10 @@ def check_configuration(input_dict):
             print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
             check = False
         else:
-            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Atlas_2000', 'Blackbody', 'Userfile']
+            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Atlas_2000', 'Stagger_2015', 'Blackbody', 'Userfile']
             stellar_models_grid = stellar_models_grid[0]
             if stellar_models_grid not in allowed_stellar_models_grid:
-                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Atlas_2000, Blackbody and Userfile.')
+                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Atlas_2000, Stagger_2015, Blackbody and Userfile.')
                 check = False
         if check:
             #stellar_models_grid = stellar_models_grid[0]
@@ -376,10 +399,10 @@ def check_configuration(input_dict):
             print('ERROR: invalid length=', len(rescale_planet_flux), 'for rescale_planet_flux. It must have length=1.')
             check = False
         else:
-            allowed_rescale_planet_flux = ['Yes', 'No']
+            allowed_rescale_planet_flux = ['Yes', 'No', 'Star']
             rescale_planet_flux = rescale_planet_flux[0]
             if rescale_planet_flux not in allowed_rescale_planet_flux:
-                print('ERROR:', rescale_planet_flux, 'is not a valid entry for rescale_planet_flux. The allowed entries are Yes and No.')
+                print('ERROR:', rescale_planet_flux, 'is not a valid entry for rescale_planet_flux. The allowed entries are Yes, No and Star.')
                 check = False
             elif rescale_planet_flux=='Yes':
                 mandatory_keys_rescale_planet_flux_yes = ['system_distance', 'system_distance_unit']
@@ -1045,6 +1068,11 @@ def check_passband_limits(pb_waves, stellar_models_grid):
         maximum_wavelength = 1600000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
+    elif stellar_models_grid == 'Stagger_2015':
+        minimum_wavelength = 2000.172119140625 * u.Angstrom
+        maximum_wavelength = 10000.0791015625 * u.Angstrom
+        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
+            check = False
     elif stellar_models_grid == 'Blackbody': #This check should be redundant
         minimum_wavelength = 0.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength:
@@ -1218,7 +1246,10 @@ def get_model_spectrum(models_grid, params=None, file_to_read=None):
         try:
             model_file = pickle.load(open(file_to_read, 'rb'))
             model_wavelengths = model_file['wavelengths'].to(u.Angstrom)
-            model_fluxes = model_file['fluxes'].to(u.erg / (u.cm**2 * u.second * u.Angstrom), equivalencies=u.spectral_density(model_wavelengths))
+            if model_file['fluxes'].unit == u.dimensionless_unscaled:
+                model_fluxes = model_file['fluxes']
+            else:
+                model_fluxes = model_file['fluxes'].to(u.erg / (u.cm**2 * u.second * u.Angstrom), equivalencies=u.spectral_density(model_wavelengths))
         except:
             print('ERROR: Something went wrong when reading the file', file_to_read)
             exit()            
@@ -1258,6 +1289,27 @@ def get_photon_spectrum(model_wavelengths, model_fluxes, obj_radius, obj_distanc
     photon_fluxes = scaled_fluxes.to(u.photon / (u.second * u.Angstrom), equivalencies=u.spectral_density(model_wavelengths))
     return photon_fluxes
 
+def get_relative_spectrum(relative_model_wavelengths, relative_model_fluxes, base_model_wavelengths, base_model_fluxes):
+    """
+    This function computes the absolute spectral flux given the spectrum relative to a base model, e.g., the planet emission spectrum given the star spectrum and eclipse depths.
+    
+    :param quantity array relative_model_wavelengths: it should be in Angstrom
+    :param quantity array relative_model_fluxes: it should be dimensionless
+    :param quantity base_model_wavelengths: it should be in Angstrom
+    :param quantity base_model_fluxes:
+    :return: the scaled fluxes in absolute units and the corresponding wavelengths
+    ..note:: the scaled fluxes are calculated at the base_model_wavelengths
+    :rtype: quantity array
+    """
+    lim1 = np.max([np.min(relative_model_wavelengths.value), np.min(base_model_wavelengths.value)])
+    lim2 = np.min([np.max(relative_model_wavelengths.value), np.max(base_model_wavelengths.value)])
+    my_waves = get_waves_fromR(lim1, lim2, 10000.0) * u.Angstrom
+    f_interp = interp1d(relative_model_wavelengths.value, relative_model_fluxes.value, fill_value='extrapolate')
+    relative_interp_fluxes = f_interp(my_waves.value)
+    g_interp = interp1d(base_model_wavelengths.value, base_model_fluxes.value, fill_value='extrapolate')
+    base_interp_fluxes = g_interp(my_waves.value)
+    scaled_fluxes = relative_interp_fluxes * base_interp_fluxes * base_model_fluxes.unit
+    return my_waves, scaled_fluxes
 
 def get_passband_fluxes(model_wavelengths, photon_fluxes, passbands_dict):
     """
@@ -1274,9 +1326,12 @@ def get_passband_fluxes(model_wavelengths, photon_fluxes, passbands_dict):
     for passband in passbands:
         my_waves = passbands_dict[passband][0]
         my_pce = passbands_dict[passband][1]
-        f_interp = interp1d(model_wavelengths.value, photon_fluxes.value, fill_value='extrapolate')
-        my_photons = f_interp(my_waves.value) * photon_fluxes.unit
-        photons_dict[passband] = simps(my_photons*my_pce, my_waves)
+        if np.min(my_waves)<np.min(model_wavelengths)-1*u.Angstrom or np.max(my_waves)>np.max(model_wavelengths)+1*u.Angstrom:
+            print('WARNING: The passband', passband, 'is out of the model limits. It will be ignored.')
+        else:
+            f_interp = interp1d(model_wavelengths.value, photon_fluxes.value, fill_value='extrapolate')
+            my_photons = f_interp(my_waves.value)
+            photons_dict[passband] = (simps(my_photons*my_pce.value, my_waves.value) * photon_fluxes.unit * my_pce.unit * my_waves.unit).decompose()
     return photons_dict
 
 
@@ -1390,8 +1445,11 @@ def process_configuration_transit(input_dict):
         for i in range(n_conf):
             label = labels[i]
             [planet_day_model_wavelengths, planet_day_model_fluxes] = get_model_spectrum(planet_models_grid, file_to_read=day_file_to_read)
-            [planet_night_model_wavelengths, planet_night_model_fluxes] = get_model_spectrum(planet_models_grid, file_to_read= night_file_to_read)
-            if input_dict_local['rescale_planet_flux'][0] == 'Yes':
+            [planet_night_model_wavelengths, planet_night_model_fluxes] = get_model_spectrum(planet_models_grid, file_to_read=night_file_to_read)
+            if input_dict_local['rescale_planet_flux'][0] == 'Star':
+                [planet_day_model_wavelengths, planet_day_photon_spectrum] = get_relative_spectrum(planet_day_model_wavelengths, planet_day_model_fluxes, star_model_wavelengths, star_photon_spectrum)
+                [planet_night_model_wavelengths, planet_night_photon_spectrum] = get_relative_spectrum(planet_night_model_wavelengths, planet_night_model_fluxes, star_model_wavelengths, star_photon_spectrum)
+            elif input_dict_local['rescale_planet_flux'][0] == 'Yes':
                 system_distance = input_dict_local['system_distance'][0]
                 planet_day_photon_spectrum = get_photon_spectrum(planet_day_model_wavelengths, planet_day_model_fluxes, planet_radius, system_distance, telescope_area)
                 planet_night_photon_spectrum = get_photon_spectrum(planet_night_model_wavelengths, planet_night_model_fluxes, planet_radius, system_distance, telescope_area)
@@ -1429,16 +1487,23 @@ def process_configuration_transit(input_dict):
     phimax = (0.5 * observing_duration / orbital_period).decompose()
     transit_depth = ( (planet_radius / star_radius)**2.0 ).decompose()
     ppm = u.def_unit('ppm')
-    passbands = list(star_electrons_rate_dict.keys())
+    passbands_star = list(star_electrons_rate_dict.keys()) #Passbands that were successfully calculated for the star model
     #Performing the final calculation and storing into a dictionary of results
     results_dict = {}
     for i in range(n_conf):
         label = labels[i]
-        planet_day_temperature = input_dict_local['planet_day_temperature'][i]
-        planet_night_temperature = input_dict_local['planet_night_temperature'][i]
+        try:
+            planet_day_temperature = input_dict_local['planet_day_temperature'][i]
+            planet_night_temperature = input_dict_local['planet_night_temperature'][i]
+        except:
+            planet_day_temperature = 'not_given'
+            planet_night_temperature = 'not_given'
         results_dict[label] = {}
         reflection_factor = planet_albedo[i] * (0.5 * planet_radius / orbital_semimajor_axis)**2.0
         reflection_factor = reflection_factor.decompose()
+        passbands_day = list(planet_day_electrons_rate_dict[label].keys()) #Passbands that were successfully calculated for the planet dayside model
+        passbands_night = list(planet_night_electrons_rate_dict[label].keys()) #Passbands that were successfully calculated for the planet nightside model
+        passbands = [p for p in passbands_star if p in np.intersect1d(passbands_day, passbands_night)]
         for passband in passbands:
             results_dict[label][passband] = {}
             star_electrons_rate = copy.deepcopy(star_electrons_rate_dict[passband])
@@ -1572,7 +1637,6 @@ def process_configuration_eclipse(input_dict):
         [star_model_wavelengths, star_model_fluxes] = get_model_spectrum(stellar_models_grid, params=params)
         system_distance = input_dict_local['system_distance'][0]
         star_photon_spectrum = get_photon_spectrum(star_model_wavelengths, star_model_fluxes, star_radius, system_distance, telescope_area)
-    star_electrons_rate_dict = {}
     star_electrons_rate_dict = get_passband_fluxes(star_model_wavelengths, star_photon_spectrum, passbands_dict)
 
     #Computing the electrons rate due to the planetary day and nightside flux in each passband/wavelength bin and storing into two dictionaries:
@@ -1590,7 +1654,10 @@ def process_configuration_eclipse(input_dict):
             label = labels[i]
             [planet_day_model_wavelengths, planet_day_model_fluxes] = get_model_spectrum(planet_models_grid, file_to_read=day_file_to_read)
             [planet_night_model_wavelengths, planet_night_model_fluxes] = get_model_spectrum(planet_models_grid, file_to_read= night_file_to_read)
-            if input_dict_local['rescale_planet_flux'][0] == 'Yes':
+            if input_dict_local['rescale_planet_flux'][0] == 'Star':
+                [planet_day_model_wavelengths, planet_day_photon_spectrum] = get_relative_spectrum(planet_day_model_wavelengths, planet_day_model_fluxes, star_model_wavelengths, star_photon_spectrum)
+                [planet_night_model_wavelengths, planet_night_photon_spectrum] = get_relative_spectrum(planet_night_model_wavelengths, planet_night_model_fluxes, star_model_wavelengths, star_photon_spectrum)
+            elif input_dict_local['rescale_planet_flux'][0] == 'Yes':
                 system_distance = input_dict_local['system_distance'][0]
                 planet_day_photon_spectrum = get_photon_spectrum(planet_day_model_wavelengths, planet_day_model_fluxes, planet_radius, system_distance, telescope_area)
                 planet_night_photon_spectrum = get_photon_spectrum(planet_night_model_wavelengths, planet_night_model_fluxes, planet_radius, system_distance, telescope_area)
@@ -1628,16 +1695,23 @@ def process_configuration_eclipse(input_dict):
     phimax = (0.5 * observing_duration / orbital_period).decompose()
     transit_depth = ( (planet_radius / star_radius)**2.0 ).decompose()
     ppm = u.def_unit('ppm')
-    passbands = list(star_electrons_rate_dict.keys())
+    passbands_star = list(star_electrons_rate_dict.keys()) #Passbands that were successfully calculated for the star model
     #Performing the final calculation and storing into a dictionary of results
     results_dict = {}
     for i in range(n_conf):
         label = labels[i]
-        planet_day_temperature = input_dict_local['planet_day_temperature'][i]
-        planet_night_temperature = input_dict_local['planet_night_temperature'][i]
+        try:
+            planet_day_temperature = input_dict_local['planet_day_temperature'][i]
+            planet_night_temperature = input_dict_local['planet_night_temperature'][i]
+        except:
+            planet_day_temperature = 'not_given'
+            planet_night_temperature = 'not_given'
         results_dict[label] = {}
         reflection_factor = planet_albedo[i] * (0.5 * planet_radius / orbital_semimajor_axis)**2.0
         reflection_factor = reflection_factor.decompose()
+        passbands_day = list(planet_day_electrons_rate_dict[label].keys()) #Passbands that were successfully calculated for the planet dayside model
+        passbands_night = list(planet_night_electrons_rate_dict[label].keys()) #Passbands that were successfully calculated for the planet nightside model
+        passbands = [p for p in passbands_star if p in np.intersect1d(passbands_day, passbands_night)]
         for passband in passbands:
             results_dict[label][passband] = {}
             star_electrons_rate = copy.deepcopy(star_electrons_rate_dict[passband])
@@ -1666,7 +1740,7 @@ def process_configuration_eclipse(input_dict):
                 results_dict[label][passband][label2]['planet_day_flux'] = planet_day_electrons_rate
                 results_dict[label][passband][label2]['planet_night_flux'] = planet_night_electrons_rate
                 results_dict[label][passband][label2]['planet_flux_ooe'] = planet_electrons_rate_out
-                results_dict[label][passband][label2]['planet_flux_in'] = planet_electrons_rate_in
+                results_dict[label][passband][label2]['planet_flux_ine'] = planet_electrons_rate_in
                 #S/N calculation to be added
                 number_electrons_out = ( (star_electrons_rate + planet_electrons_rate_out)*(observing_duration[j]-T14) ).decompose()
                 number_electrons_in = ( star_electrons_rate*T14 ).decompose()
