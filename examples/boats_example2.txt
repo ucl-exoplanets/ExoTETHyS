@@ -23,7 +23,7 @@ observing_duration			2.5 !8.25
 observing_duration_unit			T_14 !hour
 ##SYSTEM PARAMETERS
 star_effective_temperature		4400.0
-star_log_gravity			4.65
+#star_log_gravity			4.65
 #star_metallicity			0.0
 star_radius				0.60
 star_radius_unit			solRad
