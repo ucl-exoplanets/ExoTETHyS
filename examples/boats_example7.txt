@@ -1,6 +1,6 @@
 #Output settings		
 #output_path				/desired_absolute_or_relative_path/
-output_filename				WASP43b_JWST_bb_bb_various_Ab_eps
+output_filename				WASP43b_NIRISS_MIRInobins_bb_bb_various_Ab_eps
 output_fileext				.pickle	.txt
 ##GENERIC
 stellar_models_grid			!Phoenix_2018	!Phoenix_2012_13	!Atlas_2000	!Stagger_2015	Blackbody	!Userfile
