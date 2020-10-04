@@ -192,7 +192,7 @@ The first variable is the list of file names in the database, the second variabl
 === SAIL output files
 When running the main function of SAIL (ldc_calculate), the results are stored in files with the extension _.pickle_.
 The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
-The objects created with SAIL.ldc_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries].
+The objects created with sail.ldc_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries].
 
 Here I show how to read such files through some examples.
 
