@@ -185,7 +185,7 @@ They can also contain other two columns:
 - _time_ (if _time_ input_series_type).
 
 The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
-The objects created with TRIP.trip_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. These files contain more information than the respective _txt_ file.
+The objects created with trip.trip_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. The _pickle_ files retain more information than the corresponding _txt_ files.
 
 Let's open the _pickle_ files that have been created with the examples:
 [source, bash]
