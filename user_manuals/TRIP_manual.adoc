@@ -80,7 +80,7 @@ Examples are in the "aux_files" folder.
 values: float type (non-negative) +
 Ratio between the planet and star radii
 
-*sma_over_rs** (only if _phi_ or _time_ input_series_type, mandatory) +
+*sma_over_rs* (only if _phi_ or _time_ input_series_type, mandatory) +
 values: float type (sma_over_rs > = 1) +
 Orbital semimajor axis in units of the star radius
 
