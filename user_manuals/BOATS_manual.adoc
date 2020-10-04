@@ -1,4 +1,4 @@
-= ExoTETHyS.SAIL User Manual
+= ExoTETHyS.BOATS User Manual
 :author: Giuseppe Morello
 :sectnums:
 :sectnumlevels: 2
@@ -8,7 +8,7 @@
 :experimental:
 :xrefstyle: short
 
-[big]#*Stellar Atmosphere Intensity Limb*#
+[big]#*Bias in the Occultation Analysis of Transiting Systems*#
 
 image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
 *version: 2.x.x - beta*
@@ -23,55 +23,75 @@ endif::[]
 
 [preamble]
 == Introduction
-The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients (LDCs) that covers:
+The BOATS subpackage is designed to evaluate the impact of common approximations in modeling transit and eclipse light curves, such as neglecting the planet's flux or its variation with phase. Additionally, it can also be used:
 
-- wide and continuous ranges of the stellar parameters (T~eff~, log(g), [M/H]);
-- built-in or user-defined passbands at UV to IR wavelengths;
-- choice among the most common limb-darkening laws and their generalizations.
+- to calculate the absolute photometric fluxes and spectra of individual objects, exoplanetary systems and binaries;
+- as a versatile S/N ratio calculator for observations with a long list of predefined instruments as well as user-supplied ones;
+- to compute the transit duration, equilibrium temperature and other exoplanet atmospheric parameters.
 
-It relies on pre-calculated grids of stellar atmosphere models providing the emergent intensities at several positions on the projected disk.
+The main functions rely on a minimal set of parameters that describe the orbital geometry and orientation, sizes and temperatures of the two bodies to compute the biases in transit/eclipse depth. Good estimates can de obtained by assuming blackbody emission spectra from star, exoplanet dayside and nightside. Pre-calculated grids of stellar spectra are also available. Users can provide their own spectra for each of the 3 components.
 
-TIP: The main advantage over other existing stellar limb-darkening calculators is the use of a novel fitting algorithm, specifically optimised for modeling the exoplanetary transits. +
-The coefficients obtained with this method enable computing the transit light-curve with precision down to <10 parts per million (ppm).
-
-I refer to the https://arxiv.org/pdf/1908.09599.pdf[main article] for detailed descriptions of the core algorithms, their performances and comparisons with other similar codes.
+I refer to the https://arxiv.org/pdf/[photometry article] and https://arxiv.org/pdf/[spectroscopy article] for an introduction to the scientific motivations, mathematics and a detailed description of the core algorithms.
 
 == User instructions
 
-To calculate LDCs you just need to import this subpackage and run the ldc_calculate function with a configuration file:
+To compute the transit/eclipse depth biases you just need to import this subpackage and run the boats_calculate_transit/boats_calculate_eclipse function with a configuration file:
 [source, bash]
 ```
->>> from exotethys import sail  
->>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
+>>> from exotethys import boats  
+>>> boats.boats_calculate_transit('PATH_TO_ROOT/examples/boats_example1.txt')   
+>>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
 ```
+NOTE: The same configuration file could be used for either transit or eclipse calculation. +
+If running both cases with the same configuration file, the output files are overwritten. +
+To avoid this issue, you can use two configuration files differing only for the names and/or location of the output files.
+
 In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
 
-NOTE: Although most of the functions within the SAIL subpackage have been designed to perform a specific step of the LDCs calculation, some functions may be useful on their own.
+TIP: Although the BOATS subpackage has been conceived with a specific purpose in mind, most functions can be used independently and/or in different combinations to perform various tasks.
 
-In the last subsection, I highlight some other SAIL functions that can be used on their own.
+In the last subsection, I discuss other possible usage of the BOATS functions.
 
-=== SAIL configuration file
-The SAIL configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with # are ignored; keyword values preceded by ! are also ignored. Examples of configuration files can be found in the "examples" folder.
+=== BOATS configuration file
+The BOATS configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with # are ignored; keyword values preceded by ! are also ignored. Examples of configuration files can be found in the "examples" folder.
 
 Below I describe the available keywords:
 
-*calculation_type* (MANDATORY) +
-values: _individual_ or _grid_ +
-_individual_ is to compute LDCs for specific targets with stellar parameters provided by the user +
-_grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
-
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_, _Atlas_2000_ or _Stagger_2015_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Atlas_2000_, _Stagger_2015_, _Blackbody_ or _Userfile_ +
 only one choice per run (i.e., configuration file) is allowed
 
-*limb_darkening_laws* (MANDATORY) +
-values: _claret4_, _power2_, _square_root_, _quadratic_, _linear_, _gen_claret_ and/or _gen_poly_
+*planet_models_grid* (MANDATORY) +
+values: _Blackbody_ or _Userfile_ +
+only one choice per run (i.e., configuration file) is allowed
 
-*gen_claret_orders* (only if _gen_claret_, mandatory) +
-values: positive integer numbers
+*star_model_path* (only if _Userfile_ stellar_models_grid, optional) +
+values: path to user star model file
 
-*gen_poly_orders* (only if _gen_poly_, mandatory) +
-values: positive integer numbers
+*star_model_file* (only if _Userfile_ stellar_models_grid, mandatory) +
+values: user star model file name
+
+*rescale_star_flux* (only if _Userfile_ stellar_models_grid, mandatory) +
+values: _Yes_ or _No_ +
+_Yes_ if the user stellar spectrum has to be rescaled by the dilution factor: (star radius / distance from the observer)^2 +
+_No_ if the user stellar spectrum already accounts for the dilution factor
+
+*planet_day_model_path* (only if _Userfile_ planet_models_grid, optional) +
+values: path to user file for the planet dayside
+
+*planet_day_model_file* (only if _Userfile_ planet_models_grid, mandatory) +
+values: user planet dayside file name
+
+*planet_night_model_path* (only if _Userfile_ planet_models_grid, optional) +
+values: path to user file for the planet nightside
+
+*planet_night_model_file* (only if _Userfile_ planet_models_grid, mandatory) +
+values: user planet nightside file name
+
+*rescale_planet_flux* (only if _Userfile_ planet_models_grid, mandatory) +
+values: _Yes_ or _No_ +
+_Yes_ if the user planet dayside and nightside spectra have to be rescaled by the dilution factor: (planet radius / distance from the observer)^2 +
+_No_ if the user planet dayside and nightside spectra already account for the dilution factor
 
 *passbands_path* (OPTIONAL) +
 values: path to user passbands
@@ -86,52 +106,18 @@ values: path to wavelength bins files
 values: user file names or _no_bins_ (if given, one entry per passband) +
 The user files must be text files with 2 columns reporting the lower and upper limits of the desired wavelength bins within the corresponding passband (each row defines a wavelength bin).
 
-*user_output* (OPTIONAL) +
-values: _basic_ (default) or _complete_ +
-if _basic_, the output files will contain only the requested LDCs and the corresponding quality of fits (weighted-r RMS) +
-if _complete_, the output files also include the passband-integrated profiles, LDCs and quality of fits for the neighbour models in the grid that are used to compute the requested LDCs.
+
+OTHER KEYWORDS TO ENTER HERE
+
 
 *output_path* (OPTIONAL) +
 values: path to where to store the results
 
-*targets_path* (only if _individual_ calculation_type, optional) +
-values: path to target file
+*output_filename* (OPTIONAL) +
+values: string type (without extension)
 
-*targets_file* (only if _individual_ calculation_type, optional) +
-values: user file name +
-The user file must be a text file with up to 4 columns. The first row contains the keywords in arbitrary order: _target_names_ (optional), _star_effective_temperature_ (mandatory), _star_log_gravity_ (optional) and _star_metallicity_ (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available for one target, write _X_ in its place to guarantee that each value is matched with the correct parameter keyword. Example files are available in the target_list folder.
-
-*target_names* (only if _individual_ calculation_type, if not targets_file, optional) +
-values: str type +
-If given, the output files will be target_name_ldc.pickle, and in case of _complete_ user_output, target_name_neighbour_ldc.pickle and target_name_neighbour_intensities.pickle. +
-If not given, the default target names will be obtained from the stellar parameters values.
-
-*star_effective_temperature* (only if _individual_ calculation_type, if not targets_file, mandatory) +
-values: float type (range depending on the stellar_models_grid)
-
-*star_log_gravity* (only if _individual_ calculation_type, if not targets_file,  optional) +
-values: float type (range depending on the stellar_models_grid, default is 4.5)
-
-*star_metallicity* (only if _individual_ calculation_type, if not targets_file, optional) +
-values: float type (range depending on the stellar_models_grid, default is 0.0)
-
-*star_minimum_effective_temperature* (only if _grid_ calculation_type, optional) +
-values: float value
-
-*star_maximum_effective_temperature* (only if _grid_ calculation_type, optional) +
-values: float value
-
-*star_minimum_log_gravity* (only if _grid_ calculation_type, optional) +
-values: float value
-
-*star_maximum_log_gravity* (only if _grid_ calculation_type, optional) +
-values: float value
-
-*star_minimum_metallicity* (only if _grid_ calculation_type, optional) +
-values: float value
-
-*star_maximum_metallicity* (only if _grid_ calculation_type, optional) +
-values: float value
+*output_fileext* (OPTIONAL) +
+values: _.pickle_ (default) and/or _.txt_
 
 
 === Description of examples
