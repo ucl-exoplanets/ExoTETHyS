@@ -106,9 +106,74 @@ values: path to wavelength bins files
 values: user file names or _no_bins_ (if given, one entry per passband) +
 The user files must be text files with 2 columns reporting the lower and upper limits of the desired wavelength bins within the corresponding passband (each row defines a wavelength bin).
 
+*telescope_area* (MANDATORY) +
+values: float type (positive)
 
-OTHER KEYWORDS TO ENTER HERE
+*telescope_area_unit* (MANDATORY) +
+values: string representation of astropy.unit area (e.g., 'm2'='m**2', 'cm2')
 
+*observing_duration* (MANDATORY) +
+values: float type (transit_duration T_14 < observing_duration < period_orbital - transit_duration T_14)
+
+*observing_duration_unit* (MANDATORY) +
+values: string representation of astropy.unit time (e.g., 'hour' = 'hr' = 'h', 'second' = 's') or T_14
+
+*star_effective_temperature* (MANDATORY, except if _Userfile_ stellar_models_grid & not planet_circulation_efficiency) +
+values: float type (range depending on the stellar_models_grid)
+
+*star_log_gravity* (OPTIONAL) +
+values: float type (range depending on the stellar_models_grid, default is 4.5)
+
+*star_metallicity* (OPTIONAL) +
+values: float type (range depending on the stellar_models_grid, default is 0.0)
+
+*star_radius* (MANDATORY) +
+values: float type (positive)
+
+*star_radius_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'solRad'='Rsun', 'km', 'm')
+
+*orbital_semimajor_axis* (MANDATORY) +
+values: float type (orbital_semimajor_axis > star_radius)
+
+*orbital_semimajor_axis_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'au'='AU', 'km', 'm') or star_radius
+
+*orbital_inclination* (MANDATORY) +
+values: float type (0 deg < = orbital_inclination < = 90 deg)
+
+*orbital_inclination_unit* (MANDATORY) +
+values: string representation of astropy.unit angle (e.g., 'deg', 'rad'='radian')
+
+*orbital_period* (MANDATORY) +
+values: float type (positive)
+
+*orbital_period_unit* (MANDATORY) +
+values: string representation of astropy.unit time (e.g., 'd'='day') or T_14
+
+*planet_bond_albedo* (OPTIONAL) +
+values: float type (0 < = planet_bond_albedo < = 1, default is 0.0)
+
+*planet_circulation_efficiency* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_day_temperature and planet_night_temperature) +
+values: float type (0 < = planet_circulation_efficiency < = 1, default is 0.0)
+
+*planet_day_temperature* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_circulation_efficiency) +
+values: float type (positive)
+
+*planet_night_temperature* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_circulation_efficiency) +
+values: float type (positive)
+
+*planet_radius* (MANDATORY) +
+values: float type (positive)
+
+*planet_radius_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'jupiterRad'='Rjup', 'km', 'm') or star_radius
+
+*system_distance* (MANDATORY) +
+values: float type (system_distance >= 1 AU)
+
+*system_distance_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'pc'='parsec')
 
 *output_path* (OPTIONAL) +
 values: path to where to store the results
@@ -122,61 +187,28 @@ values: _.pickle_ (default) and/or _.txt_
 
 === Description of examples
 
-*sail_example1*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+*boats_example1*: This example is to compute the bias over a single instrument passband with wavelength bins, using _Phoenix_2012_13_ stellar_models_grid, _Blackbody_ planet_models_grid with given planet_day_temperature and planet_night_temperature. It creates two files named "WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.pickle" and "WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.txt".
 
-*sail_example2*: This example is to test the _complete_ user_output, including the stellar intensity profile and coefficients for the neighbour models. It creates three files named "teff28300.0_logg4.35_MH-0.23_ldc.pickle", "teff28300.0_logg4.35_MH-0.23_neighbour_ldc.pickle" and "teff28300.0_logg4.35_MH-0.23_neighbour_intensities.pickle".
+*boats_example2*: This example is to compute the bias over two instrument passbands with wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with given planet_day_temperature and planet_night_temperature. It creates a file named "WASP43b_NIRISS_NIRSpec_bb_bb_Td1600_Tn850_A0e23.pickle".
 
-*sail_example3*: This example contains stellar parameters just outside the covered parameter space. If running this example, the code will exit with 2 warnings (one for each neighbour not found) and one error:
-[source, bash]
-```
-WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 3 not found for the stellar_models_grid Atlas_2000 .
-WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 4 not found for the stellar_models_grid Atlas_2000 .
-ERROR: No legal targets to calculate.
-```
-In particular, the code searches for the 8 nearest neighbours that defines a volume containing the requested point (28000, 2.6, -0.23 ) in the following order: +
-neighbour 1: (+, +, +)
+*boats_example3*: This example is to compute the bias over a single instrument passband with wavelength bins, using _Blackbody_ stellar_models_grid, _Userfile_ planet_models_grid. It creates a file named "WASP43b_NIRISS_SOSS_bb_ace_Td1600_Tn850_A0e23.pickle".
 
-neighbour 2: (+, +, -)
+*boats_example4*: This example is to compute the bias over a single instrument passband with wavelength bins, using _Userfile_ stellar_models_grid, _Userfile_ planet_models_grid. It creates a file named "WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23.pickle".
 
-neighbour 3: (+, -, +)
+*boats_example5*: This example differs from boats_example4 only for the output_filename. It creates a file named "WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23_eclipse.pickle".
 
-neighbour 4: (+, -, -)
+NOTE: In principle, all examples can be used for either transit or eclipse calculation, but I am assuming that the transit case is more interesting to study.
 
-neighbour 5: (-, +, +)
+*boats_example6*: This example is to compute the bias over four instrument passbands without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_JWST_bb_bb_various_Ab_eps.pickle".
 
-neighbour 6: (-, +, -)
+*boats_example7*: This example is to compute the bias over two instrument passbands one with one without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_NIRISS_MIRInobins_bb_bb_various_Ab_eps.pickle".
 
-neighbour 7: (-, -, +)
-
-neighbour 8: (-, -, -)
-
-where "+" and "-" denote a parameter value higher or lower than in the requested point. In this case the code fails to find neighbours with higher effective temperature and lower surface gravity, as they do not exist in the _Atlas_2000_ grid. If more targets were requested, the code would just skip this target and move to the next one. Given there are no other requested targets, the code prints the error message and exits without producing any output.  
-The user can extract the information about all the available models in the grids by typing the following commands:
-[source, bash]
-```
->>> from exotethys import sail  
->>> [files_Atlas_2000, params_Atlas_2000] = sail.get_grid_parameters('Atlas_2000') 
->>> [files_Phoenix_2012_13, params_Phoenix_2012_13] = sail.get_grid_parameters('Phoenix_2012_13') 
->>> [files_Phoenix_2018, params_Phoenix_2018] = sail.get_grid_parameters('Phoenix_2018') 
->>> [files_Stagger_2015, params_Stagger_2015] = sail.get_grid_parameters('Stagger_2015') 
-```
-The first variable is the list of file names in the database, the second variable is the 3-column numpy array with the corresponding stellar parameters.
-
-*sail_example4*: This example computes the limb-darkening coefficients for a grid of models with _complete_ user_output. It creates two files named "grid_ldc.pickle" and "grid_intensities.pickle".
-
-*sail_example5*: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
-
-*sail_example6*: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband and for another photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
-
-*sail_example7*: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
-
-*sail_example8*: This example computes the _complete_ user_output for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three _basic_ files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle", and other two files named "HD209458bSunCool_neighbour_ldc.pickle" and "HD209458bSunCool_neighbour_intensities.pickle".
-
-*sail_example9*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "stagger_example_ldc.pickle".
+*boats_example8*: This example is to compute the bias over four instrument passbands without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_JWST_bb_bb_various_Tday_tnight.pickle".
 
 
-=== SAIL output files
-When running the main function of SAIL (ldc_calculate), the results are stored in files with the extension _.pickle_.
+=== BOATS output files
+When running boats.boats_calculate_transit or boats.boats_calculate_eclipse, the results can be stored in files with the extension _.txt_ and/or _.pickle_.
+POSSIBLY DESCRIBE THE TXT FILES
 The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
 The objects created with SAIL.ldc_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries].
 
