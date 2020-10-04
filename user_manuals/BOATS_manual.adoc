@@ -208,11 +208,19 @@ NOTE: In principle, all examples can be used for either transit or eclipse calcu
 
 === BOATS output files
 When running boats.boats_calculate_transit or boats.boats_calculate_eclipse, the results can be stored in files with the extension _.txt_ and/or _.pickle_.
-POSSIBLY DESCRIBE THE TXT FILES
-The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
-The objects created with SAIL.ldc_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries].
+The _txt_ files are easy to read. The first row reports a string that defines a configuration (e.g., "albedo0.0_efficiency0.0_obs_duration_2.5T_14", "albedo0.23_Tday1600.0K_Tnight850.0K_obs_duration_2.5T_14"). The second row contains the column headers:
 
-Here I show how to read such files through some examples.
+- case of transit: "passband", "transit_depth (ppm)", "transit_depth_sigma", "transit_depth_bias", "self_blend_bias", "phase_blend_bias";
+- case of eclipse: "passband", "eclipse_depth_measured (ppm)", "eclipse_depth_sigma", "eclipse_depth_average_in", "eclipse_depth_peak_in".
+
+The following lines report the passband names (including wavelength bin limits) and the corresponding results.
+
+If more configurations are calculated, the same structure is repeated more times in the same _txt_ file. 
+
+The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
+The objects created with boats.boats_calculate_transit or boats.boats_calculate_eclipse are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. The _pickle_ files retain more information than the corresponding _txt_ files.
+
+Here I show how to read such files through some examples. TO CONTINUE FROM HERE
 
 ==== Basic individual
 Let's open the file "Sun_ldc.pickle" that has been created by running the sail_example8:
