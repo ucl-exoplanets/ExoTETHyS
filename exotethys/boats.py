@@ -831,7 +831,7 @@ def check_configuration(input_dict):
     else:
         input_dict_local['planet_day_model_path'] = ['']
 
-    #Checking the planet_day_model_file (OPTIONAL, 1 ONLY).
+    #Checking the planet_day_model_file (MANDATORY, 1 ONLY).
     if 'planet_day_model_file' in input_keys:
         planet_day_model_file = input_dict_local['planet_day_model_file']
         if not check_length(planet_day_model_file, max_length=1):
@@ -853,7 +853,7 @@ def check_configuration(input_dict):
     else:
         input_dict_local['planet_night_model_path'] = ['']
 
-    #Checking the planet_night_model_file (OPTIONAL, 1 ONLY).
+    #Checking the planet_night_model_file (MANDATORY, 1 ONLY).
     if 'planet_night_model_file' in input_keys:
         planet_night_model_file = input_dict_local['planet_night_model_file']
         if not check_length(planet_night_model_file, max_length=1):
