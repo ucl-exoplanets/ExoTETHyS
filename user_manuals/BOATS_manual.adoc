@@ -203,7 +203,7 @@ NOTE: In principle, all examples can be used for either transit or eclipse calcu
 
 *boats_example7*: This example is to compute the bias over two instrument passbands one with one without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_NIRISS_MIRInobins_bb_bb_various_Ab_eps.pickle".
 
-*boats_example8*: This example is to compute the bias over four instrument passbands without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_JWST_bb_bb_various_Tday_tnight.pickle".
+*boats_example8*: This example is to compute the bias over four instrument passbands without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_JWST_bb_bb_various_Tday_Tnight.pickle".
 
 
 === BOATS output files
@@ -220,131 +220,76 @@ If more configurations are calculated, the same structure is repeated more times
 The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
 The objects created with boats.boats_calculate_transit or boats.boats_calculate_eclipse are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. The _pickle_ files retain more information than the corresponding _txt_ files.
 
-Here I show how to read such files through some examples. TO CONTINUE FROM HERE
+Let's open the _pickle_ files that have been created with the examples:
 
-==== Basic individual
-Let's open the file "Sun_ldc.pickle" that has been created by running the sail_example8:
 [source, bash]
 ```
 >>> import pickle
->>> sun_ldc_file = pickle.load(open('Sun_ldc.pickle','rb'),encoding='latin1')
+>>> file1 = pickle.load(open('WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file2 = pickle.load(open('WASP43b_NIRISS_NIRSpec_bb_bb_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file3 = pickle.load(open('WASP43b_NIRISS_SOSS_bb_ace_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file4 = pickle.load(open('WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file5 = pickle.load(open('WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23_eclipse.pickle','rb'),encoding='latin1')
+>>> file6 = pickle.load(open('WASP43b_JWST_bb_bb_various_Ab_eps.pickle','rb'),encoding='latin1')
+>>> file7 = pickle.load(open('WASP43b_NIRISS_MIRInobins_bb_bb_various_Ab_eps.pickle','rb'),encoding='latin1')
+>>> file8 = pickle.load(open('WASP43b_JWST_bb_bb_various_Tday_Tnight.pickle','rb'),encoding='latin1')
 ```
-We already know that it contains a dictionary, therefore we can ask for its keys:
+Each file contains a dictionary, therefore we print the keys:
 [source, bash]
 ```
->>> sun_ldc_file.keys()
-dict_keys(['star_params', 'passbands'])
+>>> file1.keys()
+dict_keys(['input_info', 'results'])
 ```
-The "star_params" branch ends with a numpy array containing the stellar parameters of this target:
+The "input_info" contains all the keywords from the configuration file (in this case "boats_example1.txt"), including those not given which are then set to the default values. This offers a way to check all the calculation options that led to the results.
+
+The results are split into one or more configurations associated with the exoplanet atmosphere:
 [source, bash]
 ```
->>> sun_ldc_file['star_params']
-array([5.78e+03, 4.50e+00, 0.00e+00])
+>>> file1['results'].keys()
+dict_keys(['albedo0.23_Tday1600.0K_Tnight850.0K'])
+>>> file3['results'].keys()
+dict_keys(['albedo0.23'])
+>>> file6['results'].keys()
+dict_keys(['albedo0.0_efficiency0.0', 'albedo0.0_efficiency1.0', 'albedo0.0_efficiency0.19', 'albedo0.23_efficiency0.0', 'albedo0.23_efficiency1.0', 'albedo0.23_efficiency0.19'])
 ```
-The "passbands" branch contains other keys for the requested passbands:
+Note that the atmospheric configuration can be defined by:
+
+- albedo, dayside and nightside temperatures;
+- only albedo, if the dayside and nightside spectra are provided by the user;
+- albedo and circulation efficiency.
+
+The next level of the dictionary contains the passband labels:
 [source, bash]
 ```
->>> sun_ldc_file['passbands'].keys()
-dict_keys(['uniform_phoenix_2012_13', 'uniform_phoenix_2012_13_10880.0_16800.0', 'uniform_phoenix_2012_13_11108.0_16432.0', 'uniform_phoenix_2012_13_11108.0_11416.0', 'uniform_phoenix_2012_13_11416.0_11709.0', 'uniform_phoenix_2012_13_11709.0_11988.0', 'uniform_phoenix_2012_13_11988.0_12257.0', 'uniform_phoenix_2012_13_12257.0_12522.0', 'uniform_phoenix_2012_13_12522.0_12791.0', 'uniform_phoenix_2012_13_12791.0_13058.0', 'uniform_phoenix_2012_13_13058.0_13321.0', 'uniform_phoenix_2012_13_13321.0_13586.0', 'uniform_phoenix_2012_13_13586.0_13860.0', 'uniform_phoenix_2012_13_13860.0_14140.0', 'uniform_phoenix_2012_13_14140.0_14425.0', 'uniform_phoenix_2012_13_14425.0_14719.0', 'uniform_phoenix_2012_13_14719.0_15027.0', 'uniform_phoenix_2012_13_15027.0_15345.0', 'uniform_phoenix_2012_13_15345.0_15682.0', 'uniform_phoenix_2012_13_15682.0_16042.0', 'uniform_phoenix_2012_13_16042.0_16432.0'])
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K'].keys()
+dict_keys(['JWST_NIRISS_ord1', 'JWST_NIRISS_ord1_6000.0_7000.0', 'JWST_NIRISS_ord1_7000.0_7500.0', 'JWST_NIRISS_ord1_7500.0_8000.0', 'JWST_NIRISS_ord1_8000.0_8300.0', 'JWST_NIRISS_ord1_8300.0_8600.0', 'JWST_NIRISS_ord1_8600.0_8900.0', 'JWST_NIRISS_ord1_8900.0_9200.0', 'JWST_NIRISS_ord1_9200.0_9400.0', 'JWST_NIRISS_ord1_9400.0_9600.0', 'JWST_NIRISS_ord1_9600.0_9800.0', 'JWST_NIRISS_ord1_9800.0_10000.0', 'JWST_NIRISS_ord1_10000.0_10200.0', 'JWST_NIRISS_ord1_10200.0_10400.0', 'JWST_NIRISS_ord1_10400.0_10600.0', 'JWST_NIRISS_ord1_10600.0_10800.0', 'JWST_NIRISS_ord1_10800.0_11000.0', 'JWST_NIRISS_ord1_11000.0_11200.0', 'JWST_NIRISS_ord1_11200.0_11400.0', 'JWST_NIRISS_ord1_11400.0_11600.0', 'JWST_NIRISS_ord1_11600.0_11800.0', 'JWST_NIRISS_ord1_11800.0_12000.0', 'JWST_NIRISS_ord1_12000.0_12200.0', 'JWST_NIRISS_ord1_12200.0_12400.0', 'JWST_NIRISS_ord1_12400.0_12600.0', 'JWST_NIRISS_ord1_12600.0_12800.0', 'JWST_NIRISS_ord1_12800.0_13000.0', 'JWST_NIRISS_ord1_13000.0_13200.0', 'JWST_NIRISS_ord1_13200.0_13400.0', 'JWST_NIRISS_ord1_13400.0_13600.0', 'JWST_NIRISS_ord1_13600.0_13800.0', 'JWST_NIRISS_ord1_13800.0_14000.0', 'JWST_NIRISS_ord1_14000.0_14200.0', 'JWST_NIRISS_ord1_14200.0_14400.0', 'JWST_NIRISS_ord1_14400.0_14600.0', 'JWST_NIRISS_ord1_14600.0_14800.0', 'JWST_NIRISS_ord1_14800.0_15000.0', 'JWST_NIRISS_ord1_15000.0_15200.0', 'JWST_NIRISS_ord1_15200.0_15400.0', 'JWST_NIRISS_ord1_15400.0_15600.0', 'JWST_NIRISS_ord1_15600.0_15800.0', 'JWST_NIRISS_ord1_15800.0_16000.0', 'JWST_NIRISS_ord1_16000.0_16200.0', 'JWST_NIRISS_ord1_16200.0_16400.0', 'JWST_NIRISS_ord1_16400.0_16600.0', 'JWST_NIRISS_ord1_16600.0_16800.0', 'JWST_NIRISS_ord1_16800.0_17000.0', 'JWST_NIRISS_ord1_17000.0_17200.0', 'JWST_NIRISS_ord1_17200.0_17400.0', 'JWST_NIRISS_ord1_17400.0_17600.0', 'JWST_NIRISS_ord1_17600.0_17800.0', 'JWST_NIRISS_ord1_17800.0_18000.0', 'JWST_NIRISS_ord1_18000.0_18200.0', 'JWST_NIRISS_ord1_18200.0_18400.0', 'JWST_NIRISS_ord1_18400.0_18600.0', 'JWST_NIRISS_ord1_18600.0_18800.0', 'JWST_NIRISS_ord1_18800.0_19000.0', 'JWST_NIRISS_ord1_19000.0_19200.0', 'JWST_NIRISS_ord1_19200.0_19400.0', 'JWST_NIRISS_ord1_19400.0_19600.0', 'JWST_NIRISS_ord1_19600.0_19800.0', 'JWST_NIRISS_ord1_19800.0_20100.0', 'JWST_NIRISS_ord1_20100.0_20400.0', 'JWST_NIRISS_ord1_20400.0_20700.0', 'JWST_NIRISS_ord1_20700.0_21000.0', 'JWST_NIRISS_ord1_21000.0_21300.0', 'JWST_NIRISS_ord1_21300.0_21600.0', 'JWST_NIRISS_ord1_21600.0_21900.0', 'JWST_NIRISS_ord1_21900.0_22200.0', 'JWST_NIRISS_ord1_22200.0_22500.0', 'JWST_NIRISS_ord1_22500.0_22800.0', 'JWST_NIRISS_ord1_22800.0_23100.0', 'JWST_NIRISS_ord1_23100.0_23400.0', 'JWST_NIRISS_ord1_23400.0_23800.0', 'JWST_NIRISS_ord1_23800.0_24200.0', 'JWST_NIRISS_ord1_24200.0_24600.0', 'JWST_NIRISS_ord1_24600.0_25000.0', 'JWST_NIRISS_ord1_25000.0_25500.0', 'JWST_NIRISS_ord1_25500.0_26000.0', 'JWST_NIRISS_ord1_26000.0_26500.0', 'JWST_NIRISS_ord1_26500.0_27000.0', 'JWST_NIRISS_ord1_27000.0_27500.0', 'JWST_NIRISS_ord1_27500.0_28000.0'])
 ```
 The passband keys include:
 
-- 'uniform_phoenix_2012_13', i.e., the requested passband;
+- 'JWST_NIRISS_ord1', i.e., the requested passband;
+- 'JWST_NIRISS_ord1_lambda1_lambda2', where lambda1 and lambda2 are the lower and upper limits of the requested wavelength bins (in Angstrom).
 
-- 'uniform_phoenix_2012_13_lambda1_lambda2', where lambda1 and lambda2 are the lower and upper limits of the requested wavelength bins (in Angstrom).
-
-Let's now explore what is inside one of these passband keys:
+The next level may contain one or more keys associated with the requested observing duration(s):
 [source, bash]
 ```
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0'].keys()
-dict_keys(['claret4', 'gen_claret1', 'gen_claret2', 'gen_claret3', 'gen_claret4', 'gen_claret5', 'gen_claret6'])
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1'].keys()
+dict_keys(['obs_duration_2.5T_14'])
 ```
-The new keys correspond to the requested limb-darkening laws. The number after 'gen_claret' denote the order. +
-We look inside 'claret4':
+The next level contains the final keys that give access to the calculated quantities, notably the bias terms and predicted error bars.
 [source, bash]
 ```
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4'].keys()
-dict_keys(['coefficients', 'weighted_rms_res'])
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14'].keys()
+dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit_depth', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_oot', 'planet_flux_in', 'transit_depth_sigma'])
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['transit_depth_bias']
+<Quantity 14.90930371 ppm>
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['phase_blend_bias']
+<Quantity 15.86343971 ppm>
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['self_blend_bias']
+<Quantity -0.954136 ppm>
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['transit_depth_sigma']
+<Quantity 3.29197013 ppm>
 ```
-These are the last keys, containing the limb-darkening coefficients for this choice of star+passband+law and the quality of the fit:
-[source, bash]
-```
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['coefficients']
-array([ 0.44803605,  0.25590171, -0.18203445,  0.01312166])
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['weighted_rms_res']
-array([5.62612442e-05])
-```
-We have a quick look at the other laws to show that _gen_claret4_ is equivalent to _claret4_ and that the quality of the fit is lower/higher when using less/more coefficients (in this particular case, lower order laws are subsets of the higher order ones):
-[source, bash]
-```
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['coefficients']
-array([ 0.44803605,  0.2559017 , -0.18203444,  0.01312165])
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['weighted_rms_res']
-array([5.62612442e-05])
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['coefficients']
-array([ 0.68720911, -0.10129642])
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['weighted_rms_res']
-array([0.00081957])
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['coefficients']
-array([ 0.62487639, -0.17728853,  0.13867818,  0.29065234, -0.52615743,
-        0.20857673])
->>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['weighted_rms_res']
-array([1.46248395e-05])
-```
-
-==== Complete individual
-Let's now explore the other two output files that have been created by running the sail_example8, because of the request of the _complete_ user_output:
-[source, bash]
-```
->>> sun_neighbour_ldc_file = pickle.load(open('HD209458bSunCool_neighbour_ldc.pickle','rb'),encoding='latin1')
->>> sun_neighbour_ints_file = pickle.load(open('HD209458bSunCool_neighbour_intensities.pickle','rb'),encoding='latin1')
->>> sun_neighbour_ldc_file.keys()
-dict_keys(['teff03000_logg5.50_MH0.0', 'teff05700_logg4.5_MH0.0', 'teff05800_logg4.5_MH0.0', 'teff06100_logg4.5_MH0.0'])
->>> sun_neighbour_ints_file.keys()
-dict_keys(['teff03000_logg5.50_MH0.0', 'teff05700_logg4.5_MH0.0', 'teff05800_logg4.5_MH0.0', 'teff06100_logg4.5_MH0.0'])
-```
-The first level of keys is identical for the two files, as it contains the labels associated with the neighbour models that have been used to compute the requested targets in the sail_example8. +
-For the neighbour ldc file, the structure of the next level dictionaries is similar to that of the basic output, but with more information. For example, after selecting one specific passbands, you get the following keys:
-[source, bash]
-```
->>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0'].keys()
-dict_keys(['rescaled_mu', 'rescaled_intensities', 'weights', 'laws'])
-```
-The 'laws' contains the information about the limb-darkening coefficients and quality of the fit for the selected neighbour model and passband. For example:
-[source, bash]
-```
->>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['coefficients']
-array([ 0.40234082,  0.28553471, -0.19583254,  0.01317074])
->>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['weighted_rms_res']
-6.696820777468198e-05
-```
-The other three keys contain the information about the processed intensity profile and weights adopted in the corresponding fit, each key containing a 1D numpy array of the same size. 
-
-We can visually compare the rescaled model intensities with the corresponding values obtained with the claret4 coefficients:
-[source, bash]
-```
->>> rescaled_mu = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['rescaled_mu']
->>> rescaled_intensities = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['rescaled_intensities']
->>> claret4_coefficients = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['coefficients']
->>> claret4_intensities = sail.get_intensities_from_ldcs(rescaled_mu, claret4_coefficients, 'claret4')
->>> import matplotlib.pyplot as plt
->>> plt.plot(rescaled_mu, rescaled_intensities, 'b.', label='intensities')
-[<matplotlib.lines.Line2D object at 0x18156288d0>]
->>> plt.plot(rescaled_mu, claret4_intensities, 'r', label='claret4')
-[<matplotlib.lines.Line2D object at 0x182077bd90>]
-```
-
-The neighbour intensities file contains the original mu values and the corresponding passband intensities, that we can compare with the rescaled ones:
-[source, bash]
-```
->>> original_mu = sun_neighbour_ints_file['teff06100_logg4.5_MH0.0']['mu']
->>> original_intensities = sun_neighbour_ints_file['teff06100_logg4.5_MH0.0']['uniform_phoenix_2012_13_10880.0_16800.0']
->>> plt.plot(original_mu, original_intensities, 'k.',label='original')
-[<matplotlib.lines.Line2D object at 0x18207e4690>]
->>> plt.plot(rescaled_mu, rescaled_intensities, 'b.',label='rescaled')
-[<matplotlib.lines.Line2D object at 0x1820a29590>]
-```
-After some restyling, you could obtain the two panels of the figure below:
+CONTINUE FROM HERE
 
 [[intensity_profiles]]
 .Left panel: Rescaled intensity profile (blue dots) and fitted profile with claret-4 limb-darkening coefficients (red line). Right panel: Original intensity profile (black dots) and rescaled intensity profile (blue dots). Note the slightly different mu values between the two profiles. Read the https://arxiv.org/pdf/1908.09599.pdf[reference paper] for information about the underlying procedure.
