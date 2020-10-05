@@ -69,7 +69,8 @@ only one choice per run (i.e., configuration file) is allowed
 values: path to user star model file
 
 *star_model_file* (only if _Userfile_ stellar_models_grid, mandatory) +
-values: user star model file name
+values: user star model file name +
+only one star_model_file per run (i.e., configuration file) is allowed
 
 *rescale_star_flux* (only if _Userfile_ stellar_models_grid, mandatory) +
 values: _Yes_ or _No_ +
@@ -80,13 +81,15 @@ _No_ if the user stellar spectrum already accounts for the dilution factor
 values: path to user file for the planet dayside
 
 *planet_day_model_file* (only if _Userfile_ planet_models_grid, mandatory) +
-values: user planet dayside file name
+values: user planet dayside file name +
+only one planet_day_model_file per run (i.e., configuration file) is allowed
 
 *planet_night_model_path* (only if _Userfile_ planet_models_grid, optional) +
 values: path to user file for the planet nightside
 
 *planet_night_model_file* (only if _Userfile_ planet_models_grid, mandatory) +
-values: user planet nightside file name
+values: user planet nightside file name +
+only one planet_night_model_file per run (i.e., configuration file) is allowed
 
 *rescale_planet_flux* (only if _Userfile_ planet_models_grid, mandatory) +
 values: _Yes_ or _No_ +
@@ -107,70 +110,85 @@ values: user file names or _no_bins_ (if given, one entry per passband) +
 The user files must be text files with 2 columns reporting the lower and upper limits of the desired wavelength bins within the corresponding passband (each row defines a wavelength bin).
 
 *telescope_area* (MANDATORY) +
-values: float type (positive)
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
 
 *telescope_area_unit* (MANDATORY) +
 values: string representation of astropy.unit area (e.g., 'm2'='m**2', 'cm2')
 
 *observing_duration* (MANDATORY) +
-values: float type (transit_duration T_14 < observing_duration < period_orbital - transit_duration T_14)
+values: float type (transit_duration T_14 < observing_duration < period_orbital - transit_duration T_14) +
+multiple entries allowed
 
 *observing_duration_unit* (MANDATORY) +
 values: string representation of astropy.unit time (e.g., 'hour' = 'hr' = 'h', 'second' = 's') or T_14
 
 *star_effective_temperature* (MANDATORY, except if _Userfile_ stellar_models_grid & not planet_circulation_efficiency) +
-values: float type (range depending on the stellar_models_grid)
+values: float type (range depending on the stellar_models_grid) +
+only one value per run (i.e., configuration file) is allowed
 
 *star_log_gravity* (OPTIONAL) +
-values: float type (range depending on the stellar_models_grid, default is 4.5)
+values: float type (range depending on the stellar_models_grid, default is 4.5) +
+only one value per run (i.e., configuration file) is allowed
 
 *star_metallicity* (OPTIONAL) +
-values: float type (range depending on the stellar_models_grid, default is 0.0)
+values: float type (range depending on the stellar_models_grid, default is 0.0) +
+only one value per run (i.e., configuration file) is allowed
 
 *star_radius* (MANDATORY) +
-values: float type (positive)
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
 
 *star_radius_unit* (MANDATORY) +
 values: string representation of astropy.unit length (e.g., 'solRad'='Rsun', 'km', 'm')
 
 *orbital_semimajor_axis* (MANDATORY) +
-values: float type (orbital_semimajor_axis > star_radius)
+values: float type (orbital_semimajor_axis > star_radius) +
+only one value per run (i.e., configuration file) is allowed
 
 *orbital_semimajor_axis_unit* (MANDATORY) +
 values: string representation of astropy.unit length (e.g., 'au'='AU', 'km', 'm') or star_radius
 
 *orbital_inclination* (MANDATORY) +
-values: float type (0 deg < = orbital_inclination < = 90 deg)
+values: float type (0 deg < = orbital_inclination < = 90 deg) +
+only one value per run (i.e., configuration file) is allowed
 
 *orbital_inclination_unit* (MANDATORY) +
 values: string representation of astropy.unit angle (e.g., 'deg', 'rad'='radian')
 
 *orbital_period* (MANDATORY) +
-values: float type (positive)
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
 
 *orbital_period_unit* (MANDATORY) +
 values: string representation of astropy.unit time (e.g., 'd'='day') or T_14
 
 *planet_bond_albedo* (OPTIONAL) +
-values: float type (0 < = planet_bond_albedo < = 1, default is 0.0)
+values: float type (0 < = planet_bond_albedo < = 1, default is 0.0) +
+multiple entries allowed
 
 *planet_circulation_efficiency* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_day_temperature and planet_night_temperature) +
-values: float type (0 < = planet_circulation_efficiency < = 1, default is 0.0)
+values: float type (0 < = planet_circulation_efficiency < = 1, default is 0.0) +
+multiple entries allowed
 
 *planet_day_temperature* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_circulation_efficiency) +
-values: float type (positive)
+values: float type (positive) +
+multiple entries allowed
 
 *planet_night_temperature* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_circulation_efficiency) +
-values: float type (positive)
+values: float type (positive) +
+multiple entries allowed
 
 *planet_radius* (MANDATORY) +
-values: float type (positive)
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
 
 *planet_radius_unit* (MANDATORY) +
 values: string representation of astropy.unit length (e.g., 'jupiterRad'='Rjup', 'km', 'm') or star_radius
 
 *system_distance* (MANDATORY) +
-values: float type (system_distance >= 1 AU)
+values: float type (system_distance >= 1 AU) +
+only one value per run (i.e., configuration file) is allowed
 
 *system_distance_unit* (MANDATORY) +
 values: string representation of astropy.unit length (e.g., 'pc'='parsec')
