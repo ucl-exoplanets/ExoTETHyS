@@ -1537,7 +1537,7 @@ def process_configuration_transit(input_dict):
                 #S/N calculation to be added
                 number_electrons_out = ( (star_electrons_rate + planet_electrons_rate_out)*(observing_duration[j]-T14) ).decompose()
                 number_electrons_in = ( (star_electrons_rate*(1.0-transit_depth) + planet_electrons_rate_in)*T14 ).decompose()
-                transit_depth_sigma = (1.0-transit_depth) * np.sqrt((1.0/number_electrons_in) + (1.0/number_electrons_out))*1e6 * ppm
+                transit_depth_sigma = (1.0-transit_depth) * np.sqrt((1.0/number_electrons_in.value) + (1.0/number_electrons_out.value))*1e6 * ppm
                 results_dict[label][passband][label2]['transit_depth_sigma'] = transit_depth_sigma
 
     #Saving the final dictionary with input and results
@@ -1742,7 +1742,7 @@ def process_configuration_eclipse(input_dict):
                 #S/N calculation to be added
                 number_electrons_out = ( (star_electrons_rate + planet_electrons_rate_out)*(observing_duration[j]-T14) ).decompose()
                 number_electrons_in = ( star_electrons_rate*T14 ).decompose()
-                eclipse_depth_sigma = (1+eclipse_depth_measured) * np.sqrt((1.0/number_electrons_out) + (1.0/number_electrons_in))*1e6 * ppm
+                eclipse_depth_sigma = (1+eclipse_depth_measured) * np.sqrt((1.0/number_electrons_out.value) + (1.0/number_electrons_in.value))*1e6 * ppm
                 results_dict[label][passband][label2]['eclipse_depth_sigma'] = eclipse_depth_sigma
 
     #Saving the final dictionary with input and results
