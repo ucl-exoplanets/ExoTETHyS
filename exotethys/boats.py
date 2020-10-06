@@ -1527,6 +1527,8 @@ def process_configuration_transit(input_dict):
                 results_dict[label][passband][label2]['phase_blend_bias'] = phase_blend*1e6 * ppm
                 results_dict[label][passband][label2]['self_blend_bias'] = results_dict[label][passband][label2]['transit_depth_bias'] - results_dict[label][passband][label2]['phase_blend_bias']
                 results_dict[label][passband][label2]['transit_depth'] = transit_depth*1e6 * ppm
+                results_dict[label][passband][label2]['transit_duration_T14'] = T14
+                results_dict[label][passband][label2]['observing_duration'] = observing_duration[j]
                 results_dict[label][passband][label2]['planet_day_temperature'] = planet_day_temperature
                 results_dict[label][passband][label2]['planet_night_temperature'] = planet_night_temperature
                 results_dict[label][passband][label2]['star_flux'] = star_electrons_rate
@@ -1732,6 +1734,8 @@ def process_configuration_eclipse(input_dict):
                 results_dict[label][passband][label2]['eclipse_depth_measured'] = eclipse_depth_measured*1e6 * ppm
                 results_dict[label][passband][label2]['eclipse_depth_average_in'] = eclipse_depth_average_in*1e6 * ppm
                 results_dict[label][passband][label2]['eclipse_depth_peak_in'] = eclipse_depth_peak_in*1e6 * ppm
+                results_dict[label][passband][label2]['eclipse_duration_T14'] = T14
+                results_dict[label][passband][label2]['observing_duration'] = observing_duration[j]
                 results_dict[label][passband][label2]['planet_day_temperature'] = planet_day_temperature
                 results_dict[label][passband][label2]['planet_night_temperature'] = planet_night_temperature
                 results_dict[label][passband][label2]['star_flux'] = star_electrons_rate
