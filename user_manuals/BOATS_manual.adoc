@@ -355,10 +355,10 @@ We plot the resulting spectral biases:
 [<matplotlib.lines.Line2D object at 0x182aa41050>]
 >>> plt.plot(niriss_waves,transit_depth_bias_niriss3,color='blue',label='ACE Day/Night Planet')
 ```
-After some restyling, you could obtain the two panels of the figure below:
-[[intensity_profiles]]
-.Left panel: Rescaled intensity profile (blue dots) and fitted profile with claret-4 limb-darkening coefficients (red line). Right panel: Original intensity profile (black dots) and rescaled intensity profile (blue dots). Note the slightly different mu values between the two profiles. Read the https://arxiv.org/pdf/1908.09599.pdf[reference paper] for information about the underlying procedure.
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_WASP43b_NIRISS_examples1to3.png[width=100%]
+After some restyling, you could obtain the figure below:
+[[Niriss_bias_ex1to3]]
+.Three different estimates of the spectral bias for WASP-43 b, as observed with JWST/NIRISS: using blackbody spectra for the star, planet dayside and nightside (black line with error bars), using Phoenix stellar model for the star and blackbody spectra for both planetary sides (red), using blackbody spectrum for the star and Atmospheric Chemical Equilibrium models for the planet dayside and nightside (blue).
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_WASP43b_NIRISS_examples1to3.png[width=80%]
 
 We compare the error bars:
 [source, bash]
