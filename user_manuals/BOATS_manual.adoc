@@ -406,6 +406,7 @@ The 'eclipse_depth_average_in' denotes the average planetary flux that would be 
 <Quantity 0.00538879>
 ```
 The difference between these two eclipse values is almost identical to the phase-blend effect of the primary transit, because we assume a synusoidal phase-curve without hotspot offset:
+[source, bash]
 ```
 >>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_average_in'] - file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
 <Quantity 105.79881209 ppm>
@@ -415,6 +416,8 @@ The difference between these two eclipse values is almost identical to the phase
 The slight difference between the two values above comes from the slightly different normalization factors, i.e., total out-of-transit flux for the primary transit and star flux for the secondary eclipse.
 
 The depth corresponding to the pure nightside occultation is even higher:
+[source, bash]
+```
 >>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_peak_in']
 <Quantity 5401.02265866 ppm>
 >>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_peak_in'] - file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
