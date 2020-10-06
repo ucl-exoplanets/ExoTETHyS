@@ -297,7 +297,7 @@ The next level contains the final keys that give access to the calculated quanti
 [source, bash]
 ```
 >>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14'].keys()
-dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit_depth', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_oot', 'planet_flux_in', 'transit_depth_sigma'])
+dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit_depth', 'transit_duration_T14', 'observing_duration', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_oot', 'planet_flux_in', 'transit_depth_sigma'])
 >>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['transit_depth_bias']
 <Quantity 14.90930371 ppm>
 >>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['phase_blend_bias']
@@ -305,8 +305,10 @@ dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit
 >>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['self_blend_bias']
 <Quantity -0.954136 ppm>
 >>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['transit_depth_sigma']
-<Quantity 3.29197013 ppm>
+<Quantity 4.93803074 ppm>
 ```
+Note that the transit depth bias is the sum of phase-blend and self-blend biases. All the other output quantities can be used to verify Equations X-Y of the https://arxiv.org/pdf/[paper].
+
 CONTINUE FROM HERE
 
 [[intensity_profiles]]
