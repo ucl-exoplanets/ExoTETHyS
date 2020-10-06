@@ -358,7 +358,7 @@ We plot the resulting spectral biases:
 After some restyling, you could obtain the figure below:
 [[Niriss_bias_ex1to3]]
 .Three different estimates of the spectral bias for WASP-43 b, as observed with JWST/NIRISS: using blackbody spectra for the star, planet dayside and nightside (black line with error bars), using Phoenix stellar model for the star and blackbody spectra for both planetary sides (red), using blackbody spectrum for the star and Atmospheric Chemical Equilibrium models for the planet dayside and nightside (blue).
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_WASP43b_NIRISS_examples1to3.png[width=80%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_WASP43b_NIRISS_examples1to3.png[width=70%]
 
 We compare the error bars:
 [source, bash]
@@ -381,19 +381,50 @@ The slightly smaller error bars are obtained with the Phoenix stellar flux, whic
 <Quantity 13600985.82505771 electron / s>
 ```
 
+Finally, we look at the differences between the calculation output for the transit and eclipse cases:
+[source, bash]
+```
+>>> file4['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14'].keys()
+dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit_depth', 'transit_duration_T14', 'observing_duration', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_oot', 'planet_flux_in', 'transit_depth_sigma'])
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14'].keys()
+dict_keys(['eclipse_depth_measured', 'eclipse_depth_average_in', 'eclipse_depth_peak_in', 'eclipse_duration_T14', 'observing_duration', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_ooe', 'planet_flux_ine', 'eclipse_depth_sigma'])
+```
+The 'eclipse_depth_measured' indicates the eclipse depth that would be measured by assuming a flat out-of-eclipse, i.e., the average out-of-eclipse flux divided by the stellar flux:
+[source, bash]
+```
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
+<Quantity 5282.99430143 ppm>
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['planet_flux_ooe'] / file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['star_flux']
+<Quantity 0.00528299>
+```
+The 'eclipse_depth_average_in' denotes the average planetary flux that would be observed during the eclipse, if it was not occulted by the star:
+[source, bash]
+```
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_average_in']
+<Quantity 5388.79311352 ppm>
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['planet_flux_ine'] / file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['star_flux']
+<Quantity 0.00538879>
+```
+The difference between these two eclipse values is almost identical to the phase-blend effect of the primary transit, because we assume a synusoidal phase-curve without hotspot offset:
+```
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_average_in'] - file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
+<Quantity 105.79881209 ppm>
+>>> file4['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['phase_blend_bias']
+<Quantity 105.64320199 ppm>
+```
+The slight difference between the two values above comes from the slightly different normalization factors, i.e., total out-of-transit flux for the primary transit and star flux for the secondary eclipse.
 
-[[intensity_profiles]]
-.Left panel: Rescaled intensity profile (blue dots) and fitted profile with claret-4 limb-darkening coefficients (red line). Right panel: Original intensity profile (black dots) and rescaled intensity profile (blue dots). Note the slightly different mu values between the two profiles. Read the https://arxiv.org/pdf/1908.09599.pdf[reference paper] for information about the underlying procedure.
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merge_rescaled_vs_claret4_et_original_intensities.png[width=100%]
+The depth corresponding to the pure nightside occultation is even higher:
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_peak_in']
+<Quantity 5401.02265866 ppm>
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_peak_in'] - file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
+<Quantity 118.02835723 ppm>
+```
 
-
-NOTE: These profiles can be used as input for generating the transit light-curves with the TRIP subpackage (link:TRIP_manual.adoc[TRIP manual]).
-
-NOTE: If you are interested to the intensity profiles rather than limb-darkening coefficients, you should choose the _grid_ calculation_type and _complete_ user_output. The intensity profiles can be provided only for the models in the database; these are not interpolated to obtain the intensity profiles of stars with different sets of parameter values.
-
-=== Other SAIL functions
-The list of functions available within SAIL subpackage can be obtained by typing the standard python command `dir(sail)`. All functions are documented with docstrings.
+=== Other BOATS functions
+The list of functions available within BOATS subpackage can be obtained by typing the standard python command `dir(boats)`. All functions are documented with docstrings.
 For example:
+CONTINUE FROM HERE
 [source, bash]
 ```
 >>> print(sail.get_intensities_from_ldcs.__doc__)
