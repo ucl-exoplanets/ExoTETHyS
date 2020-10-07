@@ -516,12 +516,99 @@ How to use:
 Unit("ph / (Angstrom s)")
 ```
 
+The functions "boats.get_waves_fromR" and "boats.get_passband_fluxes" can be used to compute the detector electron rates:
+[source, bash]
+```
+>>> tess_response = np.genfromtxt('exotethys/Passbands/TESS.pass')
+>>> kepler_response = np.genfromtxt('exotethys/Passbands/Kepler.pass')
+>>> np.shape(tess_response), np.shape(kepler_response)
+((179, 2), (625, 2))
+#First column is wavelength in Angstrom, second column is conversion electron/photon
+>>> tess_response.dtype, kepler_response.dtype
+(dtype('float64'), dtype('float64'))
+#Interpolate responses over a grid with R=10000
+>>> my_waves_tess = boats.get_waves_fromR(np.min(tess_response[:,0]), np.max(tess_response[:,0]), 10000.0)
+>>> my_waves_kepler = boats.get_waves_fromR(np.min(kepler_response[:,0]), np.max(kepler_response[:,0]), 10000.0)
+>>> from scipy.interpolate import interp1d
+>>> tess_interp = interp1d(tess_response[:,0], tess_response[:,1], fill_value='extrapolate')
+>>> tess_interp = interp1d(kepler_response[:,0], kepler_response[:,1], fill_value='extrapolate')
+>>> my_pce_tess = tess_interp(my_waves_tess)
+>>> my_pce_kepler = tess_interp(my_waves_kepler)
+#Create a dictionary of passbands
+>>> passbands_dict = {}
+>>> passbands_dict['tess'] = [my_waves_tess * u.Angstrom, my_pce_tess * u.electron/u.photon]
+>>> passbands_dict['kepler'] = [my_waves_kepler * u.Angstrom, my_pce_kepler * u.electron/u.photon]
+#Calculate electrons rates
+>>> pho1213_electrons_rate_dict = boats.get_passband_fluxes(waves_pho1213, phcounts_pho1213, passbands_dict)
+>>> pho1213_electrons_rate_dict
+{'tess': <Quantity 9.82931028e+22 electron / s>, 'kepler': <Quantity 1.01898087e+23 electron / s>}
+```
 
-CONTINUE FROM HERE
+We can use "boats.get_planet_temperatures" to calculate the dayside and nightside temperatures using the bond albedo and circulation efficiency:
+[source, bash]
+```
+>>> print(boats.get_planet_temperatures.__doc__)
+
+    This function computes the exoplanet day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
+    
+    :param quantity star_effective_temperature: the effective temperature of the star (in Kelvin)
+    :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
+    :param quantity albedo: the bond albedo of the exoplanet atmosphere (dimensionless, 0<=albedo<=1)
+    :param quantity efficiency: the circulation efficiency of the exoplanet atmosphere (dimensionless, 0<=efficiency<=1)
+    :return: the exoplanet day and nightside temperatures and an associated string
+    :rtype: quantity
+    
+>>> boats.get_planet_temperatures(5780 * u.K, ((1*u.AU)/(1*u.solRad)).decompose(), 0.3, 0.0) #Tidally-locked Earth, no circulation
+(<Quantity 325.78255824 K>, <Quantity 0. K>, 'albedo0.3_efficiency0.0')
+>>> boats.get_planet_temperatures(5780 * u.K, ((1*u.AU)/(1*u.solRad)).decompose(), 0.3, 1.0) #Tidally-locked Earth, efficient circulation
+(<Quantity 254.93862918 K>, <Quantity 254.93862918 K>, 'albedo0.3_efficiency1.0')
+```
+
+On the contrary, we can use "boats.get_planet_albedo_and_efficiency" to calculate the bond albedo and circulation efficiency using the dayside and nightside temperatures:
+[source, bash]
+```
+>>> print(boats.get_planet_albedo_and_efficiency.__doc__)
+
+    This function computes the exoplanet albedo and circulation efficiency from their day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
+    
+    :param quantity planet_day_temperature: (in Kelvin)
+    :param quantity planet_night_temperature: (in Kelvin)
+    :param quantity star_effective_temperature: the effective temperature of the star (in Kelvin)
+    :param quantity orbital_semimajor_axis:
+    :param quantity star_radius:
+    :return: the exoplanet albedo and circulation efficiency
+    :rtype: quantity
+    
+>>> boats.get_planet_albedo_and_efficiency(326*u.Kelvin, 0 * u.Kelvin, 5780 * u.Kelvin, 1 * u.au, 1 * u.solRad)
+(<Quantity 0.29812928>, <Quantity 0.>)
+>>> boats.get_planet_albedo_and_efficiency(255*u.Kelvin, 255 * u.Kelvin, 5780 * u.Kelvin, 1 * u.au, 1 * u.solRad)
+(<Quantity 0.29932572>, <Quantity 1.>)
+```
+
+Finally, we mention the function "boats.get_transit_duration_T14" to compute the transit duration between the external contact points:
+[source, bash]
+```
+>>> print(boats.get_transit_duration_T14.__doc__)
+
+    This function computes the transit duration between the external contact points.
+    
+    :param quantity rp_over_rs: ratio of planet and star radii (dimensionless)
+    :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
+    :param quantity inclination: orbital inclination angle
+    :param quantity period: orbital period
+    :return: the total transit duration, i.e., between the external contact points
+    :rtype: quantity
+
+>>> boats.get_transit_duration_T14(0.12, 6, 86.5 * u.deg, 0.813*u.day)
+<Quantity 0.04597705 d>
+>>> boats.get_transit_duration_T14(0.12, 6, 86.5 * u.deg, 0.813*u.day).to(u.second)
+<Quantity 3972.41709947 s>
+```
+
 In the future we might add/hightlight here other functions, depending on the users feedback.
 
 == Database files
-Some stellar model files will be needed during a SAIL run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.SAIL, as they are only needed to perform other calculations. +
+Some stellar model files might be needed during a BOATS run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.BOATS, as they are only needed to perform other calculations. +
 However, the database files contain valuable information even outside the ExoTETHyS framework. Therefore, I explain how to read the database files.
 
 The manage_database subpackage (link[manual]) can be used to find out the path and names of the database files:
