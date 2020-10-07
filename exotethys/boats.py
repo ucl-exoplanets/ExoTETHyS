@@ -241,12 +241,9 @@ def get_planet_albedo_and_efficiency(planet_day_temperature, planet_night_temper
     """
     sma_over_rs = (orbital_semimajor_axis/star_radius).decompose()
     irradiation_temperature = star_effective_temperature/np.sqrt(sma_over_rs)
-    Tdn_ratio_4 = (planet_day_temperature/planet_night_temperature)**4.0
-    efficiency = 8.0 / (3*Tdn_ratio_4 + 5.0)
-    Tni_ratio_4 = (planet_night_temperature/irradiation_temperature)**4.0
-    albedo = 1 - Tni_ratio_4 * (4.0/efficiency)
+    efficiency = (8*planet_night_temperature**4.0) / ( (3*planet_day_temperature**4.0) + (5*planet_night_temperature**4.0) )
+    albedo = 1 - ( (3*planet_day_temperature**4.0) + (5*planet_night_temperature**4.0) )/(2*irradiation_temperature**4.0)
     return albedo, efficiency
-
 
 
 def check_configuration(input_dict):
