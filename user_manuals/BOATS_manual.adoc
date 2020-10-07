@@ -492,6 +492,31 @@ After some restyling, you could obtain the figure below:
 .Sun-like spectra obtained by using boats.get_model_spectrum: _Phoenix_2012_13_ with Teff=5800 K and log(g)=4.5 (blue), _Stagger_2015_ with Teff=5777 K and log(g)=4.4 (red), and _Blackbody_ with T=5780 K.
 image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_Sun_spectra_compar.png[width=70%]
 
+
+The function "boats.get_photon_spectrum" calculates the photon rates received by the telescope from the model spectra:
+[source, bash]
+```
+>>> print(boats.get_photon_spectrum.__doc__)
+
+    This function computes the model photon fluxes at the telescope primary from the energy fluxes at the given model wavelengths
+    
+    :param quantity array models_wavelengths:
+    :param quantity array models_fluxes: the flux should be expressed in erg/(cm^2 s A)
+    :param quantity obj_radius: the radius of the star or planet
+    :param quantity obj_distance: the distance of the system from Earth
+    :param quantity telescope_area: the collecting area of the telescope
+    :return: the photon fluxes in photon/(s A)
+    :rtype: quantity array
+```
+How to use:
+[source, bash]
+```
+>>> phcounts_pho1213 = boats.get_photon_spectrum(waves_pho1213, flux_pho1213, 1 * u.solRad, 1 * u.au, np.pi*( 5 * u.m )**2 )
+>>> phcounts_pho1213.unit
+Unit("ph / (Angstrom s)")
+```
+
+
 CONTINUE FROM HERE
 In the future we might add/hightlight here other functions, depending on the users feedback.
 
