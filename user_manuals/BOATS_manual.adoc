@@ -397,7 +397,7 @@ The 'eclipse_depth_measured' indicates the eclipse depth that would be measured 
 >>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['planet_flux_ooe'] / file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['star_flux']
 <Quantity 0.00528299>
 ```
-The 'eclipse_depth_average_in' denotes the average planetary flux that would be observed during the eclipse, if it was not occulted by the star:
+The 'eclipse_depth_average_in' denotes the average planetary flux relative to star flux that would be observed during the eclipse, if the planet was not occulted by the star:
 [source, bash]
 ```
 >>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_average_in']
@@ -415,7 +415,7 @@ The difference between these two eclipse values is almost identical to the phase
 ```
 The slight difference between the two values above comes from the slightly different normalization factors, i.e., total out-of-transit flux for the primary transit and star flux for the secondary eclipse.
 
-The depth corresponding to the pure nightside occultation is even higher:
+The 'eclipse_depth_peak_in' refers to the relative planet's flux at the phase-curve peak, corresponding to the pure nightside occultation:
 [source, bash]
 ```
 >>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_peak_in']
@@ -427,23 +427,72 @@ The depth corresponding to the pure nightside occultation is even higher:
 === Other BOATS functions
 The list of functions available within BOATS subpackage can be obtained by typing the standard python command `dir(boats)`. All functions are documented with docstrings.
 For example:
-CONTINUE FROM HERE
 [source, bash]
 ```
->>> print(sail.get_intensities_from_ldcs.__doc__)
+>>> print(boats.get_model_spectrum.__doc__)
 
-    This function computes the model intensities given the limb-darkening coefficients
+    This function returns the model spectrum from user file, blackbody calculation or built-in dataset
     
-    :param np.array mu: 1D array with mu values
-    :param np.array coefficients: 1D array with the limb-darkening coefficients
-    :param str law: name of the limb-darkening law
-    :return: the intensities at the given mu values
-    :rtype: np.array
+    :param str models_grid: the choice of stellar_models_grid or planet_models_grid
+    :argument quantity array params: default is None
+    :argument str file_to_read: user file to read, default is None
+    :return: the model wavelengths (in Angstrom) and the corresponding flux (in erg/(cm^2 s A))
+    :rtype: quantity array, quantity array
 ```
-The function "sail.get_intensities_from_ldcs" has been added to enable quick visualization of the intensity profile from the calculated LDCs, but it is not used during the LDCs calculation.
+Let's use this function to compare different stellar model spectra for a Sun-like star:
+[source, bash]
+```
+>>> Teff = 5780 * u.K
+>>> logg = 4.4
+>>> MH = 0.0
+>>> star_params = [Teff, logg, MH]
+>>> [waves_pho1213, flux_pho1213] = boats.get_model_spectrum('Phoenix_2012_13', params=star_params)
+WARNING: Adopting nearest model in the Phoenix_2012_13 grid: Teff= 5800.0 K , logg= 4.5 , [M/H]= 0.0
+Downloading...  teff05800_logg4.5_MH0.0.pickle
+>>> [waves_stag15, flux_stag15] = boats.get_model_spectrum('Stagger_2015', params=star_params)
+WARNING: Adopting nearest model in the Stagger_2015 grid: Teff= 5777.0 K , logg= 4.4 , [M/H]= 0.0
+Downloading...  teff5777.0_logg4.4_MH0.0.pickle
+>>> [waves_bb, flux_bb] = boats.get_model_spectrum('Blackbody',params=[Teff])
+```
+We smooth the spectra for better visualisation, then plot them:
+[source, bash]
+```
+>>> def binning(vector,binsize):
+...     start = np.mod(len(vector),binsize)
+...     vector = vector[start:]
+...     new_vector = np.zeros(np.int(len(vector)/binsize))
+...     for i in range(len(new_vector)):
+...         new_vector[i] = np.mean(vector[(i*binsize):((i+1)*binsize)])
+...     return new_vector
+... 
+>>> waves_pho1213_bin30 = binning(waves_pho1213.value, 30)
+>>> flux_pho1213_bin30 = binning(flux_pho1213.value, 30)
+>>> waves_stag15_bin30 = binning(waves_stag15.value, 30)
+>>> flux_stag15_bin30 = binning(flux_stag15.value, 30)
+>>> waves_bb_bin30 = binning(waves_bb.value, 30)
+>>> flux_bb_bin30 = binning(flux_bb.value, 30)
+>>>
+>>> plt.plot(waves_pho1213_bin30, flux_pho1213_bin30, color='blue', label='Phoenix_2012_13')
+[<matplotlib.lines.Line2D object at 0x1820bf4910>]
+>>> plt.plot(waves_stag15_bin30, flux_stag15_bin30, color='red', label='Stagger_2015')
+[<matplotlib.lines.Line2D object at 0x181b84ea90>]
+>>> plt.plot(waves_bb_bin30, flux_bb_bin30, color='black', label='Blackbody')
+[<matplotlib.lines.Line2D object at 0x181b936ad0>]
+>>> plt.axis([0,40000,0,1.1e7])
+[0, 40000, 0, 11000000.0]
+>>> plt.xlabel(str(waves_pho1213.unit))
+Text(0.5, 47.04444444444444, 'Angstrom')
+>>> plt.ylabel(str(flux_pho1213.unit))
+Text(85.06944444444443, 0.5, 'erg / (Angstrom cm2 s)')
+>>> plt.legend()
+<matplotlib.legend.Legend object at 0x181ae00ed0>
+```
+After some restyling, you could obtain the figure below:
+[[Sun_like_spectra]]
+.Sun-like spectra obtained by using boats.get_model_spectrum: _Phoenix_2012_13_ with Teff=5800 K and log(g)=4.5 (blue), _Stagger_2015_ with Teff=5777 K and log(g)=4.4 (red), and _Blackbody_ with T=5780 K.
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_Sun_spectra_compar.png[width=70%]
 
-The function "sail.get_grid_parameters" can be used to know the range and sampling of stellar parameter space covered by the grids in the database, and it is also used during the LDCs calculation.
-
+CONTINUE FROM HERE
 In the future we might add/hightlight here other functions, depending on the users feedback.
 
 == Database files
