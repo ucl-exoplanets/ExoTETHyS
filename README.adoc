@@ -172,8 +172,6 @@ Stagger_2015
 
 - Chiavassa, A., et al. 2018, A&A, 611, A11 *https://pollux.oreme.org/DBPollux/PolluxAccesDB/[[3D Spectra, available publicly on POLLUX database]]*
 - Magic, Z., et al. 2015, A&A, 573, A90
-- Magic, Z., et al. 2015, A&A, 557, A26
-
 
 
 == Contributors
