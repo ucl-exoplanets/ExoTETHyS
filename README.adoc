@@ -174,6 +174,31 @@ Stagger_2015
 - Magic, Z., et al. 2015, A&A, 573, A90
 
 
+If you adopt the built-in instrumental passbands, please cite the relevant references:
+
+_JWST_
+
+- Pontoppidan, K. M., et al. 2016, SPIE, 9910, 991016  *https://pypi.org/project/pandeia.engine/[[Pandeia]]*
+- Maszkiewicz, M. 2017, SPIE, 10564, 105642Q
+- Kendrew, S., et al. 2015, PASP, 127, 623
+
+_Spitzer_
+
+- Hora, J. L.,  et al. 2008, PASP, 120, 1233 *https://irsa.ipac.caltech.edu/data/SPITZER/docs/irac/calibrationfiles/spectralresponse/[[NASA/IPAC]]*
+
+_HST_
+
+- Kuntschner, H., et al. 2011, ST-ECF Instrument Science Report WFC3-2011-05
+
+_TESS_
+
+- (Vanderspek, R., unreleased) *https://heasarc.gsfc.nasa.gov/docs/tess/the-tess-space-telescope.html[[NASA/TESS]]*
+
+_Kepler_
+
+- (Bachtell, E., and Peters, D., 2008, unreleased) *https://keplerscience.arc.nasa.gov/data-products.html[[NASA/Kepler & K2]]*
+
+
 == Contributors
 
 Developer and corresponding author
