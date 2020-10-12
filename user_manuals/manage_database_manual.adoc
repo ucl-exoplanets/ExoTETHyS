@@ -77,7 +77,7 @@ You can use the "mdb.rm_database" function to remove your `.exotethys` database 
 ```
 >>> mdb.rm_database() #to remove the whole database
 >>> mdb.rm_database(grid='Phoenix_2012_13') #to remove only one grid of stellar models from the database
->>> mdb.rm_database(grid='Phoenix_2012_13', files=filenames_pho1213) #to copy selected filenames from a grid
+>>> mdb.rm_database(grid='Phoenix_2012_13', files=filenames_pho1213) #to remove selected files from a grid
 ```
 
-NOTE: You will be asked confirmation before removing the requested folders or files, as this operation is irreversible.
+NOTE: You will be asked y/n confirmation before removing the requested folders or files, as this operation is irreversible.
