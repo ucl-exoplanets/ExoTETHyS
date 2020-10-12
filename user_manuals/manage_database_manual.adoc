@@ -1,1 +1,83 @@
+= ExoTETHyS.manage_database User Manual
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: preamble
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
 
+[big]#*Manage database*#
+
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[preamble]
+== Introduction
+The manage_database subpackage is conceived to deal with the content of the `.exotethys` folder that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the items in this folder.
+
+== User instructions
+We recommend to import this subpackage with an abbreviation, as follows:
+[source, bash]
+```
+>>> from exotethys import manage_database as mdb  
+```
+
+=== Listing
+You can use the "mdb.ls_database" function to obtain the path to your `.exotethys` database folder and the name of the folders contained therein:
+[source, bash]
+```
+>>> mdb.ls_database()
+('/Users/pepe/.exotethys/', ['Atlas_2000', 'Phoenix_2012_13', 'Phoenix_2018', 'Stagger_2015'])
+```
+The first output variable is the absolute path, the second is the list of folder names.
+To access a specific folder:
+[source, bash]
+```
+>>> path_to_pho1213, filenames_pho1213 = mdb.ls_database(grid='Phoenix_2012_13')
+>>> path_to_pho1213
+'/Users/pepe/.exotethys/Phoenix_2012_13'
+>>> filenames_pho1213
+['teff03100_logg5.00_MH0.0.pickle', 'teff04400_logg4.50_MH0.0.pickle', 'teff04500_logg4.50_MH0.0.pickle', 'teff05800_logg4.5_MH0.0.pickle']
+```
+You can also select a sub-sample of files, specifying the strings with which their names start or end or a list of strings contained in their names.
+[source, bash]
+```
+>>> mdb.ls_database(grid='Phoenix_2012_13', starts='teff04')
+('/Users/pepe/.exotethys/Phoenix_2012_13', ['teff04400_logg4.50_MH0.0.pickle', 'teff04500_logg4.50_MH0.0.pickle'])
+>>> mdb.ls_database(grid='Phoenix_2012_13', starts='teff04', ends='MH0.0.pickle')
+('/Users/pepe/.exotethys/Phoenix_2012_13', ['teff04400_logg4.50_MH0.0.pickle', 'teff04500_logg4.50_MH0.0.pickle'])
+>>> mdb.ls_database(grid='Phoenix_2012_13', contains=['logg5', 'teff0'])
+('/Users/pepe/.exotethys/Phoenix_2012_13', ['teff03100_logg5.00_MH0.0.pickle'])
+>>> mdb.ls_database(grid='Phoenix_2012_13', starts='teff04', contains=['logg5']) 
+('/Users/pepe/.exotethys/Phoenix_2012_13', [])
+```
+
+=== Copying
+You can use the "mdb.cp_database" function to copy your `.exotethys` database folder or part of its content to another destination:
+[source, bash]
+```
+>>> mdb.cp_database('all', 'new_desired_path/') #to copy the whole database
+>>> mdb.cp_database('Phoenix_2012_13', 'new_desired_path/') #to copy only one grid of stellar models
+>>> mdb.cp_database('Phoenix_2012_13', 'new_desired_path/', files=filenames_pho1213) #to copy selected filenames from a grid
+```
+
+=== Removing
+You can use the "mdb.rm_database" function to remove your `.exotethys` database folder or part of its content:
+[source, bash]
+```
+>>> mdb.rm_database() #to remove the whole database
+>>> mdb.rm_database(grid='Phoenix_2012_13') #to remove only one grid of stellar models from the database
+>>> mdb.rm_database(grid='Phoenix_2012_13', files=filenames_pho1213) #to copy selected filenames from a grid
+```
+
+NOTE: You will be asked confirmation before removing the requested folders or files, as this operation is irreversible.
