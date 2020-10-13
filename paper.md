@@ -54,6 +54,11 @@ ExoTETHyS is a Python package which aims to provide a stand-alone set of tools f
 We refer to the relevant papers for description of the scientific applications and performances of SAIL and TRIP (@morello2020a), and BOATS (@morello2020b,@martin-lagarde2020).
 Technical usage details can be found on GitHub.
 
+# Statement of need
+
+The SAIL subpackage of ExoTETHyS has been used in the analysis of spectroscopic observations of exoplanetary transits (e.g., @houyip2020a, @changeat2020), as well as in future instrument simulators (@sarkar2020), and other technical studies (@houyip2020b).
+The new BOATS subpackage includes several functions that are especially useful in the preparation of observing proposals, and to account for some less known effects in the analysis of exoplanetary transits and eclipses. The high significance of such effects has been demonstrated for some targets to be osberved with the upcoming James Webb Space Telescope.
+
 # Differences with the previous version
 
 We summarize the list of changes:
