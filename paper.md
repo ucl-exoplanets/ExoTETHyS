@@ -34,7 +34,7 @@ affiliations:
 - name: "Université Côte d'Azur, Observatoire de la Côte d'Azur, CNRS, Lagrange, CS 34229, Nice, France"  
   index: 5  
 date: 8 October 2020
-bibliography: paper2.bib
+bibliography: paper.bib
 aas-doi: 
 aas-journal: The Astronomical Journal
 ---
