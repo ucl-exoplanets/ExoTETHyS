@@ -39,8 +39,6 @@ aas-doi:
 aas-journal: The Astronomical Journal
 ---
 
-%[![DOI](https://joss.theoj.org/papers/10.21105/joss.01834/status.svg)](https://doi.org/10.21105/joss.01834)
-
 # Summary
 
 We present here the second release of ExoTETHyS: Tools for Exoplanetary Transits around Host Stars.
