@@ -47,5 +47,5 @@ setup(
     install_requires = ['scipy>=1.2.2', 'numpy>=1.16.5'],
     package_data={"exotethys":["*.pickle", "Passbands/*.pass"]},
     scripts=[],
-    data_files=[('', ['README.md'])]
+    data_files=[('', ['README.adoc'])]
 )
