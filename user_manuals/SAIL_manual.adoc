@@ -61,7 +61,7 @@ _individual_ is to compute LDCs for specific targets with stellar parameters pro
 _grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
 
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_, _Atlas_2000_ or _Stagger_2015_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_ or _Stagger_2015_ +
 only one choice per run (i.e., configuration file) is allowed
 
 *limb_darkening_laws* (MANDATORY) +
@@ -99,7 +99,7 @@ values: path to target file
 
 *targets_file* (only if _individual_ calculation_type, optional) +
 values: user file name +
-The user file must be a text file with up to 4 columns. The first row contains the keywords in arbitrary order: _target_names_ (optional), _star_effective_temperature_ (mandatory), _star_log_gravity_ (optional) and _star_metallicity_ (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available for one target, write _X_ in its place to guarantee that each value is matched with the correct parameter keyword. Example files are available in the target_list folder.
+The user file must be a text file with up to 4 columns. The first row contains the keywords in arbitrary order: _target_names_ (optional), _star_effective_temperature_ (mandatory), _star_log_gravity_ (optional) and _star_metallicity_ (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available for one target, write _X_ in its place to guarantee that each value is matched with the correct parameter keyword. Example files are available in the aux_files folder.
 
 *target_names* (only if _individual_ calculation_type, if not targets_file, optional) +
 values: str type +
@@ -135,6 +135,9 @@ values: float value
 
 
 === Description of examples
+
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
 
 *sail_example1*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
 
@@ -354,7 +357,7 @@ In the future we might add/hightlight here other functions, depending on the use
 Some stellar model files will be needed during a SAIL run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.SAIL, as they are only needed to perform other calculations. +
 However, the database files contain valuable information even outside the ExoTETHyS framework. Therefore, I explain how to read the database files.
 
-The manage_database subpackage (link[manual]) can be used to find out the path and names of the database files:
+The manage_database subpackage (link:user_manuals/manage_database_manual.adoc[manage_database manual]) can be used to find out the path and names of the database files:
 [source, bash]
 ```
 >>> from exotethys import manage_database as mdb
