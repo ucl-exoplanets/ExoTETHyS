@@ -159,7 +159,7 @@ Atlas_2000
 
 - Claret, A. 2000, A&A, 363, 1081
 
-Phoenix_2012_13
+Phoenix_2012_13 & Phoenix_drift_2012
 
 - Claret, A., Hauschildt, P. H., & Witte, S. 2012, A&A, 546, A14
 - Claret, A., Hauschildt, P. H., & Witte, S. 2013, A&A, 552, A16
@@ -216,7 +216,8 @@ Python support, revision and useful comments
 Database of stellar models
 
 - *Antonio Claret* (Instituto de Astrofisica de Andalucia, Spain)
-- *Andrea Chiavassa* (Observatoire de la Côte d'Azur)
+- *Andrea Chiavassa* (Observatoire de la Côte d'Azur, France)
+- *Soeren Witte* (Hamburger Sternwarte, Germany)
 
 Peer-reviewers
 
