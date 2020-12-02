@@ -29,9 +29,9 @@ The BOATS subpackage is designed to evaluate the impact of common approximations
 - as a versatile S/N ratio calculator for observations with a long list of predefined instruments as well as user-supplied ones;
 - to compute the transit duration, equilibrium temperature and other exoplanet atmospheric parameters.
 
-The main functions rely on a minimal set of parameters that describe the orbital geometry and orientation, sizes and temperatures of the two bodies to compute the biases in transit/eclipse depth. Good estimates can de obtained by assuming blackbody emission spectra from star, exoplanet dayside and nightside. Pre-calculated grids of stellar spectra are also available. Users can provide their own spectra for each of the 3 components.
+The main functions rely on a minimal set of parameters that describe the orbital geometry and orientation, sizes and temperatures of the two bodies to compute the biases in transit/eclipse depth. Good estimates can de obtained by assuming blackbody emission spectra from star, exoplanet dayside and nightside. Precalculated grids of stellar spectra are also available. Users can provide their own spectra for each of the 3 components.
 
-I refer to the https://arxiv.org/pdf/[photometry article] and https://arxiv.org/pdf/[spectroscopy article] for an introduction to the scientific motivations, mathematics and a detailed description of the core algorithms.
+I refer to the https://iopscience.iop.org/article/10.3847/1538-3881/abac09/pdf/[photometry article] and https://arxiv.org/pdf/[spectroscopy article] for an introduction to the scientific motivations, mathematics and a detailed description of the core algorithms.
 
 == User instructions
 
@@ -58,7 +58,7 @@ The BOATS configuration file is a text file in which each line begins with a key
 Below I describe the available keywords:
 
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_, _Atlas_2000_, _Stagger_2015_, _Blackbody_ or _Userfile_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2015_, _Blackbody_ or _Userfile_ +
 only one choice per run (i.e., configuration file) is allowed
 
 *planet_models_grid* (MANDATORY) +
@@ -92,9 +92,10 @@ values: user planet nightside file name +
 only one planet_night_model_file per run (i.e., configuration file) is allowed
 
 *rescale_planet_flux* (only if _Userfile_ planet_models_grid, mandatory) +
-values: _Yes_ or _No_ +
+values: _Yes_, _No_ or _Star_ +
 _Yes_ if the user planet dayside and nightside spectra have to be rescaled by the dilution factor: (planet radius / distance from the observer)^2 +
-_No_ if the user planet dayside and nightside spectra already account for the dilution factor
+_No_ if the user planet dayside and nightside spectra already account for the dilution factor +
+_Star_ if the user planet dayside and nightside spectra are relative to the stellar spectrum (e.g., eclipse depth spectra)
 
 *passbands_path* (OPTIONAL) +
 values: path to user passbands
@@ -205,6 +206,9 @@ values: _.pickle_ (default) and/or _.txt_
 
 === Description of examples
 
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
+
 *boats_example1*: This example is to compute the bias over a single instrument passband with wavelength bins, using _Phoenix_2012_13_ stellar_models_grid, _Blackbody_ planet_models_grid with given planet_day_temperature and planet_night_temperature. It creates two files named "WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.pickle" and "WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.txt".
 
 *boats_example2*: This example is to compute the bias over two instrument passbands with wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with given planet_day_temperature and planet_night_temperature. It creates a file named "WASP43b_NIRISS_NIRSpec_bb_bb_Td1600_Tn850_A0e23.pickle".
@@ -307,7 +311,7 @@ dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit
 >>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['transit_depth_sigma']
 <Quantity 4.93803074 ppm>
 ```
-Note that the transit depth bias is the sum of phase-blend and self-blend biases. All the other output quantities can be used to verify Equations X-Y of the https://arxiv.org/pdf/[paper].
+Note that the transit depth bias is the sum of phase-blend and self-blend biases. All the other output quantities can be used to verify Equations 30-31 of the https://iopscience.iop.org/article/10.3847/1538-3881/abac09/pdf/[paper].
 
 We check how the use of blackbody or more realistic spectra affects the spectral bias estimates through the first 3 examples.
 [source, bash]
@@ -370,7 +374,7 @@ We compare the error bars:
 >>> np.mean(transit_depth_sigma_niriss3)
 54.650255932525596
 ```
-The slightly smaller error bars are obtained with the Phoenix stellar flux, which is lower than the corresponding Blackbody flux due to the absorption lines:
+The slightly smaller error bars are obtained with the Phoenix stellar flux, which is higher than the corresponding Blackbody flux:
 [source, bash]
 ```
 >>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['star_flux']
@@ -611,7 +615,7 @@ In the future we might add/hightlight here other functions, depending on the use
 Some stellar model files might be needed during a BOATS run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.BOATS, as they are only needed to perform other calculations. +
 However, the database files contain valuable information even outside the ExoTETHyS framework. Therefore, I explain how to read the database files.
 
-The manage_database subpackage (link[manual]) can be used to find out the path and names of the database files:
+The manage_database subpackage (link:user_manuals/manage_database_manual.adoc[manage_database manual]) can be used to find out the path and names of the database files:
 [source, bash]
 ```
 >>> from exotethys import manage_database as mdb
