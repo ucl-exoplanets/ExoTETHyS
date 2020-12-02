@@ -66,7 +66,7 @@ The input limb-darkening file must be a text file with 2 columns. The first colu
 values: _phi_, _time_ or _z_sep_ +
 _phi_ stands for the orbital phase (mid-transit times occur at integer values of _phi_) +
 _time_ can denote Julian Dates or any other time stamps +
-_z_sep_ denotes the sky-projected star-planet separations in units of the the stellar radius
+_z_sep_ denotes the sky-projected star-planet separations in units of the stellar radius
 
 *input_series_path* (OPTIONAL) +
 values: path to input timeseries file
@@ -160,7 +160,10 @@ values: _.pickle_ (default) and/or _.txt_
 
 === Description of examples
 
-*trip_example1*: This example computes an _exact_ transit light-curve based on some auxiliary input files. The limb-darkening profile was calculated with the SAIL subpackage (). It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
+
+*trip_example1*: This example computes an _exact_ transit light-curve based on some auxiliary input files. The limb-darkening profile was calculated with the SAIL subpackage. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
 
 *trip_example2*: This example differs from trip_example1 for the number of interpolation annuli that is set to 50000 instead of the default value of 20000. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.txt".
 
