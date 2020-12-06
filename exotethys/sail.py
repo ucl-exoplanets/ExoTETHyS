@@ -569,10 +569,10 @@ def check_configuration(input_dict):
         print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
         check = False
     else:
-        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Atlas_2000', 'Stagger_2015']
+        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015']
         stellar_models_grid = stellar_models_grid[0]
         if stellar_models_grid not in allowed_stellar_models_grid:
-            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Atlas_2000, and Stagger_2015.')
+            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, and Stagger_2015.')
             check = False
 
     #Checking the choice of limb_darkening_laws; at least one law must be specified in the input file (no default).
@@ -1185,6 +1185,11 @@ def check_passband_limits(pb_waves, stellar_models_grid):
         maximum_wavelength = 99995.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
+    elif stellar_models_grid == 'Phoenix_drift_2012':
+        minimum_wavelength = 10.0 * u.Angstrom
+        maximum_wavelength = 9000000.0 * u.Angstrom
+        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
+            check = False
     elif stellar_models_grid == 'Atlas_2000':
         minimum_wavelength = 90.9 * u.Angstrom
         maximum_wavelength = 1600000.0 * u.Angstrom
@@ -1331,7 +1336,7 @@ def rescale_and_weights(mu, intensities, stellar_models_grid):
     :rtype: np.array, np.array, np.array
     """
     radi = np.sqrt(1.0-mu**2.0)
-    if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13']:
+    if stellar_models_grid in ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012']:
         #mu increasing, r decreasing
         dint_dr = np.abs( (intensities[1:]-intensities[:-1])/(radi[1:]-radi[:-1]) )
         rmax_dr = 0.5*( radi[np.argmax(dint_dr)+1] + radi[np.argmax(dint_dr)] )
