@@ -1,0 +1,643 @@
+= ExoTETHyS.BOATS User Manual
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: preamble
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
+
+[big]#*Bias in the Occultation Analysis of Transiting Systems*#
+
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[preamble]
+== Introduction
+The BOATS subpackage is designed to evaluate the impact of common approximations in modeling transit and eclipse light curves, such as neglecting the planet's flux or its variation with phase. Additionally, it can also be used:
+
+- to calculate the absolute photometric fluxes and spectra of individual objects, exoplanetary systems and binaries;
+- as a versatile S/N ratio calculator for observations with a long list of predefined instruments as well as user-supplied ones;
+- to compute the transit duration, equilibrium temperature and other exoplanet atmospheric parameters.
+
+The main functions rely on a minimal set of parameters that describe the orbital geometry and orientation, sizes and temperatures of the two bodies to compute the biases in transit/eclipse depth. Good estimates can de obtained by assuming blackbody emission spectra from star, exoplanet dayside and nightside. Precalculated grids of stellar spectra are also available. Users can provide their own spectra for each of the 3 components.
+
+I refer to the https://iopscience.iop.org/article/10.3847/1538-3881/abac09/pdf/[photometry article] and https://arxiv.org/pdf/[spectroscopy article] for an introduction to the scientific motivations, mathematics and a detailed description of the core algorithms.
+
+== User instructions
+
+To compute the transit/eclipse depth biases you just need to import this subpackage and run the boats_calculate_transit/boats_calculate_eclipse function with a configuration file:
+[source, bash]
+```
+>>> from exotethys import boats  
+>>> boats.boats_calculate_transit('PATH_TO_ROOT/examples/boats_example1.txt')   
+>>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
+```
+NOTE: The same configuration file could be used for either transit or eclipse calculation. +
+If running both cases with the same configuration file, the output files are overwritten. +
+To avoid this issue, you can use two configuration files differing only for the names and/or location of the output files.
+
+In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
+
+TIP: Although the BOATS subpackage has been conceived with a specific purpose in mind, most functions can be used independently and/or in different combinations to perform various tasks.
+
+In the last subsection, I discuss other possible usage of the BOATS functions.
+
+=== BOATS configuration file
+The BOATS configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with # are ignored; keyword values preceded by ! are also ignored. Examples of configuration files can be found in the "examples" folder.
+
+Below I describe the available keywords:
+
+*stellar_models_grid* (MANDATORY) +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2015_, _Blackbody_ or _Userfile_ +
+only one choice per run (i.e., configuration file) is allowed
+
+*planet_models_grid* (MANDATORY) +
+values: _Blackbody_ or _Userfile_ +
+only one choice per run (i.e., configuration file) is allowed
+
+*star_model_path* (only if _Userfile_ stellar_models_grid, optional) +
+values: path to user star model file
+
+*star_model_file* (only if _Userfile_ stellar_models_grid, mandatory) +
+values: user star model file name +
+only one star_model_file per run (i.e., configuration file) is allowed
+
+*rescale_star_flux* (only if _Userfile_ stellar_models_grid, mandatory) +
+values: _Yes_ or _No_ +
+_Yes_ if the user stellar spectrum has to be rescaled by the dilution factor: (star radius / distance from the observer)^2 +
+_No_ if the user stellar spectrum already accounts for the dilution factor
+
+*planet_day_model_path* (only if _Userfile_ planet_models_grid, optional) +
+values: path to user file for the planet dayside
+
+*planet_day_model_file* (only if _Userfile_ planet_models_grid, mandatory) +
+values: user planet dayside file name +
+only one planet_day_model_file per run (i.e., configuration file) is allowed
+
+*planet_night_model_path* (only if _Userfile_ planet_models_grid, optional) +
+values: path to user file for the planet nightside
+
+*planet_night_model_file* (only if _Userfile_ planet_models_grid, mandatory) +
+values: user planet nightside file name +
+only one planet_night_model_file per run (i.e., configuration file) is allowed
+
+*rescale_planet_flux* (only if _Userfile_ planet_models_grid, mandatory) +
+values: _Yes_, _No_ or _Star_ +
+_Yes_ if the user planet dayside and nightside spectra have to be rescaled by the dilution factor: (planet radius / distance from the observer)^2 +
+_No_ if the user planet dayside and nightside spectra already account for the dilution factor +
+_Star_ if the user planet dayside and nightside spectra are relative to the stellar spectrum (e.g., eclipse depth spectra)
+
+*passbands_path* (OPTIONAL) +
+values: path to user passbands
+
+*passbands* (MANDATORY) +
+values: built-in passband names if not passbands_path (same of file names at PATH_TO_ROOT/exotethys/Passbands/, without the .pass extension) or user file names including extension
+
+*wavelength_bins_path* (OPTIONAL) +
+values: path to wavelength bins files
+
+*wavelength_bins_files* (OPTIONAL) +
+values: user file names or _no_bins_ (if given, one entry per passband) +
+The user files must be text files with 2 columns reporting the lower and upper limits of the desired wavelength bins within the corresponding passband (each row defines a wavelength bin).
+
+*telescope_area* (MANDATORY) +
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
+
+*telescope_area_unit* (MANDATORY) +
+values: string representation of astropy.unit area (e.g., 'm2'='m**2', 'cm2')
+
+*observing_duration* (MANDATORY) +
+values: float type (transit_duration T_14 < observing_duration < period_orbital - transit_duration T_14) +
+multiple entries allowed
+
+*observing_duration_unit* (MANDATORY) +
+values: string representation of astropy.unit time (e.g., 'hour' = 'hr' = 'h', 'second' = 's') or T_14
+
+*star_effective_temperature* (MANDATORY, except if _Userfile_ stellar_models_grid & not planet_circulation_efficiency) +
+values: float type (range depending on the stellar_models_grid) +
+only one value per run (i.e., configuration file) is allowed
+
+*star_log_gravity* (OPTIONAL) +
+values: float type (range depending on the stellar_models_grid, default is 4.5) +
+only one value per run (i.e., configuration file) is allowed
+
+*star_metallicity* (OPTIONAL) +
+values: float type (range depending on the stellar_models_grid, default is 0.0) +
+only one value per run (i.e., configuration file) is allowed
+
+*star_radius* (MANDATORY) +
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
+
+*star_radius_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'solRad'='Rsun', 'km', 'm')
+
+*orbital_semimajor_axis* (MANDATORY) +
+values: float type (orbital_semimajor_axis > star_radius) +
+only one value per run (i.e., configuration file) is allowed
+
+*orbital_semimajor_axis_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'au'='AU', 'km', 'm') or star_radius
+
+*orbital_inclination* (MANDATORY) +
+values: float type (0 deg < = orbital_inclination < = 90 deg) +
+only one value per run (i.e., configuration file) is allowed
+
+*orbital_inclination_unit* (MANDATORY) +
+values: string representation of astropy.unit angle (e.g., 'deg', 'rad'='radian')
+
+*orbital_period* (MANDATORY) +
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
+
+*orbital_period_unit* (MANDATORY) +
+values: string representation of astropy.unit time (e.g., 'd'='day') or T_14
+
+*planet_bond_albedo* (OPTIONAL) +
+values: float type (0 < = planet_bond_albedo < = 1, default is 0.0) +
+multiple entries allowed
+
+*planet_circulation_efficiency* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_day_temperature and planet_night_temperature) +
+values: float type (0 < = planet_circulation_efficiency < = 1, default is 0.0) +
+multiple entries allowed
+
+*planet_day_temperature* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_circulation_efficiency) +
+values: float type (positive) +
+multiple entries allowed
+
+*planet_night_temperature* (OPTIONAL, not if _Userfile_ planet_models_grid, not if planet_circulation_efficiency) +
+values: float type (positive) +
+multiple entries allowed
+
+*planet_radius* (MANDATORY) +
+values: float type (positive) +
+only one value per run (i.e., configuration file) is allowed
+
+*planet_radius_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'jupiterRad'='Rjup', 'km', 'm') or star_radius
+
+*system_distance* (MANDATORY) +
+values: float type (system_distance >= 1 AU) +
+only one value per run (i.e., configuration file) is allowed
+
+*system_distance_unit* (MANDATORY) +
+values: string representation of astropy.unit length (e.g., 'pc'='parsec')
+
+*output_path* (OPTIONAL) +
+values: path to where to store the results
+
+*output_filename* (OPTIONAL) +
+values: string type (without extension)
+
+*output_fileext* (OPTIONAL) +
+values: _.pickle_ (default) and/or _.txt_
+
+
+=== Description of examples
+
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
+
+*boats_example1*: This example is to compute the bias over a single instrument passband with wavelength bins, using _Phoenix_2012_13_ stellar_models_grid, _Blackbody_ planet_models_grid with given planet_day_temperature and planet_night_temperature. It creates two files named "WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.pickle" and "WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.txt".
+
+*boats_example2*: This example is to compute the bias over two instrument passbands with wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with given planet_day_temperature and planet_night_temperature. It creates a file named "WASP43b_NIRISS_NIRSpec_bb_bb_Td1600_Tn850_A0e23.pickle".
+
+*boats_example3*: This example is to compute the bias over a single instrument passband with wavelength bins, using _Blackbody_ stellar_models_grid, _Userfile_ planet_models_grid. It creates a file named "WASP43b_NIRISS_SOSS_bb_ace_Td1600_Tn850_A0e23.pickle".
+
+*boats_example4*: This example is to compute the bias over a single instrument passband with wavelength bins, using _Userfile_ stellar_models_grid, _Userfile_ planet_models_grid. It creates a file named "WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23.pickle".
+
+*boats_example5*: This example differs from boats_example4 only for the output_filename. It creates a file named "WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23_eclipse.pickle".
+
+NOTE: In principle, all examples can be used for either transit or eclipse calculation, but I am assuming that the transit case is more interesting to study.
+
+*boats_example6*: This example is to compute the bias over four instrument passbands without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_JWST_bb_bb_various_Ab_eps.pickle".
+
+*boats_example7*: This example is to compute the bias over two instrument passbands one with one without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_NIRISS_MIRInobins_bb_bb_various_Ab_eps.pickle".
+
+*boats_example8*: This example is to compute the bias over four instrument passbands without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_JWST_bb_bb_various_Tday_Tnight.pickle".
+
+
+=== BOATS output files
+When running boats.boats_calculate_transit or boats.boats_calculate_eclipse, the results can be stored in files with the extension _.txt_ and/or _.pickle_.
+The _txt_ files are easy to read. The first row reports a string that defines a configuration (e.g., "albedo0.0_efficiency0.0_obs_duration_2.5T_14", "albedo0.23_Tday1600.0K_Tnight850.0K_obs_duration_2.5T_14"). The second row contains the column headers:
+
+- case of transit: "passband", "transit_depth (ppm)", "transit_depth_sigma", "transit_depth_bias", "self_blend_bias", "phase_blend_bias";
+- case of eclipse: "passband", "eclipse_depth_measured (ppm)", "eclipse_depth_sigma", "eclipse_depth_average_in", "eclipse_depth_peak_in".
+
+The following lines report the passband names (including wavelength bin limits) and the corresponding results.
+
+If more configurations are calculated, the same structure is repeated more times in the same _txt_ file. 
+
+The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
+The objects created with boats.boats_calculate_transit or boats.boats_calculate_eclipse are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. The _pickle_ files retain more information than the corresponding _txt_ files.
+
+Let's open the _pickle_ files that have been created with the examples:
+
+[source, bash]
+```
+>>> import pickle
+>>> file1 = pickle.load(open('WASP43b_NIRISS_SOSS_pho1213_bb_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file2 = pickle.load(open('WASP43b_NIRISS_NIRSpec_bb_bb_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file3 = pickle.load(open('WASP43b_NIRISS_SOSS_bb_ace_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file4 = pickle.load(open('WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23.pickle','rb'),encoding='latin1')
+>>> file5 = pickle.load(open('WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23_eclipse.pickle','rb'),encoding='latin1')
+>>> file6 = pickle.load(open('WASP43b_JWST_bb_bb_various_Ab_eps.pickle','rb'),encoding='latin1')
+>>> file7 = pickle.load(open('WASP43b_NIRISS_MIRInobins_bb_bb_various_Ab_eps.pickle','rb'),encoding='latin1')
+>>> file8 = pickle.load(open('WASP43b_JWST_bb_bb_various_Tday_Tnight.pickle','rb'),encoding='latin1')
+```
+Each file contains a dictionary, therefore we print the keys:
+[source, bash]
+```
+>>> file1.keys()
+dict_keys(['input_info', 'results'])
+```
+The "input_info" contains all the keywords from the configuration file (in this case "boats_example1.txt"), including those not given which are then set to the default values. This offers a way to check all the calculation options that led to the results.
+
+The results are split into one or more configurations associated with the exoplanet atmosphere:
+[source, bash]
+```
+>>> file1['results'].keys()
+dict_keys(['albedo0.23_Tday1600.0K_Tnight850.0K'])
+>>> file3['results'].keys()
+dict_keys(['albedo0.23'])
+>>> file6['results'].keys()
+dict_keys(['albedo0.0_efficiency0.0', 'albedo0.0_efficiency1.0', 'albedo0.0_efficiency0.19', 'albedo0.23_efficiency0.0', 'albedo0.23_efficiency1.0', 'albedo0.23_efficiency0.19'])
+```
+Note that the atmospheric configuration can be defined by:
+
+- albedo, dayside and nightside temperatures;
+- only albedo, if the dayside and nightside spectra are provided by the user;
+- albedo and circulation efficiency.
+
+The next level of the dictionary contains the passband labels:
+[source, bash]
+```
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K'].keys()
+dict_keys(['JWST_NIRISS_ord1', 'JWST_NIRISS_ord1_6000.0_7000.0', 'JWST_NIRISS_ord1_7000.0_7500.0', 'JWST_NIRISS_ord1_7500.0_8000.0', 'JWST_NIRISS_ord1_8000.0_8300.0', 'JWST_NIRISS_ord1_8300.0_8600.0', 'JWST_NIRISS_ord1_8600.0_8900.0', 'JWST_NIRISS_ord1_8900.0_9200.0', 'JWST_NIRISS_ord1_9200.0_9400.0', 'JWST_NIRISS_ord1_9400.0_9600.0', 'JWST_NIRISS_ord1_9600.0_9800.0', 'JWST_NIRISS_ord1_9800.0_10000.0', 'JWST_NIRISS_ord1_10000.0_10200.0', 'JWST_NIRISS_ord1_10200.0_10400.0', 'JWST_NIRISS_ord1_10400.0_10600.0', 'JWST_NIRISS_ord1_10600.0_10800.0', 'JWST_NIRISS_ord1_10800.0_11000.0', 'JWST_NIRISS_ord1_11000.0_11200.0', 'JWST_NIRISS_ord1_11200.0_11400.0', 'JWST_NIRISS_ord1_11400.0_11600.0', 'JWST_NIRISS_ord1_11600.0_11800.0', 'JWST_NIRISS_ord1_11800.0_12000.0', 'JWST_NIRISS_ord1_12000.0_12200.0', 'JWST_NIRISS_ord1_12200.0_12400.0', 'JWST_NIRISS_ord1_12400.0_12600.0', 'JWST_NIRISS_ord1_12600.0_12800.0', 'JWST_NIRISS_ord1_12800.0_13000.0', 'JWST_NIRISS_ord1_13000.0_13200.0', 'JWST_NIRISS_ord1_13200.0_13400.0', 'JWST_NIRISS_ord1_13400.0_13600.0', 'JWST_NIRISS_ord1_13600.0_13800.0', 'JWST_NIRISS_ord1_13800.0_14000.0', 'JWST_NIRISS_ord1_14000.0_14200.0', 'JWST_NIRISS_ord1_14200.0_14400.0', 'JWST_NIRISS_ord1_14400.0_14600.0', 'JWST_NIRISS_ord1_14600.0_14800.0', 'JWST_NIRISS_ord1_14800.0_15000.0', 'JWST_NIRISS_ord1_15000.0_15200.0', 'JWST_NIRISS_ord1_15200.0_15400.0', 'JWST_NIRISS_ord1_15400.0_15600.0', 'JWST_NIRISS_ord1_15600.0_15800.0', 'JWST_NIRISS_ord1_15800.0_16000.0', 'JWST_NIRISS_ord1_16000.0_16200.0', 'JWST_NIRISS_ord1_16200.0_16400.0', 'JWST_NIRISS_ord1_16400.0_16600.0', 'JWST_NIRISS_ord1_16600.0_16800.0', 'JWST_NIRISS_ord1_16800.0_17000.0', 'JWST_NIRISS_ord1_17000.0_17200.0', 'JWST_NIRISS_ord1_17200.0_17400.0', 'JWST_NIRISS_ord1_17400.0_17600.0', 'JWST_NIRISS_ord1_17600.0_17800.0', 'JWST_NIRISS_ord1_17800.0_18000.0', 'JWST_NIRISS_ord1_18000.0_18200.0', 'JWST_NIRISS_ord1_18200.0_18400.0', 'JWST_NIRISS_ord1_18400.0_18600.0', 'JWST_NIRISS_ord1_18600.0_18800.0', 'JWST_NIRISS_ord1_18800.0_19000.0', 'JWST_NIRISS_ord1_19000.0_19200.0', 'JWST_NIRISS_ord1_19200.0_19400.0', 'JWST_NIRISS_ord1_19400.0_19600.0', 'JWST_NIRISS_ord1_19600.0_19800.0', 'JWST_NIRISS_ord1_19800.0_20100.0', 'JWST_NIRISS_ord1_20100.0_20400.0', 'JWST_NIRISS_ord1_20400.0_20700.0', 'JWST_NIRISS_ord1_20700.0_21000.0', 'JWST_NIRISS_ord1_21000.0_21300.0', 'JWST_NIRISS_ord1_21300.0_21600.0', 'JWST_NIRISS_ord1_21600.0_21900.0', 'JWST_NIRISS_ord1_21900.0_22200.0', 'JWST_NIRISS_ord1_22200.0_22500.0', 'JWST_NIRISS_ord1_22500.0_22800.0', 'JWST_NIRISS_ord1_22800.0_23100.0', 'JWST_NIRISS_ord1_23100.0_23400.0', 'JWST_NIRISS_ord1_23400.0_23800.0', 'JWST_NIRISS_ord1_23800.0_24200.0', 'JWST_NIRISS_ord1_24200.0_24600.0', 'JWST_NIRISS_ord1_24600.0_25000.0', 'JWST_NIRISS_ord1_25000.0_25500.0', 'JWST_NIRISS_ord1_25500.0_26000.0', 'JWST_NIRISS_ord1_26000.0_26500.0', 'JWST_NIRISS_ord1_26500.0_27000.0', 'JWST_NIRISS_ord1_27000.0_27500.0', 'JWST_NIRISS_ord1_27500.0_28000.0'])
+```
+The passband keys include:
+
+- 'JWST_NIRISS_ord1', i.e., the requested passband;
+- 'JWST_NIRISS_ord1_lambda1_lambda2', where lambda1 and lambda2 are the lower and upper limits of the requested wavelength bins (in Angstrom).
+
+The next level may contain one or more keys associated with the requested observing duration(s):
+[source, bash]
+```
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1'].keys()
+dict_keys(['obs_duration_2.5T_14'])
+```
+The next level contains the final keys that give access to the calculated quantities, notably the bias terms and predicted error bars.
+[source, bash]
+```
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14'].keys()
+dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit_depth', 'transit_duration_T14', 'observing_duration', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_oot', 'planet_flux_in', 'transit_depth_sigma'])
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['transit_depth_bias']
+<Quantity 14.90930371 ppm>
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['phase_blend_bias']
+<Quantity 15.86343971 ppm>
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['self_blend_bias']
+<Quantity -0.954136 ppm>
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['transit_depth_sigma']
+<Quantity 4.93803074 ppm>
+```
+Note that the transit depth bias is the sum of phase-blend and self-blend biases. All the other output quantities can be used to verify Equations 30-31 of the https://iopscience.iop.org/article/10.3847/1538-3881/abac09/pdf/[paper].
+
+We check how the use of blackbody or more realistic spectra affects the spectral bias estimates through the first 3 examples.
+[source, bash]
+```
+>>> import numpy as np
+>>> niriss_bins = [p for p in list(file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K'].keys()) if p.startswith('JWST_NIRISS_ord1_')]
+>>> niriss_waves = np.zeros(len(niriss_bins))
+>>> for i in range(len(niriss_bins)):
+...     spbin = niriss_bins[i].split('_')
+...     l1 = np.float(spbin[-2]) #lower wavelength in Angstrom
+...     l2 = np.float(spbin[-1]) #upper wavelength in Angstrom
+...     niriss_waves[i] = 0.5*(l1+l2)*1e-4 #central wavelength in micron
+```
+The other 2 examples adopt the same wavelength bins, therefore there is no need to recalculate the central wavelengths:
+[source, bash]
+```
+>>> niriss_bins == [p for p in list(file2['results']['albedo0.23_Tday1600.0K_Tnight850.0K'].keys()) if p.startswith('JWST_NIRISS_ord1_')]
+True
+>>> niriss_bins == [p for p in list(file3['results']['albedo0.23'].keys()) if p.startswith('JWST_NIRISS_ord1_')]
+True
+```
+Now we extract the corresponding biases and error bars:
+[source, bash]
+```
+>>> transit_depth_bias_niriss1 = np.zeros_like(niriss_bins)
+>>> transit_depth_sigma_niriss1 = np.zeros_like(niriss_bins)
+>>> transit_depth_bias_niriss2 = np.zeros_like(niriss_bins)
+>>> transit_depth_sigma_niriss2 = np.zeros_like(niriss_bins)
+>>> transit_depth_bias_niriss3 = np.zeros_like(niriss_bins)
+>>> transit_depth_sigma_niriss3 = np.zeros_like(niriss_bins)
+>>> for i in range(len(niriss_bins)):
+...     transit_depth_bias_niriss1[i] = file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K'][niriss_bins[i]]['obs_duration_2.5T_14']['transit_depth_bias'].value
+...     transit_depth_sigma_niriss1[i] = file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K'][niriss_bins[i]]['obs_duration_2.5T_14']['transit_depth_sigma'].value
+...     transit_depth_bias_niriss2[i] = file2['results']['albedo0.23_Tday1600.0K_Tnight850.0K'][niriss_bins[i]]['obs_duration_2.5T_14']['transit_depth_bias'].value
+...     transit_depth_sigma_niriss2[i] = file2['results']['albedo0.23_Tday1600.0K_Tnight850.0K'][niriss_bins[i]]['obs_duration_2.5T_14']['transit_depth_sigma'].value
+...     transit_depth_bias_niriss3[i] = file3['results']['albedo0.23'][niriss_bins[i]]['obs_duration_2.5T_14']['transit_depth_bias'].value
+...     transit_depth_sigma_niriss3[i] = file3['results']['albedo0.23'][niriss_bins[i]]['obs_duration_2.5T_14']['transit_depth_sigma'].value
+```
+We plot the resulting spectral biases:
+[source, bash]
+```
+>>> plt.errorbar(niriss_waves,transit_depth_bias_niriss2,transit_depth_sigma_niriss2,color='black',label='Blackbodies')
+<ErrorbarContainer object of 3 artists>
+>>> plt.plot(niriss_waves,transit_depth_bias_niriss1,color='red',label='Phoenix_2012_13 Star')
+[<matplotlib.lines.Line2D object at 0x182aa41050>]
+>>> plt.plot(niriss_waves,transit_depth_bias_niriss3,color='blue',label='ACE Day/Night Planet')
+```
+After some restyling, you could obtain the figure below:
+[[Niriss_bias_ex1to3]]
+.Three different estimates of the spectral bias for WASP-43 b, as observed with JWST/NIRISS: using blackbody spectra for the star, planet dayside and nightside (black line with error bars), using Phoenix stellar model for the star and blackbody spectra for both planetary sides (red), using blackbody spectrum for the star and Atmospheric Chemical Equilibrium models for the planet dayside and nightside (blue).
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_WASP43b_NIRISS_examples1to3.png[width=70%]
+
+We compare the error bars:
+[source, bash]
+```
+>>> np.mean(transit_depth_sigma_niriss1)
+50.361336946886276
+>>> np.mean(transit_depth_sigma_niriss2)
+54.650460457764595
+>>> np.mean(transit_depth_sigma_niriss3)
+54.650255932525596
+```
+The slightly smaller error bars are obtained with the Phoenix stellar flux, which is higher than the corresponding Blackbody flux:
+[source, bash]
+```
+>>> file1['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['star_flux']
+<Quantity 15461686.95686177 electron / s>
+>>> file2['results']['albedo0.23_Tday1600.0K_Tnight850.0K']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['star_flux']
+<Quantity 13600985.82505771 electron / s>
+>>> file3['results']['albedo0.23']['JWST_NIRISS_ord1']['obs_duration_2.5T_14']['star_flux']
+<Quantity 13600985.82505771 electron / s>
+```
+
+Finally, we look at the differences between the calculation output for the transit and eclipse cases:
+[source, bash]
+```
+>>> file4['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14'].keys()
+dict_keys(['transit_depth_bias', 'phase_blend_bias', 'self_blend_bias', 'transit_depth', 'transit_duration_T14', 'observing_duration', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_oot', 'planet_flux_in', 'transit_depth_sigma'])
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14'].keys()
+dict_keys(['eclipse_depth_measured', 'eclipse_depth_average_in', 'eclipse_depth_peak_in', 'eclipse_duration_T14', 'observing_duration', 'planet_day_temperature', 'planet_night_temperature', 'star_flux', 'planet_day_flux', 'planet_night_flux', 'planet_flux_ooe', 'planet_flux_ine', 'eclipse_depth_sigma'])
+```
+The 'eclipse_depth_measured' indicates the eclipse depth that would be measured by assuming a flat out-of-eclipse, i.e., the average out-of-eclipse flux divided by the stellar flux:
+[source, bash]
+```
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
+<Quantity 5282.99430143 ppm>
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['planet_flux_ooe'] / file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['star_flux']
+<Quantity 0.00528299>
+```
+The 'eclipse_depth_average_in' denotes the average planetary flux relative to star flux that would be observed during the eclipse, if the planet was not occulted by the star:
+[source, bash]
+```
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_average_in']
+<Quantity 5388.79311352 ppm>
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['planet_flux_ine'] / file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['star_flux']
+<Quantity 0.00538879>
+```
+The difference between these two eclipse values is almost identical to the phase-blend effect of the primary transit, because we assume a synusoidal phase-curve without hotspot offset:
+[source, bash]
+```
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_average_in'] - file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
+<Quantity 105.79881209 ppm>
+>>> file4['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['phase_blend_bias']
+<Quantity 105.64320199 ppm>
+```
+The slight difference between the two values above comes from the slightly different normalization factors, i.e., total out-of-transit flux for the primary transit and star flux for the secondary eclipse.
+
+The 'eclipse_depth_peak_in' refers to the relative planet's flux at the phase-curve peak, corresponding to the pure nightside occultation:
+[source, bash]
+```
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_peak_in']
+<Quantity 5401.02265866 ppm>
+>>> file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_peak_in'] - file5['results']['albedo0.23']['JWST_MIRI_LRS']['obs_duration_2.5T_14']['eclipse_depth_measured']
+<Quantity 118.02835723 ppm>
+```
+
+=== Other BOATS functions
+The list of functions available within BOATS subpackage can be obtained by typing the standard python command `dir(boats)`. All functions are documented with docstrings.
+For example:
+[source, bash]
+```
+>>> print(boats.get_model_spectrum.__doc__)
+
+    This function returns the model spectrum from user file, blackbody calculation or built-in dataset
+    
+    :param str models_grid: the choice of stellar_models_grid or planet_models_grid
+    :argument quantity array params: default is None
+    :argument str file_to_read: user file to read, default is None
+    :return: the model wavelengths (in Angstrom) and the corresponding flux (in erg/(cm^2 s A))
+    :rtype: quantity array, quantity array
+```
+Let's use this function to compare different stellar model spectra for a Sun-like star:
+[source, bash]
+```
+>>> Teff = 5780 * u.K
+>>> logg = 4.4
+>>> MH = 0.0
+>>> star_params = [Teff, logg, MH]
+>>> [waves_pho1213, flux_pho1213] = boats.get_model_spectrum('Phoenix_2012_13', params=star_params)
+WARNING: Adopting nearest model in the Phoenix_2012_13 grid: Teff= 5800.0 K , logg= 4.5 , [M/H]= 0.0
+Downloading...  teff05800_logg4.5_MH0.0.pickle
+>>> [waves_stag15, flux_stag15] = boats.get_model_spectrum('Stagger_2015', params=star_params)
+WARNING: Adopting nearest model in the Stagger_2015 grid: Teff= 5777.0 K , logg= 4.4 , [M/H]= 0.0
+Downloading...  teff5777.0_logg4.4_MH0.0.pickle
+>>> [waves_bb, flux_bb] = boats.get_model_spectrum('Blackbody',params=[Teff])
+```
+We smooth the spectra for better visualisation, then plot them:
+[source, bash]
+```
+>>> def binning(vector,binsize):
+...     start = np.mod(len(vector),binsize)
+...     vector = vector[start:]
+...     new_vector = np.zeros(np.int(len(vector)/binsize))
+...     for i in range(len(new_vector)):
+...         new_vector[i] = np.mean(vector[(i*binsize):((i+1)*binsize)])
+...     return new_vector
+... 
+>>> waves_pho1213_bin30 = binning(waves_pho1213.value, 30)
+>>> flux_pho1213_bin30 = binning(flux_pho1213.value, 30)
+>>> waves_stag15_bin30 = binning(waves_stag15.value, 30)
+>>> flux_stag15_bin30 = binning(flux_stag15.value, 30)
+>>> waves_bb_bin30 = binning(waves_bb.value, 30)
+>>> flux_bb_bin30 = binning(flux_bb.value, 30)
+>>>
+>>> plt.plot(waves_pho1213_bin30, flux_pho1213_bin30, color='blue', label='Phoenix_2012_13')
+[<matplotlib.lines.Line2D object at 0x1820bf4910>]
+>>> plt.plot(waves_stag15_bin30, flux_stag15_bin30, color='red', label='Stagger_2015')
+[<matplotlib.lines.Line2D object at 0x181b84ea90>]
+>>> plt.plot(waves_bb_bin30, flux_bb_bin30, color='black', label='Blackbody')
+[<matplotlib.lines.Line2D object at 0x181b936ad0>]
+>>> plt.axis([0,40000,0,1.1e7])
+[0, 40000, 0, 11000000.0]
+>>> plt.xlabel(str(waves_pho1213.unit))
+Text(0.5, 47.04444444444444, 'Angstrom')
+>>> plt.ylabel(str(flux_pho1213.unit))
+Text(85.06944444444443, 0.5, 'erg / (Angstrom cm2 s)')
+>>> plt.legend()
+<matplotlib.legend.Legend object at 0x181ae00ed0>
+```
+After some restyling, you could obtain the figure below:
+[[Sun_like_spectra]]
+.Sun-like spectra obtained by using boats.get_model_spectrum: _Phoenix_2012_13_ with Teff=5800 K and log(g)=4.5 (blue), _Stagger_2015_ with Teff=5777 K and log(g)=4.4 (red), and _Blackbody_ with T=5780 K.
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_Sun_spectra_compar.png[width=70%]
+
+
+The function "boats.get_photon_spectrum" calculates the photon rates received by the telescope from the model spectra:
+[source, bash]
+```
+>>> print(boats.get_photon_spectrum.__doc__)
+
+    This function computes the model photon fluxes at the telescope primary from the energy fluxes at the given model wavelengths
+    
+    :param quantity array models_wavelengths:
+    :param quantity array models_fluxes: the flux should be expressed in erg/(cm^2 s A)
+    :param quantity obj_radius: the radius of the star or planet
+    :param quantity obj_distance: the distance of the system from Earth
+    :param quantity telescope_area: the collecting area of the telescope
+    :return: the photon fluxes in photon/(s A)
+    :rtype: quantity array
+```
+How to use:
+[source, bash]
+```
+>>> phcounts_pho1213 = boats.get_photon_spectrum(waves_pho1213, flux_pho1213, 1 * u.solRad, 1 * u.au, np.pi*( 5 * u.m )**2 )
+>>> phcounts_pho1213.unit
+Unit("ph / (Angstrom s)")
+```
+
+The functions "boats.get_waves_fromR" and "boats.get_passband_fluxes" can be used to compute the detector electron rates:
+[source, bash]
+```
+>>> tess_response = np.genfromtxt('exotethys/Passbands/TESS.pass')
+>>> kepler_response = np.genfromtxt('exotethys/Passbands/Kepler.pass')
+>>> np.shape(tess_response), np.shape(kepler_response)
+((179, 2), (625, 2))
+#First column is wavelength in Angstrom, second column is conversion electron/photon
+>>> tess_response.dtype, kepler_response.dtype
+(dtype('float64'), dtype('float64'))
+#Interpolate responses over a grid with R=10000
+>>> my_waves_tess = boats.get_waves_fromR(np.min(tess_response[:,0]), np.max(tess_response[:,0]), 10000.0)
+>>> my_waves_kepler = boats.get_waves_fromR(np.min(kepler_response[:,0]), np.max(kepler_response[:,0]), 10000.0)
+>>> from scipy.interpolate import interp1d
+>>> tess_interp = interp1d(tess_response[:,0], tess_response[:,1], fill_value='extrapolate')
+>>> tess_interp = interp1d(kepler_response[:,0], kepler_response[:,1], fill_value='extrapolate')
+>>> my_pce_tess = tess_interp(my_waves_tess)
+>>> my_pce_kepler = tess_interp(my_waves_kepler)
+#Create a dictionary of passbands
+>>> passbands_dict = {}
+>>> passbands_dict['tess'] = [my_waves_tess * u.Angstrom, my_pce_tess * u.electron/u.photon]
+>>> passbands_dict['kepler'] = [my_waves_kepler * u.Angstrom, my_pce_kepler * u.electron/u.photon]
+#Calculate electrons rates
+>>> pho1213_electrons_rate_dict = boats.get_passband_fluxes(waves_pho1213, phcounts_pho1213, passbands_dict)
+>>> pho1213_electrons_rate_dict
+{'tess': <Quantity 9.82931028e+22 electron / s>, 'kepler': <Quantity 1.01898087e+23 electron / s>}
+```
+
+We can use "boats.get_planet_temperatures" to calculate the dayside and nightside temperatures using the bond albedo and circulation efficiency:
+[source, bash]
+```
+>>> print(boats.get_planet_temperatures.__doc__)
+
+    This function computes the exoplanet day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
+    
+    :param quantity star_effective_temperature: the effective temperature of the star (in Kelvin)
+    :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
+    :param quantity albedo: the bond albedo of the exoplanet atmosphere (dimensionless, 0<=albedo<=1)
+    :param quantity efficiency: the circulation efficiency of the exoplanet atmosphere (dimensionless, 0<=efficiency<=1)
+    :return: the exoplanet day and nightside temperatures and an associated string
+    :rtype: quantity
+    
+>>> boats.get_planet_temperatures(5780 * u.K, ((1*u.AU)/(1*u.solRad)).decompose(), 0.3, 0.0) #Tidally-locked Earth, no circulation
+(<Quantity 325.78255824 K>, <Quantity 0. K>, 'albedo0.3_efficiency0.0')
+>>> boats.get_planet_temperatures(5780 * u.K, ((1*u.AU)/(1*u.solRad)).decompose(), 0.3, 1.0) #Tidally-locked Earth, efficient circulation
+(<Quantity 254.93862918 K>, <Quantity 254.93862918 K>, 'albedo0.3_efficiency1.0')
+```
+
+On the contrary, we can use "boats.get_planet_albedo_and_efficiency" to calculate the bond albedo and circulation efficiency using the dayside and nightside temperatures:
+[source, bash]
+```
+>>> print(boats.get_planet_albedo_and_efficiency.__doc__)
+
+    This function computes the exoplanet albedo and circulation efficiency from their day and nightside temperatures, based on Cowan & Agol 2011, ApJ, 729, 54, Equations 4 and 5.
+    
+    :param quantity planet_day_temperature: (in Kelvin)
+    :param quantity planet_night_temperature: (in Kelvin)
+    :param quantity star_effective_temperature: the effective temperature of the star (in Kelvin)
+    :param quantity orbital_semimajor_axis:
+    :param quantity star_radius:
+    :return: the exoplanet albedo and circulation efficiency
+    :rtype: quantity
+    
+>>> boats.get_planet_albedo_and_efficiency(326*u.Kelvin, 0 * u.Kelvin, 5780 * u.Kelvin, 1 * u.au, 1 * u.solRad)
+(<Quantity 0.29812928>, <Quantity 0.>)
+>>> boats.get_planet_albedo_and_efficiency(255*u.Kelvin, 255 * u.Kelvin, 5780 * u.Kelvin, 1 * u.au, 1 * u.solRad)
+(<Quantity 0.29932572>, <Quantity 1.>)
+```
+
+Finally, we mention the function "boats.get_transit_duration_T14" to compute the transit duration between the external contact points:
+[source, bash]
+```
+>>> print(boats.get_transit_duration_T14.__doc__)
+
+    This function computes the transit duration between the external contact points.
+    
+    :param quantity rp_over_rs: ratio of planet and star radii (dimensionless)
+    :param quantity sma_over_rs: ratio of orbital semimajor axis and star radius (dimensionless)
+    :param quantity inclination: orbital inclination angle
+    :param quantity period: orbital period
+    :return: the total transit duration, i.e., between the external contact points
+    :rtype: quantity
+
+>>> boats.get_transit_duration_T14(0.12, 6, 86.5 * u.deg, 0.813*u.day)
+<Quantity 0.04597705 d>
+>>> boats.get_transit_duration_T14(0.12, 6, 86.5 * u.deg, 0.813*u.day).to(u.second)
+<Quantity 3972.41709947 s>
+```
+
+In the future we might add/hightlight here other functions, depending on the users feedback.
+
+== Database files
+Some stellar model files might be needed during a BOATS run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.BOATS, as they are only needed to perform other calculations. +
+However, the database files contain valuable information even outside the ExoTETHyS framework. Therefore, I explain how to read the database files.
+
+The manage_database subpackage (link:user_manuals/manage_database_manual.adoc[manage_database manual]) can be used to find out the path and names of the database files:
+[source, bash]
+```
+>>> from exotethys import manage_database as mdb
+>>> path, filenames = mdb.ls_database(grid='Phoenix_2012_13')
+>>> path
+'/Users/pepe/.exotethys/Phoenix_2012_13'
+>>> filenames
+['teff03000_logg5.50_MH0.0.pickle', 'teff05700_logg4.5_MH0.0.pickle', 'teff05800_logg4.5_MH0.0.pickle', 'teff06100_logg4.5_MH0.0.pickle']
+```
+Note that the database files have _pickle_ format and contain _python_ dictionaries. Let's now read one of these files:
+[source, bash]
+```
+>>> import os, pickle
+>>> chosen_file_path = os.path.join(path, 'teff05800_logg4.5_MH0.0.pickle')
+>>> content = pickle.load(open(chosen_file_path,'rb'),encoding='latin1')
+>>> content.keys()
+dict_keys(['mu', 'wavelengths', 'star_params', 'intensities', 'fluxes'])
+```
+- The "star_params" branch contains a numpy array with the stellar parameters. +
+- The "wavelengths" branch contains a https://docs.astropy.org/en/stable/units/[quantity array] with the model wavelengths. +
+- The "mu" branch contains a numpy array of positions on the stellar disk. +
+- The "intensities" branch contains a 2D numpy array with the model intensities at the tabulated mu and wavelengths. +
+- The "fluxes" branch contains the disk-integrated flux at the stellar surface.
+
+

@@ -2,7 +2,7 @@
 #output_path				/desired_absolute_or_relative_path/
 ##GENERIC
 calculation_type			grid		!individual
-stellar_models_grid			!Phoenix_2018	Phoenix_2012_13		!Atlas_2000
+stellar_models_grid			!Phoenix_2018	Phoenix_2012_13 !Phoenix_drift_2012	!Atlas_2000 !Stagger_2015
 limb_darkening_laws			claret4		!power2		!square_root	!quadratic	!linear		!gen_claret	!gen_poly
 #gen_claret_orders			1 2 3 4 5 6
 #gen_poly_orders				1 2 3 4 5 6
@@ -10,7 +10,7 @@ limb_darkening_laws			claret4		!power2		!square_root	!quadratic	!linear		!gen_cl
 passbands				Kepler
 #wavelength_bins_path			/absolute_or_relative_path_to_user_wavelength_bins_files/
 #wavelength_bins_files			WFC3_G141_bins_Tsiaras2018_low.txt
-#user_output				basic		!complete
+user_output				!basic		complete
 #
 ##for INDIVIDUAL calculation_type
 #targets_path				/absolute_or_relative_path_to_target_list/

@@ -171,7 +171,7 @@ def get_default_value(param):
     if param=='time_conversion_factor':
         default_value = 1.0
     if param=='n_annuli':
-        default_value = 100000
+        default_value = 20000
     if param=='interpolation_type':
         default_value = 'linear'
     if param=='interpolation_variable':
@@ -496,7 +496,7 @@ def check_configuration(input_dict):
             print('ERROR: invalid length=', len(n_annuli), 'for n_annuli. It must have length=1.')
             check = False
         if not check_integers(n_annuli):
-            print('ERROR: invalid type for n_annuli. It must be positive integer. Default is 100000.')
+            print('ERROR: invalid type for n_annuli. It must be positive integer. Default is 20000.')
             check = False
     else:
         input_dict_local['n_annuli'] = [get_default_value('n_annuli')]

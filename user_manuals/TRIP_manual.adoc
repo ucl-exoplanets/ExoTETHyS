@@ -1,0 +1,289 @@
+= ExoTETHyS.TRIP User Manual
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: preamble
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
+
+[big]#*Transit Ring-Integrated Profile*#
+
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[preamble]
+== Introduction
+The TRIP subpackage is designed to generate the _exact_ exoplanet transit light-curves with spherically-symmetric stellar limb-darkening.
+
+It makes use of a table with the specific intensities instead of the limb-darkening coefficients. The user must provide the model intensities in a text file. The SAIL subpackage can also be used to obtain the normalised model intensities (consult the link:SAIL_manual.adoc[SAIL manual]).
+
+NOTE: The radiative transfer codes for stellar atmospheres automatically provide intensity tables. +
+The limb-darkening coefficients provide approximate intensity profiles to speed-up the calculations.
+
+TIP: The aim of this code is to calculate _benchmark_ transit light-curves, that can be compared with the _approximated_ light-curves obtained from https://github.com/ucl-exoplanets/pylightcurve[faster tools]. +
+This comparison offers a way to test and improve the treatment of stellar limb-darkening in the analysis of transit light-curves with photometric precision down to <10 parts per million (ppm).
+
+I refer to the https://arxiv.org/pdf/1908.09599.pdf[main article] for a detailed description of the algorithm and the results achieved so far.
+
+== User instructions
+
+To generate a transit light-curve you have to import this subpackage and run the trip_calculate function with a configuration file:
+[source, bash]
+```
+>>> from exotethys import trip  
+>>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example1.txt')  
+```
+
+In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
+
+=== TRIP configuration file
+The TRIP configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with # are ignored; keyword values preceded by ! are also ignored. Examples of configuration files can be found in the "examples" folder.
+
+Below I describe the available keywords:
+
+*input_limb_type* (MANDATORY) +
+values: _mu_ or _radi_ +
+The type of coordinate adopted in the input limb-darkening file.
+
+*input_limb_path* (OPTIONAL) +
+values: path to input limb-darkening file
+
+*input_limb_file* (MANDATORY) +
+values: user file name +
+The input limb-darkening file must be a text file with 2 columns. The first column reports the _mu_ or _radi_ coordinates at which the intensities are calculated (0 < = mu, radi < = 1). The second column reports the specific intensities (the calculation is insensitive to a uniform scaling factor for the intensities). Examples are in the "aux_files" folder.
+
+*input_series_type* (MANDATORY) +
+values: _phi_, _time_ or _z_sep_ +
+_phi_ stands for the orbital phase (mid-transit times occur at integer values of _phi_) +
+_time_ can denote Julian Dates or any other time stamps +
+_z_sep_ denotes the sky-projected star-planet separations in units of the stellar radius
+
+*input_series_path* (OPTIONAL) +
+values: path to input timeseries file
+
+*input_series_file* (MANDATORY) +
+values: user file name +
+This refers to a text file with 1 column reporting the points (_phi_, _time_ or _z_sep_) at which to compute the light-curve.
+Examples are in the "aux_files" folder.  
+
+*rp_over_rs* (MANDATORY) +
+values: float type (non-negative) +
+Ratio between the planet and star radii
+
+*sma_over_rs* (only if _phi_ or _time_ input_series_type, mandatory) +
+values: float type (sma_over_rs > = 1) +
+Orbital semimajor axis in units of the star radius
+
+*inclination* (only if _phi_ or _time_ input_series_type, mandatory) +
+values: float type (0 < = inclination < = 90) +
+Angle between the normal to the orbital plane and the observer's line of sight
+
+*eccentricity* (only if _phi_ or _time_ input_series_type, optional) +
+values: float type (0 < = eccentricity < 1.0, default is 0.0)
+
+*arg_pericenter* (only if _phi_ or _time_ input_series_type, optional) +
+values: float type (-180.0 < arg_pericenter < 360.0, default is 0.0)
+
+*period_orbital* (only if _time_ input_series_type, mandatory) +
+values: float type (positive)
+
+*epoch_of_transit* (only if _time_ input_series_type, mandatory) +
+values: float type +
+Reference time for mid-transit. It must be in the same units of the input timeseries.
+
+*time_conversion_factor* (only if _time_ input_series_type, optional) +
+values: float type (positive, default is 1) +
+It is the ratio between timeseries and orbital period units (e.g., time_conversion_factor = 1.157407407407407e-05 if timeseries in seconds and orbital period in days).
+
+*n_annuli* (OPTIONAL) +
+values: positive integer number (default is 20000, before it was 100000)
+
+*interpolation_type* (OPTIONAL) +
+values: _linear_ (default), _nearest_, _zero_, _slinear_, _quadratic_, _cubic_, _previous_ or _next_ +
+Check https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html[scipy.interpolate.interp1d] function for details.
+
+*interpolation_variable* (OPTIONAL) +
+values: _mu_ (default) or _radi_
+
+*cutting_limb* (OPTIONAL) +
+values: _no_cut_ (default), _radi_gradient_, _mu_gradient_ or _user_cut_ +
+Different options for truncating the input limb-darkening model: +
+If _radi_gradient_, the limit radius is given by the maximum of the intensity gradient vs. _radi_; +
+If _mu_gradient_, the limit radius is given by the maximum of the intensity gradient vs. _mu_; +
+If _user_cut_, the limit radius is set by the user.
+
+*user_cut_mu* (only if _user_cut_ cutting_limb and no user_cut_radi, mandatory) +
+values: float type (0 < _user_cut_mu_ < 1) +
+The limit radius for truncating the input limb-darkening model, expressed in terms of _mu_.
+
+*user_cut_radi* (only if _user_cut_ cutting_limb and no user_cut_mu, mandatory)  
+values: float number (0 < user_cut_radi < 1) +
+The limit radius for truncating the input limb-darkening model, expressed in terms of _radi_.
+
+*rescaling_limb* (OPTIONAL) +
+values: _as_cut_ (default), _no_rescale_ or _user_rescale_ +
+Different options for rescaling the _mu_ or _radi_ coordinates of the input limb-darkening model. +
+If _as_cut_, these are rescaled such that _mu_=0 (i.e., _radi_=1) at the truncation radius; +
+If _user_rescale_, the rescaling radius is set by the user.
+
+*user_rescale_mu* (only if _user_rescale_ rescaling_limb and no user_rescale_radi, mandatory) +
+values: float number (0 < user_rescale_mu < 1) +
+The original _mu_ value that corresponds to _mu_=0 after rescaling.
+
+*user_rescale_radi* (only if _user_rescale_ rescaling_limb and no user_rescale_mu, mandatory) +
+values: float number (0 < user_rescale_radi < 1) +
+The original _radi_ value that corresponds to _radi_=1 after rescaling.
+
+*rescaling_input_params* (OPTIONAL) +
+values: _no_ (default) or _yes_ + 
+If _yes_, the rp_over_rs and sma_over_rs values are divided by the rescaling radius.
+
+*output_path* (OPTIONAL) +
+values: path to where to store the results
+
+*output_filename* (OPTIONAL) +
+values: string type (without extension)
+
+*output_fileext* (OPTIONAL) +
+values: _.pickle_ (default) and/or _.txt_
+
+
+=== Description of examples
+
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
+
+*trip_example1*: This example computes an _exact_ transit light-curve based on some auxiliary input files. The limb-darkening profile was calculated with the SAIL subpackage. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.txt".
+
+*trip_example2*: This example differs from trip_example1 for the number of interpolation annuli that is set to 50000 instead of the default value of 20000. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.txt".
+
+*trip_example3*: This example differs from trip_example1 because cutting_limb is set to _radi_gradient_ instead of the default value _no_cut_. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi.txt".
+
+*trip_example4*: This example differs from trip_example3 because rescaling_input_params is set to _yes_ instead of the default value _no_. It creates two files named "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi_resparams.pickle" and "trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi_resparams.txt".
+
+
+=== TRIP output files
+When running the main function of TRIP (trip_calculate), the results can be stored in files with the extension _.txt_ and/or _.pickle_.
+
+The _txt_ files are easy to read. They contain at least two columns:
+
+- _z_sep_, i.e., the series of projected star-planet separation in units of the star radius (that is necessary to compute the occulted flux);
+
+- _flux_norm_, i.e., the series of normalised flux values (with respect to the stellar flux).
+
+They can also contain other two columns:
+
+- _phi_, i.e., the orbital phase (if _phi_ or _time_ input_series_type);
+
+- _time_ (if _time_ input_series_type).
+
+The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
+The objects created with trip.trip_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries]. The _pickle_ files retain more information than the corresponding _txt_ files.
+
+Let's open the _pickle_ files that have been created with the examples:
+[source, bash]
+```
+>>> import pickle
+>>> hj_file = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS.pickle','rb'),encoding='latin1')
+>>> hj_file_n50000 = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_n50000.pickle','rb'),encoding='latin1')
+>>> hj_file_cutradi = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi.pickle','rb'),encoding='latin1')
+>>> hj_file_cutradi_resparams = pickle.load(open('trip_HJ_ld_Teff6100.0_logg4.5_MH0.0_TESS_cutradi_resparams.pickle','rb'),encoding='latin1')
+```
+They contain a dictionary, the structure of the dictionary is identical for all the files. We can print the keys:
+[source, bash]
+```
+>>> hj_file.keys()
+dict_keys(['configuration_file', 'limb_model_original', 'limb_model_final', 'cut_and_rescale', 'rescaled_params', 'time_series'])
+```
+The "configuration_file" branch contains all the keywords from the file "trip_example1.txt", including those not given which are then set to the default values. This offers a way to check all the calculation options that led to the results in "time_series". 
+
+The "time_series" branch contains the 4 time series corresponding to the 4 columns of the output _txt_ file:
+[source, bash]
+```
+>>> hj_file['time_series'].keys()
+dict_keys(['z_sep', 'flux_norm', 'time', 'phi'])
+```
+We can plot the transit light-curve as follows:
+[source, bash]
+```
+>>> import matplotlib.pyplot as plt
+>>> plt.plot(hj_file['time_series']['phi'], hj_file['time_series']['flux_norm'],'b')
+[<matplotlib.lines.Line2D object at 0x181bf20690>]
+```
+The light-curves from the other files are very similar, as they represent essentially the same transit calculated with slightly different options. Therefore we plot their differences:
+[source, bash]
+```
+>>> plt.plot(hj_file['time_series']['phi'], hj_file_n50000['time_series']['flux_norm'] - hj_file['time_series']['flux_norm'], color='dodgerblue', label='n5000 - ref')
+[<matplotlib.lines.Line2D object at 0x181ca92d90>]
+>>> plt.plot(hj_file['time_series']['phi'], hj_file_cutradi['time_series']['flux_norm'] - hj_file['time_series']['flux_norm'], color='green', label='cutradi - ref')
+[<matplotlib.lines.Line2D object at 0x181bf95490>]
+>>> plt.plot(hj_file['time_series']['phi'], hj_file_cutradi_resparams['time_series']['flux_norm'] - hj_file['time_series']['flux_norm'], color='red', label='cutradi_resparams - ref')
+[<matplotlib.lines.Line2D object at 0x181c180ad0>]
+```
+
+[[Comparisons]]
+.Left panel: Reference ransit light-curve. Middle panel: Differences between the light-curves calculated with different options and the reference light-curve. Right panel: Effective intensity profiles adopted in the examples.
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merged_trip_figures.png[width=100%]
+
+
+
+Increasing the number of annuli from 20000 (default value) to 50000 has a very small effect, the maximum difference between the two curves being smaller than 6e-8, i.e., less than 0.06 ppm (dodgerblue). The differences in the other two cases will be better understood from the following discussion.
+
+
+The "limb_model_original" branch contains the limb-darkening profile read from the input_limb_file:
+[source, bash]
+```
+>>> hj_file['limb_model_original'].keys()
+dict_keys(['mu', 'radi', 'intensity'])
+```
+Similarly, the "limb_model_final" branch contains the processed limb-darkening profile. In the first and second examples, the limb-darkening profile has not been modified:
+[source, bash]
+```
+>>> np.max(np.abs(hj_file['limb_model_original']['mu'] - hj_file['limb_model_final']['mu']))
+2.508410146262463e-15
+>>> np.max(np.abs(hj_file['limb_model_original']['radi'] - hj_file['limb_model_final']['radi']))
+0.0
+>>> np.max(np.abs(hj_file['limb_model_original']['intensity'] - hj_file['limb_model_final']['intensity']))
+0.0
+```
+This fact is confirmed by looking at the "cut_and_rescale" branch, that reports the coordinates of the cutting and rescaling radii:
+[source, bash]
+```
+>>> hj_file['cut_and_rescale']
+{'mu0cut': 0.0, 'r0cut': 1.0, 'mu0res': 0.0, 'r0res': 1.0}
+>>> hj_file_n50000['cut_and_rescale']
+{'mu0cut': 0.0, 'r0cut': 1.0, 'mu0res': 0.0, 'r0res': 1.0}
+>>> hj_file_cutradi['cut_and_rescale']
+{'mu0cut': 0.03843316889382515, 'r0cut': 0.999261172831597, 'mu0res': 0.03843316889382515, 'r0res': 0.999261172831597}
+>>> hj_file_cutradi_resparams['cut_and_rescale']
+{'mu0cut': 0.03843316889382515, 'r0cut': 0.999261172831597, 'mu0res': 0.03843316889382515, 'r0res': 0.999261172831597}
+```
+These values indicate that the limb-darkening profile was not trasformed in the first two examples, while it underwent the same operations in the other two examples. This transformation affects significantly the transit light-curve (difference in green), unless the transit parameters are properly rescaled (difference in red, maximum difference < 2 ppm):
+[source, bash]
+```
+>>> hj_file['rescaled_params']
+{'rp_over_rs': 0.16, 'sma_over_rs': 8.78, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+>>> hj_file_n50000['rescaled_params']
+{'rp_over_rs': 0.16, 'sma_over_rs': 8.78, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+>>> hj_file_cutradi['rescaled_params']
+{'rp_over_rs': 0.16, 'sma_over_rs': 8.78, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+>>> hj_file_cutradi_resparams['rescaled_params']
+{'rp_over_rs': 0.1601182997500138, 'sma_over_rs': 8.786491698782006, 'inclination': 89.0, 'eccentricity': 0.0, 'arg_pericenter': 0.0, 'period_orbital': 3.52474859, 'epoch_of_transit': 0.0}
+```
+I refer to the https://arxiv.org/pdf/1908.09599.pdf[reference paper] for the scientific motivation of this study, along with more general results.
+
+
+
+
+
+

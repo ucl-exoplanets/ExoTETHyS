@@ -1,0 +1,226 @@
+
+= ExoTETHyS:
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: preamble
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
+
+#*Tools for Exoplanetary Transits around Host Stars*#
+
+image::logo.png[width=40%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+TO BE COMPLETED
+
+ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
+
+== Getting started
+
+IMPORTANT: This branch version is still under development.
+
+These instructions will get you to have a version of the package on your computer up and running.
+
+=== Requirements
+The code is consistent with python2/3. +
+The required python libraries are specified in the file requirements.txt.
+
+=== Download and installation
+
+==== From Pypi (NOT YET FOR THIS VERSION)
+
+Type on the terminal: `` pip install exotethys `` +
+This command installs the latest stable version of the package.
+
+==== From Github
+
+The most updated version of the package is available on GitHub. As this version is constantly under development, stability is not guaranteed.
+
+To download and install with a single command, type on the terminal +
+`pip install git+git://github.com/ucl-exoplanets/ExoTETHyS@v2-beta`.
+
+To download, then (optionally) install:
+
+1. Go to <https://github.com/ucl-exoplanets/ExoTETHyS/tree/v2-beta>, +
+then click the green button *Clone or download*, +
+then click *Download ZIP* to download the whole repository. +
++
+_Alternatively_ type on the terminal +
+`git clone --single-branch --branch v2-beta https://github.com/ucl-exoplanets/ExoTETHyS`.
+
+2. Access the root folder from terminal (you may need to unzip first).
+
+3. After accessing the root folder from terminal, type `pip install .` to install the package. +
++
+_Otherwise_, you could import the package without installation, if you run python from the root folder.
+
+4. To test the installation, you can type:
+[source, bash]
+```
+pytest PATH_TO_ROOT/exotethys/tests/test_sail.py  
+pytest PATH_TO_ROOT/exotethys/tests/test_trip.py 
+pytest PATH_TO_ROOT/exotethys/tests/boats_trip.py 
+```
+
+NOTE: The root folder name depends on the download process. It appears to be *ExoTETHyS-2-beta* if downloaded from the web browser interface, *ExoTETHyS* if git cloned from terminal.
+
+==== Before using
+
+TIP: If this is the first time that you are using ExoTETHyS, you can skip this subsection.
+
+If you had already installed/used an older version of ExoTETHyS, you should delete the old database folder to avoid incompatibility issues.
+
+NOTE: If a file from the old database is mistakenly used with this new version, *the run will fail* raising an error message. There is *no risk* to obtain wrong results.
+
+The database folder should be located in your home: `/PATH_HOME/.exotethys`.
+You could locate and remove this folder. +
+This operation can also be performed by using the manage_database subpackage of ExoTETHyS, as follows:
+
+[source, bash]
+```
+>>> from exotethys import manage_database as mdb 
+>>> mdb.rm_database() 
+Are you sure that you want to delete the directory /Users/pepe/.exotethys? [y/N]: y 
+```
+
+WARNING: *The above operation is irreversible.* It is highly recommended that you read more about the manage_database subpackage before deciding to perform this operation.
+
+
+=== Quick how to run the subpackages
+
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
+
+1. *SAIL -- Stellar Atmosphere Intensity Limb* +
+This subpackage can compute the stellar limb-darkening coefficients for requested targets.
++
+[source, bash]
+```
+>>> from exotethys import sail  
+>>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
+```
+Consult the link:user_manuals/SAIL_manual.adoc[SAIL manual].
+
+2. *TRIP -- Transit Ring-Integrated Profile* +
+This subpackage can compute transit light-curves by using stellar specific intensities rather than (approximate) limb-darkening coefficients.
++
+[source, bash]
+```
+>>> from exotethys import trip  
+>>> trip.trip_calculate('PATH_TO_ROOT/examples/trip_example1.txt')  
+```
+Consult the link:user_manuals/TRIP_manual.adoc[TRIP manual].
+
+3. *BOATS -- Bias in the Occultation Analysis of Transiting Systems* +  
+   This subpackage can compute the potential bias in transit/eclipse depth due to neglecting the exoplanetary flux and/or its variation with the orbital phase (common approximations). It also provides the predicted transit/eclipse depth values with the photon noise limited error bars.
++
+[source, bash]
+```
+>>> from exotethys import boats  
+>>> boats.boats_calculate_transit('PATH_TO_ROOT/examples/boats_example4.txt')  
+>>> boats.boats_calculate_eclipse('PATH_TO_ROOT/examples/boats_example5.txt')  
+```
+Consult the link:user_manuals/BOATS_manual.adoc[BOATS manual].
+
+4. *manage_database* +
+   This subpackage can be used to manage the `.exotethys` folder that is created in your home the first time that a file is downloaded to perform a calculation. It contains 3 functions to list, copy and remove the items in this folder.
+Consult the link:user_manuals/manage_database_manual.adoc[manage_database manual].
+
+
+== License
+
+This package is an open source project under GNU General Public License v3.
+
+== References
+
+If you use this package for your research, please consider citing the following references:
+
+- Morello, G., Claret, A., Martin-Lagarde, M., Cossou, C., Tsiaras, A., & Lagage, P.-O. 2020, _The ExoTETHyS package: Tools for Exoplanetary Transits around Host Stars_, AJ, 159, 75 +
+(Pivotal paper for the SAIL and TRIP subpackages)
+- Morello, G., Claret, A., Martin-Lagarde, M., Cossou, C., Tsiaras, A., & Lagage, P.-O. 2020, _ExoTETHyS: Tools for Exoplanetary Transits around Host Stars_, JOSS, 5, 1834 +
+(First official software release)
+- Martin-Lagarde, M., Morello, G., Lagage, P.-O., Gastaud, R., & Cossou, C. 2020, _Phase-curve pollution of exoplanet transit depths_, AJ, 160, 197 +
+(First use of the BOATS subpackage)
+
+If you adopt the built-in stellar model grids, please consider citing the relevant references:
+
+Atlas_2000
+
+- Claret, A. 2000, A&A, 363, 1081
+
+Phoenix_2012_13 & Phoenix_drift_2012
+
+- Claret, A., Hauschildt, P. H., & Witte, S. 2012, A&A, 546, A14
+- Claret, A., Hauschildt, P. H., & Witte, S. 2013, A&A, 552, A16
+
+Phoenix_2018
+
+- Claret, A. 2018, A&A, 618, A20
+
+Stagger_2015
+
+- Chiavassa, A., et al. 2018, A&A, 611, A11 *https://pollux.oreme.org/DBPollux/PolluxAccesDB/[[3D Spectra, available publicly on POLLUX database]]*
+- Magic, Z., et al. 2015, A&A, 573, A90
+
+
+If you adopt the built-in instrumental passbands, please consider citing the relevant references:
+
+_JWST_
+
+- Pontoppidan, K. M., et al. 2016, SPIE, 9910, 991016  *https://pypi.org/project/pandeia.engine/[[Pandeia]]*
+- Maszkiewicz, M. 2017, SPIE, 10564, 105642Q
+- Kendrew, S., et al. 2015, PASP, 127, 623
+
+_Spitzer_
+
+- Hora, J. L.,  et al. 2008, PASP, 120, 1233 *https://irsa.ipac.caltech.edu/data/SPITZER/docs/irac/calibrationfiles/spectralresponse/[[NASA/IPAC]]*
+
+_HST_
+
+- Kuntschner, H., et al. 2011, ST-ECF Instrument Science Report WFC3-2011-05
+
+_TESS_
+
+- (Vanderspek, R., unreleased) *https://heasarc.gsfc.nasa.gov/docs/tess/the-tess-space-telescope.html[[NASA/TESS]]*
+
+_Kepler_
+
+- (Bachtell, E., and Peters, D., 2008, unreleased) *https://keplerscience.arc.nasa.gov/data-products.html[[NASA/Kepler & K2]]*
+
+
+== Contributors
+
+Developer and corresponding author
+
+- *Giuseppe Morello* (CEA-Saclay, France), giuseppe.morello@cea.fr, giuseppe.morello.11@ucl.ac.uk
+
+Python support, revision and useful comments
+
+- *Christophe Cossou* (CEA-Saclay, France)
+- *Marine Martin-Lagarde* (CEA-Saclay)
+- *Rene Gastaud* (CEA-Saclay)
+- *Pierre Olivier-Lagage* (CEA-Saclay)
+- *Angelos Tsiaras* (University College London, UK)
+
+Database of stellar models
+
+- *Antonio Claret* (Instituto de Astrofisica de Andalucia, Spain)
+- *Andrea Chiavassa* (Observatoire de la Côte d'Azur, France)
+- *Soeren Witte* (Hamburger Sternwarte, Germany)
+
+Peer-reviewers
+
+- *Arfon Smith* (JOSS editor)
+- *Steven Murray* (Arizona State University, USA)
+- *William James Handley* (University of Cambridge, UK)

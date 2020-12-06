@@ -1,0 +1,43 @@
+#Output settings		
+#output_path				/desired_absolute_or_relative_path/
+output_filename				WASP43b_MIRI_LRS_jy_ace_Td1600_Tn850_A0e23_eclipse
+output_fileext				.pickle	!.txt
+##GENERIC
+stellar_models_grid			!Phoenix_2018	!Phoenix_2012_13	!Phoenix_drift_2012 !Atlas_2000	!Stagger_2015	!Blackbody	Userfile
+planet_models_grid			!Blackbody	Userfile
+star_model_path				aux_files/
+star_model_file				Wasp43_star_microJy.pickle
+rescale_star_flux			!Yes	No
+planet_day_model_path			aux_files/
+planet_day_model_file			WASP43b_emission_ace_T1600.pickle
+planet_night_model_path			aux_files/
+planet_night_model_file			WASP43b_emission_ace_T850.pickle
+rescale_planet_flux			!Yes	!No	Star
+#passbands_path				/absolute_or_relative_path_to_user_passbands/
+passbands				JWST_MIRI_LRS
+wavelength_bins_path			aux_files/wavelength_bins_files/
+wavelength_bins_files			MIRI_LRS_bins.txt
+telescope_area				25.0
+telescope_area_unit		        m2
+observing_duration			2.5 !8.25
+observing_duration_unit			T_14 !hour
+##SYSTEM PARAMETERS
+#star_effective_temperature		4400.0
+#star_log_gravity			4.65
+#star_metallicity			0.0
+star_radius				0.60
+star_radius_unit			solRad
+orbital_semimajor_axis			0.0142
+orbital_semimajor_axis_unit		AU	!star_radius
+orbital_inclination			82.6
+orbital_inclination_unit		deg
+orbital_period				0.813475
+orbital_period_unit			d
+planet_bond_albedo			0.23
+#planet_circulation_efficiency		0.0 0.5 1.0
+#planet_day_temperature			1600.0
+#planet_night_temperature		850.0
+planet_radius				0.93
+planet_radius_unit			Rjup
+system_distance				86.9633
+system_distance_unit			parsec

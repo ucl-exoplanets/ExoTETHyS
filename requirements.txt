@@ -2,3 +2,4 @@ pytest
 setuptools
 scipy>=1.2.2
 numpy>=1.16.5
+astropy>=2.0.11

@@ -1,0 +1,385 @@
+= ExoTETHyS.SAIL User Manual
+:author: Giuseppe Morello
+:sectnums:
+:sectnumlevels: 2
+:toc: preamble
+:toclevels: 4
+:source-language: python
+:experimental:
+:xrefstyle: short
+
+[big]#*Stellar Atmosphere Intensity Limb*#
+
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
+*version: 2.x.x - beta*
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[preamble]
+== Introduction
+The SAIL subpackage is primarily a calculator of stellar limb-darkening coefficients (LDCs) that covers:
+
+- wide and continuous ranges of the stellar parameters (T~eff~, log(g), [M/H]);
+- built-in or user-defined passbands at UV to IR wavelengths;
+- choice among the most common limb-darkening laws and their generalizations.
+
+It relies on pre-calculated grids of stellar atmosphere models providing the emergent intensities at several positions on the projected disk.
+
+TIP: The main advantage over other existing stellar limb-darkening calculators is the use of a novel fitting algorithm, specifically optimised for modeling the exoplanetary transits. +
+The coefficients obtained with this method enable computing the transit light-curve with precision down to <10 parts per million (ppm).
+
+I refer to the https://arxiv.org/pdf/1908.09599.pdf[main article] for detailed descriptions of the core algorithms, their performances and comparisons with other similar codes.
+
+== User instructions
+
+To calculate LDCs you just need to import this subpackage and run the ldc_calculate function with a configuration file:
+[source, bash]
+```
+>>> from exotethys import sail  
+>>> sail.ldc_calculate('PATH_TO_ROOT/examples/sail_example1.txt')   
+```
+In the following subsection I describe the configuration file and explain the various options available. Then I discuss the examples of configuration files that are available in the GitHub repository and show how to read the file products.
+
+NOTE: Although most of the functions within the SAIL subpackage have been designed to perform a specific step of the LDCs calculation, some functions may be useful on their own.
+
+In the last subsection, I highlight some other SAIL functions that can be used on their own.
+
+=== SAIL configuration file
+The SAIL configuration file is a text file in which each line begins with a keyword followed by one or more values associated with the keyword. The lines starting with # are ignored; keyword values preceded by ! are also ignored. Examples of configuration files can be found in the "examples" folder.
+
+Below I describe the available keywords:
+
+*calculation_type* (MANDATORY) +
+values: _individual_ or _grid_ +
+_individual_ is to compute LDCs for specific targets with stellar parameters provided by the user +
+_grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
+
+*stellar_models_grid* (MANDATORY) +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_ or _Stagger_2015_ +
+only one choice per run (i.e., configuration file) is allowed
+
+*limb_darkening_laws* (MANDATORY) +
+values: _claret4_, _power2_, _square_root_, _quadratic_, _linear_, _gen_claret_ and/or _gen_poly_
+
+*gen_claret_orders* (only if _gen_claret_, mandatory) +
+values: positive integer numbers
+
+*gen_poly_orders* (only if _gen_poly_, mandatory) +
+values: positive integer numbers
+
+*passbands_path* (OPTIONAL) +
+values: path to user passbands
+
+*passbands* (MANDATORY) +
+values: built-in passband names if not passbands_path (same of file names at PATH_TO_ROOT/exotethys/Passbands/, without the .pass extension) or user file names including extension
+
+*wavelength_bins_path* (OPTIONAL) +
+values: path to wavelength bins files
+
+*wavelength_bins_files* (OPTIONAL) +
+values: user file names or _no_bins_ (if given, one entry per passband) +
+The user files must be text files with 2 columns reporting the lower and upper limits of the desired wavelength bins within the corresponding passband (each row defines a wavelength bin).
+
+*user_output* (OPTIONAL) +
+values: _basic_ (default) or _complete_ +
+if _basic_, the output files will contain only the requested LDCs and the corresponding quality of fits (weighted-r RMS) +
+if _complete_, the output files also include the passband-integrated profiles, LDCs and quality of fits for the neighbour models in the grid that are used to compute the requested LDCs.
+
+*output_path* (OPTIONAL) +
+values: path to where to store the results
+
+*targets_path* (only if _individual_ calculation_type, optional) +
+values: path to target file
+
+*targets_file* (only if _individual_ calculation_type, optional) +
+values: user file name +
+The user file must be a text file with up to 4 columns. The first row contains the keywords in arbitrary order: _target_names_ (optional), _star_effective_temperature_ (mandatory), _star_log_gravity_ (optional) and _star_metallicity_ (optional). The other rows contain the corresponding key values for the requested targets. If one of the optional parameters is not available for one target, write _X_ in its place to guarantee that each value is matched with the correct parameter keyword. Example files are available in the aux_files folder.
+
+*target_names* (only if _individual_ calculation_type, if not targets_file, optional) +
+values: str type +
+If given, the output files will be target_name_ldc.pickle, and in case of _complete_ user_output, target_name_neighbour_ldc.pickle and target_name_neighbour_intensities.pickle. +
+If not given, the default target names will be obtained from the stellar parameters values.
+
+*star_effective_temperature* (only if _individual_ calculation_type, if not targets_file, mandatory) +
+values: float type (range depending on the stellar_models_grid)
+
+*star_log_gravity* (only if _individual_ calculation_type, if not targets_file,  optional) +
+values: float type (range depending on the stellar_models_grid, default is 4.5)
+
+*star_metallicity* (only if _individual_ calculation_type, if not targets_file, optional) +
+values: float type (range depending on the stellar_models_grid, default is 0.0)
+
+*star_minimum_effective_temperature* (only if _grid_ calculation_type, optional) +
+values: float value
+
+*star_maximum_effective_temperature* (only if _grid_ calculation_type, optional) +
+values: float value
+
+*star_minimum_log_gravity* (only if _grid_ calculation_type, optional) +
+values: float value
+
+*star_maximum_log_gravity* (only if _grid_ calculation_type, optional) +
+values: float value
+
+*star_minimum_metallicity* (only if _grid_ calculation_type, optional) +
+values: float value
+
+*star_maximum_metallicity* (only if _grid_ calculation_type, optional) +
+values: float value
+
+
+=== Description of examples
+
+NOTE: The following example files are written to be launched from root directory level. +
+Alternatively, the paths in the examples need to be personalized by the user.
+
+*sail_example1*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+*sail_example2*: This example is to test the _complete_ user_output, including the stellar intensity profile and coefficients for the neighbour models. It creates three files named "teff28300.0_logg4.35_MH-0.23_ldc.pickle", "teff28300.0_logg4.35_MH-0.23_neighbour_ldc.pickle" and "teff28300.0_logg4.35_MH-0.23_neighbour_intensities.pickle".
+
+*sail_example3*: This example contains stellar parameters just outside the covered parameter space. If running this example, the code will exit with 2 warnings (one for each neighbour not found) and one error:
+[source, bash]
+```
+WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 3 not found for the stellar_models_grid Atlas_2000 .
+WARNING: teff28300.0_logg2.6_MH-0.23 cannot be calculated. Neighbour 4 not found for the stellar_models_grid Atlas_2000 .
+ERROR: No legal targets to calculate.
+```
+In particular, the code searches for the 8 nearest neighbours that defines a volume containing the requested point (28000, 2.6, -0.23 ) in the following order: +
+neighbour 1: (+, +, +)
+
+neighbour 2: (+, +, -)
+
+neighbour 3: (+, -, +)
+
+neighbour 4: (+, -, -)
+
+neighbour 5: (-, +, +)
+
+neighbour 6: (-, +, -)
+
+neighbour 7: (-, -, +)
+
+neighbour 8: (-, -, -)
+
+where "+" and "-" denote a parameter value higher or lower than in the requested point. In this case the code fails to find neighbours with higher effective temperature and lower surface gravity, as they do not exist in the _Atlas_2000_ grid. If more targets were requested, the code would just skip this target and move to the next one. Given there are no other requested targets, the code prints the error message and exits without producing any output.  
+The user can extract the information about all the available models in the grids by typing the following commands:
+[source, bash]
+```
+>>> from exotethys import sail  
+>>> [files_Atlas_2000, params_Atlas_2000] = sail.get_grid_parameters('Atlas_2000') 
+>>> [files_Phoenix_2012_13, params_Phoenix_2012_13] = sail.get_grid_parameters('Phoenix_2012_13') 
+>>> [files_Phoenix_2018, params_Phoenix_2018] = sail.get_grid_parameters('Phoenix_2018') 
+>>> [files_Stagger_2015, params_Stagger_2015] = sail.get_grid_parameters('Stagger_2015') 
+```
+The first variable is the list of file names in the database, the second variable is the 3-column numpy array with the corresponding stellar parameters.
+
+*sail_example4*: This example computes the limb-darkening coefficients for a grid of models with _complete_ user_output. It creates two files named "grid_ldc.pickle" and "grid_intensities.pickle".
+
+*sail_example5*: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+*sail_example6*: This example computes the limb-darkening coefficients for a single stellar target over multiple spectroscopic bins within an instrument passband and for another photometric passband. It creates a file named "teff6065.0_logg4.36_MH0.0_ldc.pickle".
+
+*sail_example7*: This example computes the limb-darkening coefficients for two targets with names over multiple spectroscopic bins within an instrument passband. It creates two files named "HD209458b_ldc.pickle" and "WASP43b_ldc.pickle".
+
+*sail_example8*: This example computes the _complete_ user_output for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three _basic_ files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle", and other two files named "HD209458bSunCool_neighbour_ldc.pickle" and "HD209458bSunCool_neighbour_intensities.pickle".
+
+*sail_example9*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "stagger_example_ldc.pickle".
+
+
+=== SAIL output files
+When running the main function of SAIL (ldc_calculate), the results are stored in files with the extension _.pickle_.
+The _pickle_ format is specifically designed to save objects created with _python_ (https://pythontips.com/2013/08/02/what-is-pickle-in-python/[more info]).
+The objects created with sail.ldc_calculate are _python_ https://docs.python.org/3/tutorial/datastructures.html#dictionaries[dictionaries].
+
+Here I show how to read such files through some examples.
+
+==== Basic individual
+Let's open the file "Sun_ldc.pickle" that has been created by running the sail_example8:
+[source, bash]
+```
+>>> import pickle
+>>> sun_ldc_file = pickle.load(open('Sun_ldc.pickle','rb'),encoding='latin1')
+```
+We already know that it contains a dictionary, therefore we can ask for its keys:
+[source, bash]
+```
+>>> sun_ldc_file.keys()
+dict_keys(['star_params', 'passbands'])
+```
+The "star_params" branch ends with a numpy array containing the stellar parameters of this target:
+[source, bash]
+```
+>>> sun_ldc_file['star_params']
+array([5.78e+03, 4.50e+00, 0.00e+00])
+```
+The "passbands" branch contains other keys for the requested passbands:
+[source, bash]
+```
+>>> sun_ldc_file['passbands'].keys()
+dict_keys(['uniform_phoenix_2012_13', 'uniform_phoenix_2012_13_10880.0_16800.0', 'uniform_phoenix_2012_13_11108.0_16432.0', 'uniform_phoenix_2012_13_11108.0_11416.0', 'uniform_phoenix_2012_13_11416.0_11709.0', 'uniform_phoenix_2012_13_11709.0_11988.0', 'uniform_phoenix_2012_13_11988.0_12257.0', 'uniform_phoenix_2012_13_12257.0_12522.0', 'uniform_phoenix_2012_13_12522.0_12791.0', 'uniform_phoenix_2012_13_12791.0_13058.0', 'uniform_phoenix_2012_13_13058.0_13321.0', 'uniform_phoenix_2012_13_13321.0_13586.0', 'uniform_phoenix_2012_13_13586.0_13860.0', 'uniform_phoenix_2012_13_13860.0_14140.0', 'uniform_phoenix_2012_13_14140.0_14425.0', 'uniform_phoenix_2012_13_14425.0_14719.0', 'uniform_phoenix_2012_13_14719.0_15027.0', 'uniform_phoenix_2012_13_15027.0_15345.0', 'uniform_phoenix_2012_13_15345.0_15682.0', 'uniform_phoenix_2012_13_15682.0_16042.0', 'uniform_phoenix_2012_13_16042.0_16432.0'])
+```
+The passband keys include:
+
+- 'uniform_phoenix_2012_13', i.e., the requested passband;
+
+- 'uniform_phoenix_2012_13_lambda1_lambda2', where lambda1 and lambda2 are the lower and upper limits of the requested wavelength bins (in Angstrom).
+
+Let's now explore what is inside one of these passband keys:
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0'].keys()
+dict_keys(['claret4', 'gen_claret1', 'gen_claret2', 'gen_claret3', 'gen_claret4', 'gen_claret5', 'gen_claret6'])
+```
+The new keys correspond to the requested limb-darkening laws. The number after 'gen_claret' denote the order. +
+We look inside 'claret4':
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4'].keys()
+dict_keys(['coefficients', 'weighted_rms_res'])
+```
+These are the last keys, containing the limb-darkening coefficients for this choice of star+passband+law and the quality of the fit:
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['coefficients']
+array([ 0.44803605,  0.25590171, -0.18203445,  0.01312166])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['claret4']['weighted_rms_res']
+array([5.62612442e-05])
+```
+We have a quick look at the other laws to show that _gen_claret4_ is equivalent to _claret4_ and that the quality of the fit is lower/higher when using less/more coefficients (in this particular case, lower order laws are subsets of the higher order ones):
+[source, bash]
+```
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['coefficients']
+array([ 0.44803605,  0.2559017 , -0.18203444,  0.01312165])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret4']['weighted_rms_res']
+array([5.62612442e-05])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['coefficients']
+array([ 0.68720911, -0.10129642])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret2']['weighted_rms_res']
+array([0.00081957])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['coefficients']
+array([ 0.62487639, -0.17728853,  0.13867818,  0.29065234, -0.52615743,
+        0.20857673])
+>>> sun_ldc_file['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['gen_claret6']['weighted_rms_res']
+array([1.46248395e-05])
+```
+
+==== Complete individual
+Let's now explore the other two output files that have been created by running the sail_example8, because of the request of the _complete_ user_output:
+[source, bash]
+```
+>>> sun_neighbour_ldc_file = pickle.load(open('HD209458bSunCool_neighbour_ldc.pickle','rb'),encoding='latin1')
+>>> sun_neighbour_ints_file = pickle.load(open('HD209458bSunCool_neighbour_intensities.pickle','rb'),encoding='latin1')
+>>> sun_neighbour_ldc_file.keys()
+dict_keys(['teff03000_logg5.50_MH0.0', 'teff05700_logg4.5_MH0.0', 'teff05800_logg4.5_MH0.0', 'teff06100_logg4.5_MH0.0'])
+>>> sun_neighbour_ints_file.keys()
+dict_keys(['teff03000_logg5.50_MH0.0', 'teff05700_logg4.5_MH0.0', 'teff05800_logg4.5_MH0.0', 'teff06100_logg4.5_MH0.0'])
+```
+The first level of keys is identical for the two files, as it contains the labels associated with the neighbour models that have been used to compute the requested targets in the sail_example8. +
+For the neighbour ldc file, the structure of the next level dictionaries is similar to that of the basic output, but with more information. For example, after selecting one specific passbands, you get the following keys:
+[source, bash]
+```
+>>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0'].keys()
+dict_keys(['rescaled_mu', 'rescaled_intensities', 'weights', 'laws'])
+```
+The 'laws' contains the information about the limb-darkening coefficients and quality of the fit for the selected neighbour model and passband. For example:
+[source, bash]
+```
+>>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['coefficients']
+array([ 0.40234082,  0.28553471, -0.19583254,  0.01317074])
+>>> sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['weighted_rms_res']
+6.696820777468198e-05
+```
+The other three keys contain the information about the processed intensity profile and weights adopted in the corresponding fit, each key containing a 1D numpy array of the same size. 
+
+We can visually compare the rescaled model intensities with the corresponding values obtained with the claret4 coefficients:
+[source, bash]
+```
+>>> rescaled_mu = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['rescaled_mu']
+>>> rescaled_intensities = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['rescaled_intensities']
+>>> claret4_coefficients = sun_neighbour_ldc_file['teff06100_logg4.5_MH0.0']['passbands']['uniform_phoenix_2012_13_10880.0_16800.0']['laws']['claret4']['coefficients']
+>>> claret4_intensities = sail.get_intensities_from_ldcs(rescaled_mu, claret4_coefficients, 'claret4')
+>>> import matplotlib.pyplot as plt
+>>> plt.plot(rescaled_mu, rescaled_intensities, 'b.', label='intensities')
+[<matplotlib.lines.Line2D object at 0x18156288d0>]
+>>> plt.plot(rescaled_mu, claret4_intensities, 'r', label='claret4')
+[<matplotlib.lines.Line2D object at 0x182077bd90>]
+```
+
+The neighbour intensities file contains the original mu values and the corresponding passband intensities, that we can compare with the rescaled ones:
+[source, bash]
+```
+>>> original_mu = sun_neighbour_ints_file['teff06100_logg4.5_MH0.0']['mu']
+>>> original_intensities = sun_neighbour_ints_file['teff06100_logg4.5_MH0.0']['uniform_phoenix_2012_13_10880.0_16800.0']
+>>> plt.plot(original_mu, original_intensities, 'k.',label='original')
+[<matplotlib.lines.Line2D object at 0x18207e4690>]
+>>> plt.plot(rescaled_mu, rescaled_intensities, 'b.',label='rescaled')
+[<matplotlib.lines.Line2D object at 0x1820a29590>]
+```
+After some restyling, you could obtain the two panels of the figure below:
+
+[[intensity_profiles]]
+.Left panel: Rescaled intensity profile (blue dots) and fitted profile with claret-4 limb-darkening coefficients (red line). Right panel: Original intensity profile (black dots) and rescaled intensity profile (blue dots). Note the slightly different mu values between the two profiles. Read the https://arxiv.org/pdf/1908.09599.pdf[reference paper] for information about the underlying procedure.
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merge_rescaled_vs_claret4_et_original_intensities.png[width=100%]
+
+
+NOTE: These profiles can be used as input for generating the transit light-curves with the TRIP subpackage (link:TRIP_manual.adoc[TRIP manual]).
+
+NOTE: If you are interested to the intensity profiles rather than limb-darkening coefficients, you should choose the _grid_ calculation_type and _complete_ user_output. The intensity profiles can be provided only for the models in the database; these are not interpolated to obtain the intensity profiles of stars with different sets of parameter values.
+
+=== Other SAIL functions
+The list of functions available within SAIL subpackage can be obtained by typing the standard python command `dir(sail)`. All functions are documented with docstrings.
+For example:
+[source, bash]
+```
+>>> print(sail.get_intensities_from_ldcs.__doc__)
+
+    This function computes the model intensities given the limb-darkening coefficients
+    
+    :param np.array mu: 1D array with mu values
+    :param np.array coefficients: 1D array with the limb-darkening coefficients
+    :param str law: name of the limb-darkening law
+    :return: the intensities at the given mu values
+    :rtype: np.array
+```
+The function "sail.get_intensities_from_ldcs" has been added to enable quick visualization of the intensity profile from the calculated LDCs, but it is not used during the LDCs calculation.
+
+The function "sail.get_grid_parameters" can be used to know the range and sampling of stellar parameter space covered by the grids in the database, and it is also used during the LDCs calculation.
+
+In the future we might add/hightlight here other functions, depending on the users feedback.
+
+== Database files
+Some stellar model files will be needed during a SAIL run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.SAIL, as they are only needed to perform other calculations. +
+However, the database files contain valuable information even outside the ExoTETHyS framework. Therefore, I explain how to read the database files.
+
+The manage_database subpackage (link:user_manuals/manage_database_manual.adoc[manage_database manual]) can be used to find out the path and names of the database files:
+[source, bash]
+```
+>>> from exotethys import manage_database as mdb
+>>> path, filenames = mdb.ls_database(grid='Phoenix_2012_13')
+>>> path
+'/Users/pepe/.exotethys/Phoenix_2012_13'
+>>> filenames
+['teff03000_logg5.50_MH0.0.pickle', 'teff05700_logg4.5_MH0.0.pickle', 'teff05800_logg4.5_MH0.0.pickle', 'teff06100_logg4.5_MH0.0.pickle']
+```
+Note that the database files have _pickle_ format and contain _python_ dictionaries. Let's now read one of these files:
+[source, bash]
+```
+>>> import os, pickle
+>>> chosen_file_path = os.path.join(path, 'teff05800_logg4.5_MH0.0.pickle')
+>>> content = pickle.load(open(chosen_file_path,'rb'),encoding='latin1')
+>>> content.keys()
+dict_keys(['mu', 'wavelengths', 'star_params', 'intensities', 'fluxes'])
+```
+- The "star_params" branch contains a numpy array with the stellar parameters. +
+- The "wavelengths" branch contains a https://docs.astropy.org/en/stable/units/[quantity array] with the model wavelengths. +
+- The "mu" branch contains a numpy array of positions on the stellar disk. +
+- The "intensities" branch contains a 2D numpy array with the model intensities at the tabulated mu and wavelengths. +
+- The "fluxes" branch contains the disk-integrated flux at the stellar surface.
+
+
