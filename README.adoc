@@ -73,7 +73,7 @@ pytest PATH_TO_ROOT/exotethys/tests/test_trip.py
 pytest PATH_TO_ROOT/exotethys/tests/boats_trip.py 
 ```
 
-NOTE: The root folder name depends on the download process. It appears to be *ExoTETHyS-2-beta* if downloaded from the web browser interface, *ExoTETHyS* if git cloned from terminal.
+NOTE: The root folder name depends on the download process. It appears to be *ExoTETHyS-master* if downloaded from the web browser interface, *ExoTETHyS* if git cloned from terminal.
 
 ==== Before using
 
