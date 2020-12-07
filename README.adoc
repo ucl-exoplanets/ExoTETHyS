@@ -25,7 +25,7 @@ endif::[]
 TO BE COMPLETED
 
 ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena. +
-It includes various subpackages with different functions. We remind to the link:user_manuals/[user manuals] and relevant papers (see below) for their rationale and detailed instructions.
+It includes various subpackages with different functions. We remind to the link:user_manuals/[user manuals] and relevant papers (see below) for their rationale and detailed instructions. You can also consult the wiki with the answers to frequently asked questions (link:wiki/ExoTETHyS-FAQ[FAQ]).
 
 == Getting started
 
