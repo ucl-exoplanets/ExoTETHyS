@@ -24,7 +24,8 @@ endif::[]
 
 TO BE COMPLETED
 
-ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena.
+ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena. +
+It includes various subpackages with different functions. We remind to the link:user_manuals/[user manuals] and relevant papers (see below) for their rationale and detailed instructions.
 
 == Getting started
 
@@ -79,7 +80,7 @@ NOTE: The root folder name depends on the download process. It appears to be *Ex
 
 TIP: If this is the first time that you are using ExoTETHyS, you can skip this subsection.
 
-If you had already installed/used an older version of ExoTETHyS, you should delete the old database folder to avoid incompatibility issues.
+If you had already installed/used an older version of ExoTETHyS (v1.x.y), you should delete the old database folder to avoid incompatibility issues.
 
 NOTE: If a file from the old database is mistakenly used with this new version, *the run will fail* raising an error message. There is *no risk* to obtain wrong results.
 
