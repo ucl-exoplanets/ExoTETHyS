@@ -17,3 +17,12 @@ Version fully revised by the JOSS reviewers
 * Fixed small issues and bugs  
 * Added history and community guidelines files  
 * Made repository pip-installable  
+
+**version 2.0.0**  
+Second online release  
+* Added BOATS and manage_database subpackages  
+* Added Phoenix_drift_2012 and Stagger_2015 stellar models grids in the online database  
+* Using quantity arrays with astropy.units instead of numpy arrays in the files of the stellar model grids  
+* Including disk-integrated stellar spectra in addition to the specific intensities in the files of the stellar model grids  
+* Provided detailed user manuals for each subpackage and a revised README.adoc  
+* Added FAQ section in the wiki  
