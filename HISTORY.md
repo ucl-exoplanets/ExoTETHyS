@@ -24,5 +24,10 @@ Second online release
 * Added Phoenix_drift_2012 and Stagger_2015 stellar models grids in the online database  
 * Using quantity arrays with astropy.units instead of numpy arrays in the files of the stellar model grids  
 * Including disk-integrated stellar spectra in addition to the specific intensities in the files of the stellar model grids  
+* Added new precalculated passbands  
+* Slightly revised algorithms for the SAIL subpackage, but results are unaffected  
+* Reduced default number of annuli for the TRIP calculation, after testing precision  
 * Provided detailed user manuals for each subpackage and a revised README.adoc  
 * Added FAQ section in the wiki  
+* Added new examples and auxiliary files  
+* New organization of the GitHub repository
