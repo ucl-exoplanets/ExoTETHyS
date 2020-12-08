@@ -11,7 +11,7 @@
 [big]#*Stellar Atmosphere Intensity Limb*#
 
 image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
-*version: 2.x.x - beta*
+*version: 2.0.0*
 
 ifdef::env-github[]
 :tip-caption: :bulb:
