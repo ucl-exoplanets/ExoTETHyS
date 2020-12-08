@@ -49,3 +49,19 @@ setup(
     scripts=[],
     data_files=[('', ['README.adoc'])]
 )
+
+
+from distutils.core import setup
+
+setup(
+    name = 'exotethys',
+    packages = ['exotethys'],
+    version = '2.0.0',  # Ideally should be same as your GitHub release tag version
+    description = 'description',
+    author = 'Giuseppe Morello',
+    author_email = 'giuseppe.morello.11@ucl.ac.uk',
+    url = 'https://github.com/ucl-exoplanets/ExoTETHyS',
+    download_url = 'https://github.com/ucl-exoplanets/ExoTETHyS/archive/2.0.0.tar.gz',
+    keywords = [],
+    classifiers = [],
+)
