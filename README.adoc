@@ -28,8 +28,6 @@ It includes various subpackages with different functions. We remind to the link:
 
 == Getting started
 
-IMPORTANT: This branch version is still under development.
-
 These instructions will get you to have a version of the package on your computer up and running.
 
 === Requirements
