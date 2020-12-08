@@ -203,7 +203,7 @@ _Kepler_
 
 Developer and corresponding author
 
-- *Giuseppe Morello* (Instituto de Astrofisica de Canarias, Spain), gmorello@iac.es, giuseppe.morello.11@ucl.ac.uk
+- *Giuseppe Morello* (Instituto de Astrofísica de Canarias, Spain), gmorello@iac.es, giuseppe.morello.11@ucl.ac.uk
 
 Python support, revision and useful comments
 
@@ -212,6 +212,7 @@ Python support, revision and useful comments
 - *Rene Gastaud* (CEA-Saclay)
 - *Pierre Olivier-Lagage* (CEA-Saclay)
 - *Angelos Tsiaras* (University College London, UK)
+- *Tiziano Zingales* (Université de Bordeaux)
 
 Database of stellar models
 
