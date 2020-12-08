@@ -615,7 +615,7 @@ In the future we might add/hightlight here other functions, depending on the use
 Some stellar model files might be needed during a BOATS run. The necessary files will be downloaded automatically during the run, unless these files are already found in a directory inside `PATH_HOME/.exotethys`. Such files are a collateral output of ExoTETHyS.BOATS, as they are only needed to perform other calculations. +
 However, the database files contain valuable information even outside the ExoTETHyS framework. Therefore, I explain how to read the database files.
 
-The manage_database subpackage (link:user_manuals/manage_database_manual.adoc[manage_database manual]) can be used to find out the path and names of the database files:
+The manage_database subpackage (link:manage_database_manual.adoc[manage_database manual]) can be used to find out the path and names of the database files:
 [source, bash]
 ```
 >>> from exotethys import manage_database as mdb
