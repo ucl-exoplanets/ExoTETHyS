@@ -12,7 +12,7 @@
 #*Tools for Exoplanetary Transits around Host Stars*#
 
 image::logo.png[width=40%]
-*version: 2.x.x - beta*
+*version: 2.0.0*
 
 ifdef::env-github[]
 :tip-caption: :bulb:
@@ -22,7 +22,6 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-TO BE COMPLETED
 
 ExoTETHyS is an open-source package for modeling exoplanetary transits, eclipsing binaries and related phenomena. +
 It includes various subpackages with different functions. We remind to the link:user_manuals/[user manuals] and relevant papers (see below) for their rationale and detailed instructions. You can also consult the wiki with the answers to frequently asked questions (link:../../wiki/ExoTETHyS-FAQ[FAQ]).
@@ -39,7 +38,7 @@ The required python libraries are specified in the file requirements.txt.
 
 === Download and installation
 
-==== From Pypi (NOT YET FOR THIS VERSION)
+==== From Pypi
 
 Type on the terminal: `` pip install exotethys `` +
 This command installs the latest stable version of the package.
