@@ -203,7 +203,7 @@ _Kepler_
 
 Developer and corresponding author
 
-- *Giuseppe Morello* (CEA-Saclay, France), giuseppe.morello@cea.fr, giuseppe.morello.11@ucl.ac.uk
+- *Giuseppe Morello* (Instituto de Astrofisica de Canarias, Spain), gmorello@iac.es, giuseppe.morello.11@ucl.ac.uk
 
 Python support, revision and useful comments
 
