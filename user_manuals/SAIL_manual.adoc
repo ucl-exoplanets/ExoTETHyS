@@ -326,7 +326,7 @@ After some restyling, you could obtain the two panels of the figure below:
 
 [[intensity_profiles]]
 .Left panel: Rescaled intensity profile (blue dots) and fitted profile with claret-4 limb-darkening coefficients (red line). Right panel: Original intensity profile (black dots) and rescaled intensity profile (blue dots). Note the slightly different mu values between the two profiles. Read the https://arxiv.org/pdf/1908.09599.pdf[reference paper] for information about the underlying procedure.
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merge_rescaled_vs_claret4_et_original_intensities.png[width=100%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/user_manuals/figures/merge_rescaled_vs_claret4_et_original_intensities.png[width=100%]
 
 
 NOTE: These profiles can be used as input for generating the transit light-curves with the TRIP subpackage (link:TRIP_manual.adoc[TRIP manual]).
