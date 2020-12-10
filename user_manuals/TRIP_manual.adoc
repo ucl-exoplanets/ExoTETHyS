@@ -233,7 +233,7 @@ The light-curves from the other files are very similar, as they represent essent
 
 [[Comparisons]]
 .Left panel: Reference ransit light-curve. Middle panel: Differences between the light-curves calculated with different options and the reference light-curve. Right panel: Effective intensity profiles adopted in the examples.
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/merged_trip_figures.png[width=100%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/user_manuals/figures/merged_trip_figures.png[width=100%]
 
 
 
