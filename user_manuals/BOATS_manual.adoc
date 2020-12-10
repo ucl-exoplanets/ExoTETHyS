@@ -362,7 +362,7 @@ We plot the resulting spectral biases:
 After some restyling, you could obtain the figure below:
 [[Niriss_bias_ex1to3]]
 .Three different estimates of the spectral bias for WASP-43 b, as observed with JWST/NIRISS: using blackbody spectra for the star, planet dayside and nightside (black line with error bars), using Phoenix stellar model for the star and blackbody spectra for both planetary sides (red), using blackbody spectrum for the star and Atmospheric Chemical Equilibrium models for the planet dayside and nightside (blue).
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_WASP43b_NIRISS_examples1to3.png[width=70%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/user_manuals/figures/boats_WASP43b_NIRISS_examples1to3.png[width=70%]
 
 We compare the error bars:
 [source, bash]
@@ -494,7 +494,7 @@ Text(85.06944444444443, 0.5, 'erg / (Angstrom cm2 s)')
 After some restyling, you could obtain the figure below:
 [[Sun_like_spectra]]
 .Sun-like spectra obtained by using boats.get_model_spectrum: _Phoenix_2012_13_ with Teff=5800 K and log(g)=4.5 (blue), _Stagger_2015_ with Teff=5777 K and log(g)=4.4 (red), and _Blackbody_ with T=5780 K.
-image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/v2-beta/user_manuals/figures/boats_Sun_spectra_compar.png[width=70%]
+image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/user_manuals/figures/boats_Sun_spectra_compar.png[width=70%]
 
 
 The function "boats.get_photon_spectrum" calculates the photon rates received by the telescope from the model spectra:
