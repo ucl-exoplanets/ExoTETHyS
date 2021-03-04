@@ -48,11 +48,11 @@ def get_intensities_from_ldcs(mu, coefficients, law):
     elif law=='gen_poly':
         model = 1.0
         for n in range(len(coefficients)):
-            model -= coefficients[n]*(1.0-mucut**(n+1.0))
+            model -= coefficients[n]*(1.0-mu**(n+1.0))
     elif law=='gen_claret':
         model = 1.0
         for n in range(len(coefficients)):
-            model -= coefficients[n]*(1.0-mucut**((n+1.0)/2))
+            model -= coefficients[n]*(1.0-mu**((n+1.0)/2))
     return  model
 
 
@@ -1251,22 +1251,23 @@ def read_wavelength_bins(wavelength_bins_path, wavelength_bins_file, pb_waves, p
     if wavelength_bins_file == 'no_bins':
         check = True
         return np.array([]) * u.Angstrom, check
-    [wb, check] = read_as_numpy_array(wavelength_bins_path+wavelength_bins_file)
+    wavelength_bins_pathfile = os.path.join(wavelength_bins_path, wavelength_bins_file)
+    [wb, check] = read_as_numpy_array(wavelength_bins_pathfile)
     if not check:
         print('WARNING: Ignoring wavelength_bins_file', wavelength_bins_file, '.')
         return np.array([]) * u.Angstrom, check
     wb = np.atleast_2d(wb)
     if not check_2Darray(wb, n_col=2):
-        print('WARNING: invalid format for wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, '. It must have 2 columns. Ignoring wavelength_bins_file', wavelength_bins_file, '.')
+        print('WARNING: invalid format for wavelength_bins_file', wavelength_bins_pathfile, '. It must have 2 columns. Ignoring wavelength_bins_file', wavelength_bins_file, '.')
         check = False
         return np.array([]) * u.Angstrom, check
     wb *= u.Angstrom
     if (wb[:,0]>=wb[:,1]).any():
-        print('WARNING: invalid line in wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, '. The lower limit cannot be greater or equal to the upper limit.')
+        print('WARNING: invalid line in wavelength_bins_file', wavelength_bins_pathfile, '. The lower limit cannot be greater or equal to the upper limit.')
         check = False
         return np.array([]) * u.Angstrom, check
     if np.min(wb)<np.min(pb_waves) or np.max(wb)>np.max(pb_waves):
-        print('WARNING:wavelength_bins_file', wavelength_bins_path+wavelength_bins_file, 'exceeds wavelength range for the ', passband, 'passband. Ignoring this file.')
+        print('WARNING:wavelength_bins_file', wavelength_bins_pathfile, 'exceeds wavelength range for the ', passband, 'passband. Ignoring this file.')
         check = False
         return np.array([]) * u.Angstrom, check
     return wb, check
