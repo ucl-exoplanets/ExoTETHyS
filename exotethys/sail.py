@@ -1273,14 +1273,14 @@ def read_wavelength_bins(wavelength_bins_path, wavelength_bins_file, pb_waves, p
     return wb, check
 
 
-def get_waves_fromR(lambda1, lambda2, R):
+def get_waves_fromR(lambda1, lambda2, R=1e6):
     """
     This function computes an array of wavelengths with constant spectral resolution, including the minimum and maximum wavelengths.
     The requested resolution can be automatically increased to guarantee the minimum length of 10 for the array of wavelengths.
     
     :param float lambda1: minimum wavelength
     :param float lambda2: maximum wavelength
-    :param float R: spectral resolution
+    :argument float R: spectral resolution
     ..note:: the input params are already checked to avoid errors, if using the boats_calculate_transit or boats_calculate_eclipse functions
     :return: the 1D array of wavelengths
     :rtype: np.array
@@ -1591,13 +1591,13 @@ def process_configuration(input_dict):
         [pb_wavelengths, pb_pce, check] = read_passband(passbands_path, passbands_ext, passbands[i], stellar_models_grid) #user or built-in file
         if check:
             f_interp = interp1d(pb_wavelengths.value, pb_pce.value, fill_value='extrapolate')
-            my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value), 10000.0) * pb_wavelengths.unit #choice of wavelengths
+            my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value), R=1e6) * pb_wavelengths.unit #choice of wavelengths
             my_pce = f_interp(my_waves.value) * pb_pce.unit
             passbands_dict[passbands[i]] = [my_waves, my_pce]
             [wb, check] = read_wavelength_bins(wavelength_bins_path, wavelength_bins_files[i], pb_wavelengths, passbands[i]) #includes no_bins case
             if check:
                 for wbin in wb:
-                    my_waves = get_waves_fromR(wbin[0].value, wbin[1].value, 10000.0) * pb_wavelengths.unit #choice of wavelengths
+                    my_waves = get_waves_fromR(wbin[0].value, wbin[1].value, R=1e6) * pb_wavelengths.unit #choice of wavelengths
                     my_pce = f_interp(my_waves.value) * pb_pce.unit
                     passbands_dict[passbands[i]+'_'+str(wbin[0].value)+'_'+str(wbin[1].value)] = [my_waves, my_pce]
 
