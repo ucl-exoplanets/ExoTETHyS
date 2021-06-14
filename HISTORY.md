@@ -31,3 +31,9 @@ Second online release
 * Added FAQ section in the wiki  
 * Added new examples and auxiliary files  
 * New organization of the GitHub repository
+
+
+**version 2.0.1**
+* Increased default resolution from 1e4 to 1e6 for get_waves_fromR (both in SAIL and BOATS)
+* Fixed read_wavelength_bins using os.path.join
+* Fixed bugs in sail.get_intensities_from_ldcs with gen_claret and gen_poly laws.
