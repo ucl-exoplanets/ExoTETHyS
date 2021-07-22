@@ -39,6 +39,29 @@ def str2float(s): #function in common with SAIL
     except ValueError:
         return s
 
+
+def my_vstack(array1,array2): #function in common with SAIL
+    """
+    This function is a variant of numpy.vstack that accepts if one of the two arrays is empty.
+    
+    :param np.array array1:
+    :param np.array array2:
+    :return: the array formed by stacking the given arrays
+    :rtype: np.array
+    """
+    try:
+        return np.vstack((array1,array2))
+    except ValueError:
+        if len(array1)==0:
+            return array2
+        elif len(array2)==0:
+            return array1
+        else:
+            return np.vstack((array1,array2))
+
+
+
+
 def check_length(vector, min_length=1, max_length=None): #function in common with SAIL
     """
     This function checks if the length of a vector is within the expected range and returns a boolean value.
@@ -259,7 +282,7 @@ def check_configuration(input_dict):
     input_dict_local = copy.deepcopy(input_dict)
     input_keys = list(input_dict_local.keys())
     mandatory_keys = ['stellar_models_grid', 'planet_models_grid', 'passbands', 'observing_duration', 'observing_duration_unit', 'telescope_area', 'telescope_area_unit', 'star_radius', 'star_radius_unit', 'orbital_semimajor_axis', 'orbital_semimajor_axis_unit', 'orbital_inclination', 'orbital_inclination_unit', 'orbital_period', 'orbital_period_unit', 'planet_radius', 'planet_radius_unit']
-    allowed_keys = mandatory_keys + ['output_path', 'output_filename', 'output_fileext', 'passbands_path', 'wavelength_bins_path', 'wavelength_bins_files', 'star_effective_temperature', 'star_log_gravity', 'star_metallicity', 'planet_bond_albedo', 'planet_circulation_efficiency', 'planet_day_temperature', 'planet_night_temperature', 'system_distance', 'system_distance_unit', 'star_model_path', 'star_model_file', 'rescale_star_flux', 'planet_day_model_path', 'planet_day_model_file', 'planet_night_model_path', 'planet_night_model_file', 'rescale_planet_flux']
+    allowed_keys = mandatory_keys + ['output_path', 'output_filename', 'output_fileext', 'passbands_path', 'wavelength_bins_path', 'wavelength_bins_files', 'star_effective_temperature', 'star_log_gravity', 'star_metallicity', 'planet_bond_albedo', 'planet_circulation_efficiency', 'planet_day_temperature', 'planet_night_temperature', 'system_distance', 'system_distance_unit', 'star_model_path', 'star_model_file', 'rescale_star_flux', 'planet_day_model_path', 'planet_day_model_file', 'planet_night_model_path', 'planet_night_model_file', 'rescale_planet_flux', 'star_database_interpolation']
 
     #Checking that all the keywords in the input file are valid.
     for key in input_keys:
@@ -289,7 +312,7 @@ def check_configuration(input_dict):
             #stellar_models_grid = stellar_models_grid[0]
             if stellar_models_grid=='Userfile':
                 mandatory_keys_userstar = ['star_model_file', 'rescale_star_flux']
-                redundant_keys_userstar = ['star_log_gravity', 'star_metallicity']
+                redundant_keys_userstar = ['star_log_gravity', 'star_metallicity', 'star_database_interpolation']
                 for key in mandatory_keys_userstar:
                     if key not in input_keys:
                         print('ERROR: mandatory keyword', key, 'is not specified for', stellar_models_grid, 'stellar_models_grid.')
@@ -300,7 +323,7 @@ def check_configuration(input_dict):
                         check = False
             elif stellar_models_grid=='Blackbody':
                 mandatory_keys_bbstar = ['star_effective_temperature', 'system_distance', 'system_distance_unit']
-                redundant_keys_bbstar = ['star_model_path', 'star_model_file', 'rescale_star_flux', 'star_log_gravity', 'star_metallicity']
+                redundant_keys_bbstar = ['star_model_path', 'star_model_file', 'rescale_star_flux', 'star_log_gravity', 'star_metallicity', 'star_database_interpolation']
                 for key in mandatory_keys_bbstar:
                     if key not in input_keys:
                         print('ERROR: mandatory keyword', key, 'is not specified for', stellar_models_grid, 'stellar_models_grid.')
@@ -505,6 +528,21 @@ def check_configuration(input_dict):
                 print('ERROR: unrecognised input for observing_duration_unit. It must be a string associated with a unit of time or T_14.')
                 check = False
 
+
+    #Checking star_database_interpolation (OPTIONAL, 1 ONLY)
+    if 'star_database_interpolation' in input_keys:
+        star_database_interpolation = input_dict_local['star_database_interpolation']
+        if not check_length(star_database_interpolation, max_length=1):
+            print('ERROR: invalid length=', len(star_database_interpolation), 'for star_database_interpolation. It must have length=1.')
+            check = False
+        else:
+            allowed_star_database_interpolation = ['seq_linear', 'nearest']
+            star_database_interpolation = star_database_interpolation[0]
+            if star_database_interpolation not in allowed_star_database_interpolation:
+                print('ERROR:',star_database_interpolation,'is not a valid star_database_interpolation method. The allowed names are seq_linear and nearest.')
+                check = False
+
+
     #Checking star_effective_temperature (OPTIONAL, 1 ONLY)
     if 'star_effective_temperature' in input_keys:
         star_effective_temperature = input_dict_local['star_effective_temperature']
@@ -514,6 +552,7 @@ def check_configuration(input_dict):
         if not check_type_in_list(star_effective_temperature, float):
             print('ERROR: invalid type for item in star_effective_temperature. Items must be float.')
             check = False
+
 
     #Checking star_log_gravity (OPTIONAL, 1 ONLY)
     if 'star_log_gravity' in input_keys:
@@ -887,6 +926,8 @@ def create_new_dict(input_dict):
         if not 'star_metallicity' in input_keys:
             input_dict_local['star_metallicity'] = [0.0]
             print('WARNING: Assuming star_metallicity = 0.0.')
+        if not 'star_database_interpolation' in input_keys:
+            input_dict_local['star_database_interpolation'] = ['nearest']
 
     input_dict_local['telescope_area'] *= u.Unit( input_dict_local['telescope_area_unit'][0] )
     del input_dict_local['telescope_area_unit']
@@ -1221,8 +1262,8 @@ def get_nearest_file_index(star_effective_temperature, star_log_gravity, star_me
     :return: the index of the nearest neighbour
     :rtype: int
     """
-    min_teff_diff = np.min(np.abs(star_params_grid[:,0]*u.Kelvin-star_effective_temperature))
-    indices_teff = np.where( np.abs(star_params_grid[:,0]*u.Kelvin-star_effective_temperature) == min_teff_diff )[0]
+    min_teff_diff = np.min(np.abs(star_params_grid[:,0]-star_effective_temperature))
+    indices_teff = np.where( np.abs(star_params_grid[:,0]-star_effective_temperature) == min_teff_diff )[0]
     min_logg_diff = np.min(np.abs(star_params_grid[indices_teff,1]-star_log_gravity))
     indices_logg = np.where( np.abs(star_params_grid[:,1]-star_log_gravity) == min_logg_diff )[0]
     indices_teff_logg = np.intersect1d(indices_teff, indices_logg)
@@ -1233,8 +1274,188 @@ def get_nearest_file_index(star_effective_temperature, star_log_gravity, star_me
     return index_teff_logg_mh
 
 
+def get_neighbour_files_indices(target_name,star_effective_temperature,star_log_gravity,star_metallicity,star_params_grid,stellar_models_grid):
+    """
+    This function searchs for up to 8 neighbours for a given set of stellar parameters and returns the corresponding indices in the files list (repeated indices are possible).
+    
+    :param str target_name: name associated with the target to compute
+    :param float star_effective_temperature: stellar effective temperature of the target
+    :param float star_log_gravity: stellar log gravity of the target
+    :param float star_metallicity: stellar metallicity of the target
+    :param np.array star_params_grid: 3-column array with stellar effective temperatures, log gravities and metallicities of the database models
+    :params str stellar_models_grid: the name of the chosen stellar database
+    :return: the indices of the (up to) eight nearest neighbour models (the array will contain 8 indices, but repeated indices are possible).
+    :rtype: np.array
+    """
+    #star_effective_temperature = star_effective_temperature.value
+    teff_min = np.min(star_params_grid[:,0])
+    teff_max = np.max(star_params_grid[:,0])
+    logg_min = np.min(star_params_grid[:,1])
+    logg_max = np.max(star_params_grid[:,1])
+    mh_min = np.min(star_params_grid[:,2])
+    mh_max = np.max(star_params_grid[:,2])
+    cond1 = (star_effective_temperature<teff_min)
+    cond2 = (star_effective_temperature>teff_max)
+    cond3 = (star_log_gravity<logg_min)
+    cond4 = (star_log_gravity>logg_max)
+    cond5 = (star_metallicity<mh_min)
+    cond6 = (star_metallicity>mh_max)
+    if cond1 or cond2:
+        print('WARNING:', target_name, 'cannot be calculated. The star_effective_temperature is out of the range (',teff_min,'-',teff_max,' K) for the stellar_models_grid', stellar_models_grid, '.')
+        neigh_indices = np.array([])
+    if cond3 or cond4:
+        print('WARNING:', target_name, 'cannot be calculated. The star_log_gravity is out of the range (',logg_min,'-',logg_max,') for the stellar_models_grid', stellar_models_grid, '.')
+        neigh_indices = np.array([])
+    if cond5 or cond6:
+        print('WARNING:', target_name, 'cannot be calculated. The star_metallicity is out of the range (',mh_min,'-',mh_max,') for the stellar_models_grid', stellar_models_grid, '.')
+        neigh_indices = np.array([])
+    if cond1 or cond2 or cond3 or cond4 or cond5 or cond6:
+        return neigh_indices
+    #
+    indices_teff_sup = np.where(star_params_grid[:,0]>=star_effective_temperature)[0]
+    indices_teff_inf = np.where(star_params_grid[:,0]<=star_effective_temperature)[0]
+    indices_logg_sup = np.where(star_params_grid[:,1]>=star_log_gravity)[0]
+    indices_logg_inf = np.where(star_params_grid[:,1]<=star_log_gravity)[0]
+    indices_mh_sup = np.where(star_params_grid[:,2]>=star_metallicity)[0]
+    indices_mh_inf = np.where(star_params_grid[:,2]<=star_metallicity)[0]
+    #
+    indices_teff_sup_logg_sup = np.intersect1d( indices_teff_sup, indices_logg_sup )
+    indices_teff_sup_logg_sup_mh_sup = np.intersect1d( indices_teff_sup_logg_sup, indices_mh_sup )
+    indices_teff_sup_logg_sup_mh_inf = np.intersect1d( indices_teff_sup_logg_sup, indices_mh_inf )
+    indices_teff_sup_logg_inf = np.intersect1d( indices_teff_sup, indices_logg_inf )
+    indices_teff_sup_logg_inf_mh_sup = np.intersect1d( indices_teff_sup_logg_inf, indices_mh_sup )
+    indices_teff_sup_logg_inf_mh_inf = np.intersect1d( indices_teff_sup_logg_inf, indices_mh_inf )
+    indices_teff_inf_logg_sup = np.intersect1d( indices_teff_inf, indices_logg_sup )
+    indices_teff_inf_logg_sup_mh_sup = np.intersect1d( indices_teff_inf_logg_sup, indices_mh_sup )
+    indices_teff_inf_logg_sup_mh_inf = np.intersect1d( indices_teff_inf_logg_sup, indices_mh_inf )
+    indices_teff_inf_logg_inf = np.intersect1d( indices_teff_inf, indices_logg_inf )
+    indices_teff_inf_logg_inf_mh_sup = np.intersect1d( indices_teff_inf_logg_inf, indices_mh_sup )
+    indices_teff_inf_logg_inf_mh_inf = np.intersect1d( indices_teff_inf_logg_inf, indices_mh_inf )
+    condd1 = (len(indices_teff_sup_logg_sup_mh_sup)==0)
+    condd2 = (len(indices_teff_sup_logg_sup_mh_inf)==0)
+    condd3 = (len(indices_teff_sup_logg_inf_mh_sup)==0)
+    condd4 = (len(indices_teff_sup_logg_inf_mh_inf)==0)
+    condd5 = (len(indices_teff_inf_logg_sup_mh_sup)==0)
+    condd6 = (len(indices_teff_inf_logg_sup_mh_inf)==0)
+    condd7 = (len(indices_teff_inf_logg_inf_mh_sup)==0)
+    condd8 = (len(indices_teff_inf_logg_inf_mh_inf)==0)
+    if condd1:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 1 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd2:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 2 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd3:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 3 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd4:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 4 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd5:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 5 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd6:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 6 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd7:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 7 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd8:
+        print('WARNING:', target_name, 'cannot be calculated. Neighbour 8 not found for the stellar_models_grid', stellar_models_grid, '.')
+    if condd1 or condd2 or condd3 or condd4 or condd5 or condd6 or condd7 or condd8:
+        neigh_indices = np.array([])
+        return neigh_indices
+    #
+    indices1t = indices_teff_sup_logg_sup_mh_sup[np.where( star_params_grid[indices_teff_sup_logg_sup_mh_sup,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_sup_mh_sup,0]-star_effective_temperature) )[0] ]
+    indices1tg = indices1t[np.where( star_params_grid[indices1t,1]-star_log_gravity == np.min(star_params_grid[indices1t,1]-star_log_gravity) )[0] ]
+    index1tgm = indices1tg[np.argmin( star_params_grid[indices1tg,2]-star_metallicity )]
+    #
+    indices2t = indices_teff_sup_logg_sup_mh_inf[np.where( star_params_grid[indices_teff_sup_logg_sup_mh_inf,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_sup_mh_inf,0]-star_effective_temperature) )[0] ]
+    indices2tg = indices2t[np.where( star_params_grid[indices2t,1]-star_log_gravity == np.min(star_params_grid[indices2t,1]-star_log_gravity) )[0] ]
+    index2tgm = indices2tg[np.argmin( star_metallicity-star_params_grid[indices2tg,2] )]
+    #
+    indices3t = indices_teff_sup_logg_inf_mh_sup[np.where( star_params_grid[indices_teff_sup_logg_inf_mh_sup,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_inf_mh_sup,0]-star_effective_temperature) )[0] ]
+    indices3tg = indices3t[np.where( star_log_gravity-star_params_grid[indices3t,1] == np.min(star_log_gravity-star_params_grid[indices3t,1]) )[0] ]
+    index3tgm = indices3tg[np.argmin( star_params_grid[indices3tg,2]-star_metallicity )]
+    #
+    indices4t = indices_teff_sup_logg_inf_mh_inf[np.where( star_params_grid[indices_teff_sup_logg_inf_mh_inf,0]-star_effective_temperature == np.min(star_params_grid[indices_teff_sup_logg_inf_mh_inf,0]-star_effective_temperature) )[0] ]
+    indices4tg = indices4t[np.where( star_log_gravity-star_params_grid[indices4t,1] == np.min(star_log_gravity-star_params_grid[indices4t,1]) )[0] ]
+    index4tgm = indices4tg[np.argmin( star_metallicity-star_params_grid[indices4tg,2] )]
+    #
+    indices5t = indices_teff_inf_logg_sup_mh_sup[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_sup,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_sup,0]) )[0] ]
+    indices5tg = indices5t[np.where( star_params_grid[indices5t,1]-star_log_gravity == np.min(star_params_grid[indices5t,1]-star_log_gravity) )[0] ]
+    index5tgm = indices5tg[np.argmin( star_params_grid[indices5tg,2]-star_metallicity )]
+    #
+    indices6t = indices_teff_inf_logg_sup_mh_inf[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_inf,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_sup_mh_inf,0]) )[0] ]
+    indices6tg = indices6t[np.where( star_params_grid[indices6t,1]-star_log_gravity == np.min(star_params_grid[indices6t,1]-star_log_gravity) )[0] ]
+    index6tgm = indices6tg[np.argmin( star_metallicity-star_params_grid[indices6tg,2] )]
+    #
+    indices7t = indices_teff_inf_logg_inf_mh_sup[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_sup,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_sup,0]) )[0] ]
+    indices7tg = indices7t[np.where( star_log_gravity-star_params_grid[indices7t,1] == np.min(star_log_gravity-star_params_grid[indices7t,1]) )[0] ]
+    index7tgm = indices7tg[np.argmin( star_params_grid[indices7tg,2]-star_metallicity )]
+    #
+    indices8t = indices_teff_inf_logg_inf_mh_inf[np.where( star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_inf,0] == np.min(star_effective_temperature-star_params_grid[indices_teff_inf_logg_inf_mh_inf,0]) )[0] ]
+    indices8tg = indices8t[np.where( star_log_gravity-star_params_grid[indices8t,1] == np.min(star_log_gravity-star_params_grid[indices8t,1]) )[0] ]
+    index8tgm = indices8tg[np.argmin( star_metallicity-star_params_grid[indices8tg,2] )]
+    #
+    neigh_indices = np.array([index1tgm, index2tgm, index3tgm, index4tgm, index5tgm, index6tgm, index7tgm, index8tgm])
+    return neigh_indices
 
-def get_model_spectrum(models_grid, params=None, file_to_read=None):
+
+def interp_model_spectra(teff, logg, mh, neigh_params_tgm, neigh_wavelengths, neigh_fluxes):
+    """
+    This function interpolates the limb-darkening coefficients by sequential linear interpolation.
+    
+    :param float teff: stellar effective temperature of the requested model
+    :param float logg: stellar surface log gravity of the requested model
+    :param float mh: stellar metallicity of the requested model
+    :param np.array neigh_indices: indices of the neighbour models in the online database
+    :param str passband: name of the passband (eventually, it includes the wavelength bin limits)
+    :param str law: name of the limb-darkening law
+    :param dict neighbour_limb_darkening_coefficients: dictionary containing the limb-darkening coefficients for the neighbour models
+    
+    :return: the interpolated limb-darkening coefficients and weighted rms for the requested model
+    :rtype: np.array, float
+    """
+    common_waves = np.unique( neigh_wavelengths )
+    neigh_fluxes_tgm = np.array([])
+    for i in range(np.shape(neigh_fluxes)[0]):
+        f_interp = interp1d(neigh_wavelengths[i,:].value, neigh_fluxes[i,:].value, fill_value='extrapolate')
+        neigh_fluxes_tgm = my_vstack( neigh_fluxes_tgm, f_interp(common_waves) )
+    neigh_fluxes_tgm *= neigh_fluxes.unit
+    neigh_fluxes_tg = np.array([])
+    neigh_params_tg = np.array([])
+    for i in [0, 2, 4, 6]:
+        w2 = neigh_params_tgm[i,2]-mh
+        w1 = mh-neigh_params_tgm[i+1,2]
+        if w1+w2==0:
+            neigh_fluxes_tg = my_vstack(neigh_fluxes_tg, neigh_fluxes_tgm[i,:])
+            neigh_params_tg = my_vstack(neigh_params_tg, neigh_params_tgm[i,:])
+        else:
+            w_neigh_fluxes = (w1*neigh_fluxes_tgm[i,:]+w2*neigh_fluxes_tgm[i+1,:])/(w1+w2)
+            w_neigh_params = (w1*neigh_params_tgm[i,:]+w2*neigh_params_tgm[i+1,:])/(w1+w2)
+            neigh_fluxes_tg = my_vstack(neigh_fluxes_tg, w_neigh_fluxes)
+            neigh_params_tg = my_vstack(neigh_params_tg, w_neigh_params)
+    #star log gravity interpolation
+    neigh_fluxes_t = np.array([])
+    neigh_params_t = np.array([])
+    for i in [0, 2]:
+        w2 = neigh_params_tg[i,1]-logg
+        w1 = logg-neigh_params_tg[i+1,1]
+        if w1+w2==0:
+            neigh_fluxes_t = my_vstack(neigh_fluxes_t, neigh_fluxes_tg[i,:])
+            neigh_params_t = my_vstack(neigh_params_t, neigh_params_tg[i,:])
+        else:
+            w_neigh_fluxes = (w1*neigh_fluxes_tg[i,:]+w2*neigh_fluxes_tg[i+1,:])/(w1+w2)
+            w_neigh_params = (w1*neigh_params_tg[i,:]+w2*neigh_params_tg[i+1,:])/(w1+w2)
+            neigh_fluxes_t = my_vstack(neigh_fluxes_t, w_neigh_fluxes)
+            neigh_params_t = my_vstack(neigh_params_t, w_neigh_params)
+    #star temperature interpolation
+    neigh_fluxes_final = np.array([])
+    neigh_params_final = np.array([])
+    w2 = neigh_params_t[0,0]-teff
+    w1 = teff-neigh_params_t[1,0]
+    if w1+w2==0:
+        neigh_fluxes_final = my_vstack(neigh_fluxes_final, neigh_fluxes_t[0,:])
+    else:
+        neigh_fluxes_final = (w1*neigh_fluxes_t[0,:]+w2*neigh_fluxes_t[1,:])/(w1+w2)
+    return common_waves, neigh_fluxes_final
+
+
+def get_model_spectrum(models_grid, params=None, file_to_read=None, nearest_warning=None):
     """
     This function returns the model spectrum from user file, blackbody calculation or built-in dataset
     
@@ -1257,7 +1478,8 @@ def get_model_spectrum(models_grid, params=None, file_to_read=None):
             exit()            
     elif models_grid=='Blackbody':
         blackbody_temperature = params[0]
-        model_wavelengths = get_waves_fromR(1.0, 2000000.0, R=1e6) * u.Angstrom
+        #model_wavelengths = get_waves_fromR(1.0, 2000000.0, 1e6) * u.Angstrom
+        model_wavelengths = get_waves_fromR(1.0, 2000000.0) * u.Angstrom
         model_fluxes = blackbody_lambda(model_wavelengths, blackbody_temperature)
         model_fluxes *= np.pi * u.sr
     else:
@@ -1265,12 +1487,14 @@ def get_model_spectrum(models_grid, params=None, file_to_read=None):
         star_effective_temperature =  params[0]
         star_log_gravity =  params[1]
         star_metallicity =  params[2]
-        neighbour_index = get_nearest_file_index(star_effective_temperature, star_log_gravity, star_metallicity, star_params_grid, models_grid)
-        print('WARNING: Adopting nearest model in the', models_grid, 'grid: Teff=', star_params_grid[neighbour_index,0]*u.Kelvin, ', logg=', star_params_grid[neighbour_index,1], ', [M/H]=', star_params_grid[neighbour_index,2])
+        neighbour_index = get_nearest_file_index(star_effective_temperature.value, star_log_gravity, star_metallicity, star_params_grid, models_grid)
+        if nearest_warning:
+            print('WARNING: Adopting nearest model in the', models_grid, 'grid: Teff=', star_params_grid[neighbour_index,0]*u.Kelvin, ', logg=', star_params_grid[neighbour_index,1], ', [M/H]=', star_params_grid[neighbour_index,2])
         neighbour_model = databases[models_grid].get_file_content(dbx_file=star_files_grid[neighbour_index])
         model_wavelengths = neighbour_model['wavelengths']
         model_fluxes = neighbour_model['fluxes']
     return model_wavelengths, model_fluxes
+
 
 
 def get_photon_spectrum(model_wavelengths, model_fluxes, obj_radius, obj_distance, telescope_area):
@@ -1305,7 +1529,8 @@ def get_relative_spectrum(relative_model_wavelengths, relative_model_fluxes, bas
     """
     lim1 = np.max([np.min(relative_model_wavelengths.value), np.min(base_model_wavelengths.value)])
     lim2 = np.min([np.max(relative_model_wavelengths.value), np.max(base_model_wavelengths.value)])
-    my_waves = get_waves_fromR(lim1, lim2, R=1e6) * u.Angstrom
+    #my_waves = get_waves_fromR(lim1, lim2, 1e6) * u.Angstrom
+    my_waves = get_waves_fromR(lim1, lim2) * u.Angstrom
     f_interp = interp1d(relative_model_wavelengths.value, relative_model_fluxes.value, fill_value='extrapolate')
     relative_interp_fluxes = f_interp(my_waves.value)
     g_interp = interp1d(base_model_wavelengths.value, base_model_fluxes.value, fill_value='extrapolate')
@@ -1394,13 +1619,15 @@ def process_configuration_transit(input_dict):
         [pb_wavelengths, pb_pce, check] = read_passband(passbands_path, passbands_ext, passbands[i], stellar_models_grid) #user or built-in file
         if check:
             f_interp = interp1d(pb_wavelengths.value, pb_pce.value, fill_value='extrapolate')
-            my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value), R=1e6) * pb_wavelengths.unit #choice of wavelengths
+            #my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value), 1e6) * pb_wavelengths.unit #choice of wavelengths
+            my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value)) * pb_wavelengths.unit #choice of wavelengths
             my_pce = f_interp(my_waves.value) * pb_pce.unit
             passbands_dict[passbands[i]] = [my_waves, my_pce]
             [wb, check] = read_wavelength_bins(wavelength_bins_path, wavelength_bins_files[i], pb_wavelengths, passbands[i]) #includes no_bins case
             if check:
                 for wbin in wb:
-                    my_waves = get_waves_fromR(wbin[0].value, wbin[1].value, R=1e6) * pb_wavelengths.unit
+                    #my_waves = get_waves_fromR(wbin[0].value, wbin[1].value, 1e6) * pb_wavelengths.unit
+                    my_waves = get_waves_fromR(wbin[0].value, wbin[1].value) * pb_wavelengths.unit
                     my_pce = f_interp(my_waves.value) * pb_pce.unit
                     passbands_dict[passbands[i]+'_'+str(wbin[0].value)+'_'+str(wbin[1].value)] = [my_waves, my_pce]
 
@@ -1427,7 +1654,23 @@ def process_configuration_transit(input_dict):
         star_log_gravity = input_dict_local['star_log_gravity'][0]
         star_metallicity = input_dict_local['star_metallicity'][0]
         params = [star_effective_temperature, star_log_gravity, star_metallicity]
-        [star_model_wavelengths, star_model_fluxes] = get_model_spectrum(stellar_models_grid, params=params)
+        star_database_interpolation = input_dict_local['star_database_interpolation'][0]
+        if star_database_interpolation=='nearest':
+            [star_model_wavelengths, star_model_fluxes] = get_model_spectrum(stellar_models_grid, params=params, nearest_warning=True)
+        elif star_database_interpolation=='seq_linear':
+            target_name = 'this target'
+            [star_files_grid, star_params_grid] = get_stellar_grid_parameters(stellar_models_grid) #Reading file names and stellar parameters from the selected database
+            neighbour_files_indices = get_neighbour_files_indices(target_name, star_effective_temperature.value, star_log_gravity, star_metallicity, star_params_grid, stellar_models_grid)
+            neighbour_star_params = np.array([])
+            neighbour_star_model_wavelengths = np.array([])
+            neighbour_star_model_fluxes = np.array([])
+            for i in neighbour_files_indices:
+                neighbour_star_params = my_vstack( neighbour_star_params, star_params_grid[i,:] )
+                params = [ star_params_grid[i,0]*u.Kelvin, star_params_grid[i,1], star_params_grid[i,2] ]
+                [neigh_star_model_wavelengths, neigh_star_model_fluxes] = get_model_spectrum(stellar_models_grid, params=params)
+                neighbour_star_model_wavelengths = my_vstack( neighbour_star_model_wavelengths, neigh_star_model_wavelengths )
+                neighbour_star_model_fluxes = my_vstack( neighbour_star_model_fluxes, neigh_star_model_fluxes )
+            [star_model_wavelengths, star_model_fluxes] = interp_model_spectra(star_effective_temperature.value, star_log_gravity, star_metallicity, neighbour_star_params, neighbour_star_model_wavelengths, neighbour_star_model_fluxes)
         system_distance = input_dict_local['system_distance'][0]
         star_photon_spectrum = get_photon_spectrum(star_model_wavelengths, star_model_fluxes, star_radius, system_distance, telescope_area)
     star_electrons_rate_dict = {}
@@ -1603,13 +1846,15 @@ def process_configuration_eclipse(input_dict):
         [pb_wavelengths, pb_pce, check] = read_passband(passbands_path, passbands_ext, passbands[i], stellar_models_grid) #user or built-in file
         if check:
             f_interp = interp1d(pb_wavelengths.value, pb_pce.value, fill_value='extrapolate')
-            my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value), R=1e6) * pb_wavelengths.unit #choice of wavelengths
+            #my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value), 1e6) * pb_wavelengths.unit #choice of wavelengths
+            my_waves = get_waves_fromR(np.min(pb_wavelengths.value), np.max(pb_wavelengths.value)) * pb_wavelengths.unit #choice of wavelengths
             my_pce = f_interp(my_waves.value) * pb_pce.unit
             passbands_dict[passbands[i]] = [my_waves, my_pce]
             [wb, check] = read_wavelength_bins(wavelength_bins_path, wavelength_bins_files[i], pb_wavelengths, passbands[i]) #includes no_bins case
             if check:
                 for wbin in wb:
-                    my_waves = get_waves_fromR(wbin[0].value, wbin[1].value, R=1e6) * pb_wavelengths.unit
+                    #my_waves = get_waves_fromR(wbin[0].value, wbin[1].value, 1e6) * pb_wavelengths.unit
+                    my_waves = get_waves_fromR(wbin[0].value, wbin[1].value) * pb_wavelengths.unit
                     my_pce = f_interp(my_waves.value) * pb_pce.unit
                     passbands_dict[passbands[i]+'_'+str(wbin[0].value)+'_'+str(wbin[1].value)] = [my_waves, my_pce]
 
@@ -1636,7 +1881,22 @@ def process_configuration_eclipse(input_dict):
         star_log_gravity = input_dict_local['star_log_gravity'][0]
         star_metallicity = input_dict_local['star_metallicity'][0]
         params = [star_effective_temperature, star_log_gravity, star_metallicity]
-        [star_model_wavelengths, star_model_fluxes] = get_model_spectrum(stellar_models_grid, params=params)
+        star_database_interpolation = input_dict_local['star_database_interpolation'][0]
+        if star_database_interpolation=='nearest':
+            [star_model_wavelengths, star_model_fluxes] = get_model_spectrum(stellar_models_grid, params=params, nearest_warning=True)
+        elif star_database_interpolation=='seq_linear':
+            target_name = 'this target'
+            [star_files_grid, star_params_grid] = get_stellar_grid_parameters(stellar_models_grid) #Reading file names and stellar parameters from the selected database
+            neighbour_files_indices = get_neighbour_files_indices(target_name, star_effective_temperature.value, star_log_gravity, star_metallicity, star_params_grid, stellar_models_grid)
+            neighbour_star_params = np.array([])
+            neighbour_star_model_wavelengths = np.array([])
+            neighbour_star_model_fluxes = np.array([])
+            for i in neighbour_files_indices:
+                neighbour_star_params = my_vstack( neighbour_star_params, star_params_grid[i,:] )
+                [neigh_star_model_wavelengths, neigh_star_model_fluxes] = get_model_spectrum(stellar_models_grid, params=star_params_grid[i,:])
+                neighbour_star_model_wavelengths = my_vstack( neighbour_star_model_wavelengths, neigh_star_model_wavelengths )
+                neighbour_star_model_fluxes = my_vstack( neighbour_star_model_fluxes, neigh_star_model_fluxes )
+            [star_model_wavelengths, star_model_fluxes] = interp_model_spectra(star_effective_temperature.value, star_log_gravity, star_metallicity, neighbour_star_params, neighbour_star_model_wavelengths, neighbour_star_model_fluxes)
         system_distance = input_dict_local['system_distance'][0]
         star_photon_spectrum = get_photon_spectrum(star_model_wavelengths, star_model_fluxes, star_radius, system_distance, telescope_area)
     star_electrons_rate_dict = get_passband_fluxes(star_model_wavelengths, star_photon_spectrum, passbands_dict)
