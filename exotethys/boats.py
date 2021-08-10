@@ -15,7 +15,7 @@ import pkg_resources
 import numpy as np
 from scipy.optimize import minimize
 from collections import OrderedDict
-from astropy.modeling.blackbody import blackbody_lambda
+from astropy.modeling.models import BlackBody
 import astropy.units as u
 from scipy.interpolate import interp1d
 from scipy.integrate import simps
@@ -1479,7 +1479,8 @@ def get_model_spectrum(models_grid, params=None, file_to_read=None, star_databas
         blackbody_temperature = params[0]
         #model_wavelengths = get_waves_fromR(1.0, 2000000.0, 1e6) * u.Angstrom
         model_wavelengths = get_waves_fromR(1.0, 2000000.0) * u.Angstrom
-        model_fluxes = blackbody_lambda(model_wavelengths, blackbody_temperature)
+        bb_lam = BlackBody(blackbody_temperature, scale=1.0 * u.erg / (u.cm ** 2 * u.AA * u.s * u.sr))
+        model_fluxes = bb_lam(model_wavelengths)
         model_fluxes *= np.pi * u.sr
     else:
         [star_files_grid, star_params_grid] = get_stellar_grid_parameters(models_grid) #Reading file names and stellar parameters from the selected database
