@@ -1397,7 +1397,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.9, -0.5, 0.9, -0.5))
             while conv==False:
-                ldc_claret4 = minimize(claret4, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xtol':1e-8,'maxfev':10000,'disp':False})
+                ldc_claret4 = minimize(claret4, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_claret4.success
                 params = ldc_claret4.x
             ldc_dict['passbands'][passband]['laws']['claret4']['coefficients'] = ldc_claret4.x
@@ -1407,7 +1407,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.5, 1.0))
             while conv==False:
-                ldc_power2 = minimize(power2, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xtol':1e-8,'maxfev':10000,'disp':False})
+                ldc_power2 = minimize(power2, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_power2.success
                 params = ldc_power2.x
             ldc_dict['passbands'][passband]['laws']['power2']['coefficients'] = ldc_power2.x
@@ -1417,7 +1417,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.9, -0.5))
             while conv==False:
-                ldc_square_root = minimize(square_root, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xtol':1e-8,'maxfev':10000,'disp':False})
+                ldc_square_root = minimize(square_root, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_square_root.success
                 params = ldc_square_root.x
             ldc_dict['passbands'][passband]['laws']['square_root']['coefficients'] = ldc_square_root.x
@@ -1427,7 +1427,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.9, -0.5))
             while conv==False:
-                ldc_quadratic = minimize(quadratic, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xtol':1e-8,'maxfev':10000,'disp':False})
+                ldc_quadratic = minimize(quadratic, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_quadratic.success
                 params = ldc_quadratic.x
             ldc_dict['passbands'][passband]['laws']['quadratic']['coefficients'] = ldc_quadratic.x
@@ -1437,7 +1437,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.5))
             while conv==False:
-                ldc_linear = minimize(linear, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xtol':1e-8,'maxfev':10000,'disp':False})
+                ldc_linear = minimize(linear, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_linear.success
                 params = ldc_linear.x
             ldc_dict['passbands'][passband]['laws']['linear']['coefficients'] = ldc_linear.x
@@ -1448,7 +1448,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
                 conv = False
                 params = np.ones(n)/n
                 while conv==False:
-                    ldc_gen_poly = minimize(gen_poly, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xtol':1e-8,'maxfev':10000,'disp':False})
+                    ldc_gen_poly = minimize(gen_poly, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                     conv = ldc_gen_poly.success
                     params = ldc_gen_poly.x
                 ldc_dict['passbands'][passband]['laws']['gen_poly'+str(n)]['coefficients'] = ldc_gen_poly.x
@@ -1459,7 +1459,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
                 conv = False
                 params = np.ones(n)/n
                 while conv==False:
-                    ldc_gen_claret = minimize(gen_claret, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xtol':1e-8,'maxfev':10000,'disp':False})
+                    ldc_gen_claret = minimize(gen_claret, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                     conv = ldc_gen_claret.success
                     params = ldc_gen_claret.x
                 ldc_dict['passbands'][passband]['laws']['gen_claret'+str(n)]['coefficients'] = ldc_gen_claret.x
