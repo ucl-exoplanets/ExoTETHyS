@@ -1211,7 +1211,7 @@ def get_waves_fromR(lambda1, lambda2, R=1e6):
     log_step = np.log( (2*R+1)/(2*R-1) )
     n_steps = np.ceil( (log_lambda2-log_lambda1)/log_step )
     n_steps = np.max([10, n_steps])
-    log_waves = np.linspace(log_lambda1, log_lambda2, num=np.int(n_steps))
+    log_waves = np.linspace(log_lambda1, log_lambda2, num=int(n_steps))
     waves = np.exp(log_waves)
     return waves
 
