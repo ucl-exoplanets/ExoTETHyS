@@ -12,7 +12,7 @@
 #*Tools for Exoplanetary Transits around Host Stars*#
 
 image::logo.png[width=40%]
-*version: 2.0.0*
+*version: 2.0.3*
 
 ifdef::env-github[]
 :tip-caption: :bulb:
@@ -168,11 +168,13 @@ Phoenix_2018
 
 - Claret, A. 2018, A&A, 618, A20
 
-Stagger_2015
+Stagger_2018
 
 - Chiavassa, A., et al. 2018, A&A, 611, A11 *https://pollux.oreme.org/DBPollux/PolluxAccesDB/[[3D Spectra, available publicly on POLLUX database]]*
-- Magic, Z., et al. 2015, A&A, 573, A90
 
+Stagger_2015
+
+- Magic, Z., et al. 2015, A&A, 573, A90
 
 If you adopt the built-in instrumental passbands, please consider citing the relevant references:
 
