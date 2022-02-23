@@ -569,10 +569,10 @@ def check_configuration(input_dict):
         print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
         check = False
     else:
-        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015']
+        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015', 'Stagger_2018']
         stellar_models_grid = stellar_models_grid[0]
         if stellar_models_grid not in allowed_stellar_models_grid:
-            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, and Stagger_2015.')
+            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018 and Stagger_2015.')
             check = False
 
     #Checking the choice of limb_darkening_laws; at least one law must be specified in the input file (no default).
@@ -1195,6 +1195,11 @@ def check_passband_limits(pb_waves, stellar_models_grid):
         maximum_wavelength = 1600000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
+    elif stellar_models_grid == 'Stagger_2018':
+        minimum_wavelength = 1010.0 * u.Angstrom
+        maximum_wavelength = 199960.16 * u.Angstrom
+        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
+            check = False
     elif stellar_models_grid == 'Stagger_2015':
         minimum_wavelength = 2000.172119140625 * u.Angstrom
         maximum_wavelength = 10000.0791015625 * u.Angstrom
@@ -1358,7 +1363,7 @@ def rescale_and_weights(mu, intensities, stellar_models_grid):
         weights_dr[0] = 0.5*radi[1]
         weights_dr[-1] = (1.0-radi[-1]) + 0.5*(radi[-1]-radi[-2])
         return mu, intensities, weights_dr
-    elif stellar_models_grid in ['Stagger_2015']:
+    elif stellar_models_grid in ['Stagger_2018', 'Stagger_2015']:
         #mu increasing, r decreasing
         weights_dr = np.zeros_like(radi)
         weights_dr[1:-1] = -0.5*(radi[2:]-radi[:-2])

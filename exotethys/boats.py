@@ -303,10 +303,10 @@ def check_configuration(input_dict):
             print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
             check = False
         else:
-            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015', 'Blackbody', 'Userfile']
+            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2018', 'Stagger_2015', 'Blackbody', 'Userfile']
             stellar_models_grid = stellar_models_grid[0]
             if stellar_models_grid not in allowed_stellar_models_grid:
-                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2015, Blackbody and Userfile.')
+                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018, Stagger_2015, Blackbody and Userfile.')
                 check = False
         if check:
             #stellar_models_grid = stellar_models_grid[0]
@@ -1109,6 +1109,11 @@ def check_passband_limits(pb_waves, stellar_models_grid):
     elif stellar_models_grid == 'Atlas_2000':
         minimum_wavelength = 90.9 * u.Angstrom
         maximum_wavelength = 1600000.0 * u.Angstrom
+        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
+            check = False
+    elif stellar_models_grid == 'Stagger_2018':
+        minimum_wavelength = 1010.0 * u.Angstrom
+        maximum_wavelength = 199960.16 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
     elif stellar_models_grid == 'Stagger_2015':
