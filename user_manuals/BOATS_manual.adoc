@@ -58,7 +58,7 @@ The BOATS configuration file is a text file in which each line begins with a key
 Below I describe the available keywords:
 
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2015_, _Blackbody_ or _Userfile_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2018_, _Stagger_2015_, _Blackbody_ or _Userfile_ +
 only one choice per run (i.e., configuration file) is allowed
 
 *planet_models_grid* (MANDATORY) +
