@@ -61,7 +61,7 @@ _individual_ is to compute LDCs for specific targets with stellar parameters pro
 _grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
 
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_ or _Stagger_2015_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2018_ or _Stagger_2015_ +
 only one choice per run (i.e., configuration file) is allowed
 
 *limb_darkening_laws* (MANDATORY) +
