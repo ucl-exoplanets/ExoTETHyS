@@ -40,3 +40,6 @@ Second online release
 
 **version 2.0.2**
 * Added option to interpolate stellar spectra from the available grids in boats.get_model_spectrum
+
+**version 2.0.3**
+* Added Stagger_2018 stellar models grid, which extends the wavelength coverage of Stagger_2015 up to 20 micron (everything else is identical in the common wavelength range).
