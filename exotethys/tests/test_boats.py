@@ -196,7 +196,7 @@ def test_get_waves_fromR(lambda1, lambda2, R, reference):
 waves_test = np.array([1000.0, 10000.0, 50000.0, 100000.0, 500000.0]) * u.Angstrom
 fluxes_test = np.array([144.1649012667559, 3741496.1001535463, 19456.223970992392, 1380.7778931393088, 2.4372444918063167]) * u.erg / (u.Angstrom * u.cm**2 * u.s)
 fluxes_test_j = np.array([4.808823485037e+12, 1.2480287613351322e+19, 1.6224744362141688e+18, 4.605779285946243e+17, 2.032443134215135e+16]) * u.jansky
-photons_Rsun_10pc_25m2 = np.array([9.222862600061873, 2393599.5618332108, 62235.00963957306, 8833.44328455026, 77.96062312384335]) * u.photon / (u.Angstrom * u.s)
+photons_Rsun_10pc_25m2 = np.array([9.222862446807765, 2393599.5220593377, 62235.00860542876, 8833.44313776704, 77.96062182839027]) * u.photon / (u.Angstrom * u.s)
 
 testdata = [
     (waves_test, fluxes_test, 1.0 * u.Rsun, 10.0 * u.pc, 25.0 * u.m**2, photons_Rsun_10pc_25m2),
