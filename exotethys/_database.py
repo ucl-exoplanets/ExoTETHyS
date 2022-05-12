@@ -55,9 +55,11 @@ class Database:
 			date_to_update = int(date_to_update)
 
 		if os.path.isdir(self.directory_path):
-			if force_update or len(glob.glob(os.path.join(self.directory_path, '*'))) == 0:
+			if force_update and len(glob.glob(os.path.join(self.directory_path, '*'))) != 0:
 				shutil.rmtree(self.directory_path)
-				os.mkdir(self.directory_path)
+				os.mkdir(self.directory_path)	
+				update = True
+			elif len(glob.glob(os.path.join(self.directory_path, '*'))) == 0:
 				update = True
 			else:
 				if not os.path.isfile(last_update_file_path):
