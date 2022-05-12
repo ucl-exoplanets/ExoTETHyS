@@ -43,3 +43,6 @@ Second online release
 
 **version 2.0.3**
 * Added Stagger_2018 stellar models grid, which extends the wavelength coverage of Stagger_2015 up to 20 micron (everything else is identical in the common wavelength range).
+
+**version 2.0.4**
+* Slight modification of \_database.py (lines 57-63) to fix an issue, suggested by Lorenzo Mugnai.
