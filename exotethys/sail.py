@@ -24,7 +24,7 @@ import pickle
 
 from ._database import Database, databases, sys, urlretrieve, glob, time, shutil
 
-def get_intensities_from_ldcs(mu, coefficients, law):
+def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_rot_angle=None, finite=True, positive=True, monotonically_decreasing=True):
     """
     This function computes the model intensities given the limb-darkening coefficients
     
@@ -34,29 +34,113 @@ def get_intensities_from_ldcs(mu, coefficients, law):
     :return: the intensities at the given mu values
     :rtype: np.array
     """
-
+    mu = np.atleast_2d( mu )
+    coefficients = np.atleast_2d( coefficients )
+    #print(mu)
+    if np.shape(mu)[0] not in np.shape(coefficients):
+        print('ERROR: [In SAIL.get_intensities_from_ldcs] The given mu values and limb-darkening coefficients have incompatible formats.')
+        return
     if law=='claret4':
-        model = 1.0 - coefficients[0]*(1.0-mu**0.5) - coefficients[1]*(1.0-mu) - coefficients[2]*(1.0-mu**1.5) - coefficients[3]*(1.0-mu**2.0)
+        check_ldcs = check_claret4_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
+        if not check_ldcs.all():
+            indices = list( np.where( not check_ldcs )[0] )
+            print('WARNING: [In SAIL.get_intensities_from_ldcs] Some claret4 limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
+        c1, check = make_same_format_2D(coefficients[:,0], mu, first_array='column')
+        c2, check = make_same_format_2D(coefficients[:,1], mu, first_array='column')
+        c3, check = make_same_format_2D(coefficients[:,2], mu, first_array='column')
+        c4, check = make_same_format_2D(coefficients[:,3], mu, first_array='column')
+        model = 1.0 - c1*(1.0-mu**0.5) - c2*(1.0-mu) - c3*(1.0-mu**1.5) - c4*(1.0-mu**2.0)
     elif law=='power2':
-        model = 1.0 - coefficients[0]*(1.0-mu**coefficients[1])
+        check_ldcs = check_power2_ldcs( coefficients, coeffs_type=coeffs_type, finite=finite, positive=positive, monotonically_decreasing=monotonically_decreasing)
+        if not check_ldcs.all():
+            indices = list( np.where( not check_ldcs )[0] )
+            print('WARNING: [In SAIL.get_intensities_from_ldcs] Some power2 limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
+        c_alpha = transform_power2_ldcs( coefficients, coeffs_type, 'original' )
+        c, check = make_same_format_2D(c_alpha[:,0], mu, first_array='column')
+        alpha, check = make_same_format_2D(c_alpha[:,1], mu, first_array='column')
+        #CHECK FORMAT OF C AND ALPHA (ALSO ADJUST transform_power2_ldcs). THE LINE BELOW SHOW HOW IT WORKS WITH (3, 2) FOR c AND (3, 11) FOR mu.
+        #prov = 1 - (1-mu**np.transpose(np.atleast_2d(c[:,1])))*np.transpose(np.atleast_2d(c[:,0]))
+        model = 1.0 - c*(1.0-mu**alpha)
     elif law=='square_root':
-        model = 1.0 - coefficients[0]*(1.0-mu**0.5) - coefficients[1]*(1.0-mu)
+        check_ldcs = check_square_root_ldcs( coefficients, coeffs_type=coeffs_type, i_rot_angle=i_rot_angle, positive=positive, monotonically_decreasing=monotonically_decreasing)
+        if not check_ldcs.all():
+            indices = list( np.where( not check_ldcs )[0] )
+            print('WARNING: [In SAIL.get_intensities_from_ldcs] Some square root limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
+        c1_c2 = transform_square_root_ldcs( coefficients, coeffs_type, 'original', i_rot_angle=i_rot_angle )
+        c1, check = make_same_format_2D(c1_c2[:,0], mu, first_array='column')
+        c2, check = make_same_format_2D(c1_c2[:,1], mu, first_array='column')
+        model = 1.0 - c1*(1.0-mu**0.5) - c2*(1.0-mu)
     elif law=='quadratic':
-        model = 1.0 - coefficients[0]*(1.0-mu) - coefficients[1]*(1.0-mu)**2.0
+        check_ldcs = check_quadratic_ldcs( coefficients, coeffs_type=coeffs_type, i_rot_angle=i_rot_angle, positive=positive, monotonically_decreasing=monotonically_decreasing)
+        if not check_ldcs.all():
+            indices = list( np.where( not check_ldcs )[0] )
+            print('WARNING: [In SAIL.get_intensities_from_ldcs] Some quadratic limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
+        u1_u2 = transform_quadratic_ldcs( coefficients, coeffs_type, 'original', i_rot_angle=i_rot_angle )
+        u1, check = make_same_format_2D(u1_u2[:,0], mu, first_array='column')
+        u2, check = make_same_format_2D(u1_u2[:,1], mu, first_array='column')
+        model = 1.0 - u1*(1.0-mu) - u2*(1.0-mu)**2.0
     elif law=='linear':
-        model = 1.0 - coefficients[0]*(1.0-mu)
+        check_ldcs = check_linear_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
+        if not check_ldcs.all():
+            indices = list( np.where( not check_ldcs )[0] )
+            print('WARNING: [In SAIL.get_intensities_from_ldcs] Some linear limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
+        u, check = make_same_format_2D(coefficients, mu, first_array='column')
+        model = 1.0 - u*(1.0-mu)
     elif law=='gen_poly':
+        nc = np.shape(coefficients)[1]
+        check_ldcs = check_gen_poly_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
+        if not check_ldcs.all():
+            indices = list( np.where( not check_ldcs )[0] )
+            print('WARNING: [In SAIL.get_intensities_from_ldcs] Some gen_poly', nc, 'limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         model = 1.0
-        for n in range(len(coefficients)):
-            model -= coefficients[n]*(1.0-mu**(n+1.0))
+        for n in range(nc):
+            cn, check = make_same_format_2D(coefficients[:,n], mu, first_array='column')
+            model -= cn*(1.0-mu**(n+1.0))
     elif law=='gen_claret':
+        nc = np.shape(coefficients)[1]
+        check_ldcs = check_gen_claret_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
+        if not check_ldcs.all():
+            indices = list( np.where( not check_ldcs )[0] )
+            print('WARNING: [In SAIL.get_intensities_from_ldcs] Some gen_claret', nc, 'limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         model = 1.0
-        for n in range(len(coefficients)):
-            model -= coefficients[n]*(1.0-mu**((n+1.0)/2))
+        for n in range(nc):
+            cn, check = make_same_format_2D(coefficients[:,n], mu, first_array='column')
+            model -= cn*(1.0-mu**((n+1.0)/2))
     return  model
 
 
-def claret4(params, mucut, intscut, weights):
+def check_claret4_ldcs(params, positive=True, monotonically_decreasing=True):
+    """
+    This function checks if claret4 limb-darkening coefficients comply with the requirements of
+    (A) positive, (B) monotonically decreasing profile.
+
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :return: True, if the limb-darkening coefficients comply with the above requirements; False otherwise
+    :rtype: bool (or list of bool)
+    """
+    c1 = params[:,0]
+    c2 = params[:,1]
+    c3 = params[:,2]
+    c4 = params[:,3]
+    check1 = np.isfinite(c1)
+    check2 = np.isfinite(c2)
+    check3 = np.isfinite(c3)
+    check4 = np.isfinite(c4)
+    cond = np.column_stack([ check1, check2, check3, check4 ])
+    if positive:
+        cond1 = (c1 + c2 + c3 + c4 <= 1.0) #positive
+        cond = np.column_stack([cond, cond1])
+    if monotonically_decreasing:
+        cond2 = (c1 >= 0.0) #monotonically decreasing
+        cond3 = (c1 + 2.0*c2 + 3.0*c3 + 4.0*c4 >= 0.0) #monotonically decreasing
+        cond = np.column_stack([cond, cond2, cond3])
+    cond = cond.all(axis=1)
+    return cond
+
+
+def get_wrms_claret4(params, mucut, intscut, weights, coeffs_type='original', positive=True, monotonically_decreasing=True, sum_axis=None):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
@@ -71,35 +155,339 @@ def claret4(params, mucut, intscut, weights):
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
-    c1 = params[0]
-    c2 = params[1]
-    c3 = params[2]
-    c4 = params[3]
-    model = 1.0 - c1*(1.0-mucut**0.5) - c2*(1.0-mucut) - c3*(1.0-mucut**1.5) - c4*(1.0-mucut**2.0)
-    return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
+    params = np.atleast_2d(params)
+    mucut = np.atleast_2d(mucut)
+    intscut = np.atleast_2d(intscut)
+    weights = np.atleast_2d(weights)
+    mucut, check = make_same_format_2D(mucut, intscut, first_array='row')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_claret4] The given mu values and intensities have incompatible formats.')
+        return
+    weights, check = make_same_format_2D(weights, mucut, first_array='whatever')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_claret4] The given weights and mu values or intensities have incompatible formats.')
+        return
+    params, check = make_same_format_2D( params, intscut[:,:4], first_array='row' )
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_claret4] The given limb-darkening coefficients and mu values or intensities have incompatible formats.')
+        return
+    check_ldcs = check_claret4_ldcs( params, positive=positive, monotonically_decreasing=monotonically_decreasing )
+    model = np.zeros_like( intscut ) + np.inf
+    if check_ldcs.any():
+        model[check_ldcs,:] = get_intensities_from_ldcs(mucut[check_ldcs,:], params[check_ldcs,:], 'claret4')
+    return np.sum(weights*((intscut-model)**2), axis=sum_axis) / np.sum(weights, axis=sum_axis)
 
-def power2(params, mucut, intscut, weights):
+
+def transform_power2_ldcs( params, input_type, output_type ):
+    """
+    This function converts between various formats of power2 limb-darkening coefficients:
+    original, (c, alpha) as defined by Hestroffer 1997, A&A, 327, 199
+    short_2019, (q1, q2) as defined by Short et al. 2019, RNAAS, 3, 117
+    maxted_2018, (h1, h2) as defined by Maxted 2018, A&A, 616, A39
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :param str output_type: requested format for the limb-darkening coefficients
+    :return: the transformed limb-darkening coefficients with the requested output type
+    :rtype: float, float
+    """
+    params = np.asarray( params )
+    params = np.atleast_2d( params )
+    check = check_2Darray(params, n_col=2)
+    if not check:
+        print('ERROR: wrong format for the power2 limb-darkening coefficients. It should be an Nx2 array or list of arrays.')
+        return
+    ldc1 = params[:,0]
+    ldc2 = params[:,1]
+    #ldc1 = np.atleast_2d( ldc1 )
+    #ldc2 = np.atleast_2d( ldc2 )
+    #ldc1 = np.transpose( ldc1 )
+    #ldc2 = np.transpose( ldc2 )
+    #print(ldc1, ldc2)
+    if input_type=='original':
+        if output_type=='original':
+            return np.column_stack([ ldc1, ldc2 ])
+        elif output_type=='short_2019':
+            q1 = ( 1.0 - ldc1*(2.0**(-ldc2)) )**2
+            #q2 = np.random.rand(q1.size)
+            q2 = np.zeros_like(q1)
+            indices = np.where(q1!=0)[0]
+            q2[indices] = (1.0 - ldc1[indices])/np.sqrt(q1[indices])
+            return np.column_stack([ q1, q2 ])
+        elif output_type=='maxted_2018':
+            h1 = 1.0 - ldc1*(1.0-2.0**(-ldc2))
+            h2 = ldc1*(2.0**(-ldc2))
+            return np.column_stack([ h1, h2 ])
+    elif output_type=='original':
+        if input_type=='short_2019':
+            c = 1.0 - ldc2*np.sqrt(ldc1)
+            #alpha = np.random.rand(c.size)
+            alpha = np.zeros_like(c)
+            indices = np.where(c!=0)
+            alpha[indices] = np.log2( c[indices] / (1.0 - np.sqrt(ldc1[indices])) )
+            return np.column_stack([ c, alpha ])
+        elif input_type=='maxted_2018':
+            c = 1.0 - ldc1 + ldc2
+            #alpha = np.random.rand(c.size)
+            alpha = np.zeros_like(c)
+            indices = np.where(c!=0)
+            alpha[indices] = np.log2(c[indices]/ldc2[indices])
+            return np.column_stack([ c, alpha ])
+    else:
+        c_alpha = transform_power2_ldcs( params, input_type, 'original' )
+        ldcs_tr = transform_power2_ldcs( c_alpha, 'original', output_type )
+        return ldcs_tr
+
+
+#def check_power2_ldcs(params, input_type, warning=True, correct=True):
+#    """
+#    This function checks if square root limb-darkening coefficients comply with the requirements of
+#    (A) positive, (B) monotonically decreasing profile,
+#    using the transformation defined by Short et al. 2019, RNAAS, 3, 117.
+#    By default, a correction is applied to get valid coefficients.
+
+    
+#    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+#    :param str input_type: format of the given limb-darkening coefficients
+#    :argument bool correct: if True, apply correction to get valid limb-darkening coefficients
+#    :argument bool warning: if True, print warnings
+#    :return: if correct, the corrected limb-darkening coefficients, otherwise the same as the input ones
+#    :rtype: float, float
+#    """
+#    q_ldcs = transform_power2_ldcs( params, input_type, 'short_2019' )
+#    q_ldcs = np.asarray( q_ldcs )
+#    if np.min(q_ldcs)<0.0 or np.max(q_ldcs)>1.0:
+#        if correct:
+#            q_ldcs[ np.where( q_ldcs<0.0 ) ] = 0.0
+#            q_ldcs[ np.where( q_ldcs>1.0 ) ] = 1.0
+#            if warning:
+#                print('WARNING: There are unphysical power2 limb-darkening coefficients. Fixing them automatically.')
+#        elif warning:
+#            print('WARNING: There are unphysical power2 limb-darkening coefficients. No corrections applied.')
+#    ldc1, ldc2 = transform_power2_ldcs( q_ldcs, 'short_2019', input_type )
+#    return ldc1, ldc2
+
+def check_power2_ldcs(params, coeffs_type='original', finite=True, positive=True, monotonically_decreasing=True):
+    """
+    This function checks if power2 limb-darkening coefficients comply with the requirements of
+    (A) positive, (B) monotonically decreasing profile.
+
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :return: True, if the limb-darkening coefficients comply with the above requirements; False otherwise
+    :rtype: bool (or list of bool)
+    """
+    c_alpha = transform_power2_ldcs( params, coeffs_type, 'original' )
+    c = c_alpha[:,0]
+    alpha = c_alpha[:,1]
+    check1 = np.isfinite(c)
+    check2 = np.isfinite(alpha)
+    cond = np.column_stack([ check1, check2])
+    if finite:
+        cond1 = (alpha >= 0.0)
+        cond = np.column_stack([cond, cond1])
+    if positive:
+        cond2 = (c <= 1.0) #positive
+        cond = np.column_stack([cond, cond2])
+    if monotonically_decreasing:
+        cond3 = (c >= 0.0) #monotonically decreasing
+        cond = np.column_stack([cond, cond2])
+    cond = cond.all(axis=1)
+    return cond
+
+
+def get_wrms_power2(params, mucut, intscut, weights, coeffs_type='original', finite=True, positive=True, monotonically_decreasing=True, sum_axis=None):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
     with power2 limb-darkening coefficients:
-    I(mu)/I(1) = 1.0 - u*(1-mu^a)
+    I(mu)/I(1) = 1.0 - c*(1-mu^a)
     
     :param np.array params: 1D array with two limb-darkening coefficients
     :param np.array mucut: 1D array with mu values
     :param np.array intscut: 1D array with normalized model intensities at the mu values
     :param np.array weights: 1D array of weights for the fitting algorithm
     ..note:: mucut, intscut and weights must have the same size
+    :argument str coeffs_type: format of the given limb-darkening coefficients (default is 'original')
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
-    u = params[0]
-    a = params[1]
-    model = 1.0 - u*(1.0-mucut**a)
-    return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
+    params = np.atleast_2d(params)
+    mucut = np.atleast_2d(mucut)
+    intscut = np.atleast_2d(intscut)
+    weights = np.atleast_2d(weights)
+    mucut, check = make_same_format_2D(mucut, intscut, first_array='row')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_power2] The given mu values and intensities have incompatible formats.')
+        return
+    weights, check = make_same_format_2D(weights, mucut, first_array='whatever')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_power2] The given weights and mu values or intensities have incompatible formats.')
+        return
+    params, check = make_same_format_2D( params, intscut[:,:2], first_array='row' )
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_power2] The given limb-darkening coefficients and mu values or intensities have incompatible formats.')
+        return
+    check_ldcs = check_power2_ldcs( params, coeffs_type=coeffs_type, finite=finite, positive=positive, monotonically_decreasing=monotonically_decreasing )
+    model = np.zeros_like( intscut ) + np.inf
+    if check_ldcs.any():
+        model[check_ldcs,:] = get_intensities_from_ldcs(mucut[check_ldcs,:], params[check_ldcs,:], 'power2', coeffs_type=coeffs_type)
+    return np.sum(weights*((intscut-model)**2), axis=sum_axis) / np.sum(weights, axis=sum_axis)
 
 
-def square_root(params, mucut, intscut, weights):
+
+def make_same_format_2D(arr1, arr2, first_array='row'):
+    arr1 = np.atleast_2d( arr1 )
+    arr2 = np.atleast_2d( arr2 )
+    check = True
+    #check = check_2Darray( arr1 ) and check_2Darray( arr2 )
+    #if not check:
+    #    return arr1, check
+    try:
+        r1, c1 = np.shape( arr1 )
+        r2, c2 = np.shape( arr2 )
+    except:
+        check = False
+        return arr1, check 
+    if r1==r2 and c1==c2:
+        return arr1, check
+    elif r1==1 and c1==c2 and first_array in ['row', 'whatever']:
+        arr1 = np.tile( arr1, (r2,1) )
+        return arr1, check
+    elif r1==c2 and c1==1 and first_array in ['row', 'whatever']:
+        arr1 =  np.transpose( arr1 )
+        arr1 = np.tile( arr1, (r2,1) )
+        return arr1, check
+    elif r1==r2 and c1==1 and first_array in ['column', 'whatever']:
+        arr1 = np.tile( arr1, c2 )
+        return arr1, check
+    elif r1==1 and c1==r2 and first_array in ['column', 'whatever']:
+        arr1 =  np.transpose( arr1 )
+        arr1 = np.tile( arr1, c2 )
+        return arr1, check
+    elif r1==1 and c1==1 and first_array=='whatever':
+        arr1 = np.tile( arr1, (r2, c2) )
+        return arr1, check
+    else:
+        check = False
+        return arr1, check
+   
+
+
+def transform_square_root_ldcs( params, input_type, output_type, i_rot_angle=None, o_rot_angle=None ):
+    """
+    This function converts between various formats of square root limb-darkening coefficients:
+    original, (c1, c2) as defined by Diaz-Cordoves & Gimenez 1992, A&A, 259, 227
+    square01_uniform, (q1, q2) as defined by Kipping 2013, MNRAS, 435, 2152
+    halfsquare01_uniform, (v1, v2) as defined by Kipping 2013, MNRAS, 435, 2152
+    sum_diff, (c1+c2, c1-c2)
+    2sum1_1diff2, (2*c1+c2, c1-2*c2) 
+    rotated, by applying rotation to the (c1, c2) vector
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :param str output_type: requested format for the limb-darkening coefficients
+    :argument quantity i_rot_angle: angle for the rotated limb-darkening coefficients, given as input, with respect to the original ones (default is None)
+    :argument quantity o_rot_angle: angle for the rotated limb-darkening coefficients, requested as output, with respect to the original ones (default is None)
+    :return: the transformed limb-darkening coefficients with the requested output type
+    :rtype: float, float
+    """
+    params = np.asarray( params )
+    params = np.atleast_2d( params )
+    check = check_2Darray(params, n_col=2)
+    if not check:
+        print('ERROR: wrong format for the square root limb-darkening coefficients. It should be an Nx2 array or list of arrays.')
+        return
+    ldc1 = params[:,0]
+    ldc2 = params[:,1]
+    if input_type=='original':
+        if output_type=='original':
+            return np.column_stack([ ldc1, ldc2 ])
+        elif output_type=='square01_uniform':
+            q1 = ( ldc1 + ldc2 )**2.0
+            q2 = np.zeros_like(q1)
+            indices = np.where(q1>0)
+            q2[indices] = 0.5*ldc1[indices]/q1[indices]
+            return np.column_stack([ q1, q2 ])
+        elif output_type=='halfsquare01_uniform':
+            v1 = 0.5*ldc1
+            v2 = 1.0 - ldc1 - ldc2
+            return np.column_stack([ v1, v2 ])
+        elif output_type=='sum_diff':
+            cplus = ldc1 + ldc2
+            cminus = ldc1 - ldc2
+            return np.column_stack([ cplus, cminus ])
+        elif output_type=='2sum1_1diff2':
+            c2sum1 = 2.0*ldc1 + ldc2
+            c1diff2 = ldc1 - 2.0*ldc2
+            return np.column_stack([ c2sum1, c1diff2 ])
+        elif output_type=='rotated':
+            cos_t = np.cos(o_rot_angle).value
+            sin_t = np.sin(o_rot_angle).value
+            w1 = ldc1*cos_t - ldc2*sin_t
+            w2 = ldc1*sin_t + ldc2*cos_t
+            return np.column_stack([ w1, w2 ])
+    elif output_type=='original':
+        if input_type=='square01_uniform':
+            c1 = 2.0*np.sqrt(ldc1)*ldc2
+            c2 = np.sqrt(ldc1)*(1.0-2.0*ldc2)
+            return np.column_stack([ c1, c2 ])
+        elif input_type=='halfsquare01_uniform':
+            c1 = 2.0 * ldc1
+            c2 = 1.0 - 2.0*ldc1 - ldc2
+            return np.column_stack([ c1, c2 ])
+        elif input_type=='sum_diff':
+            c1 = 0.5 * ( ldc1 + ldc2 )
+            c2 = 0.5 * ( ldc1 - ldc2 )
+            return np.column_stack([ c1, c2 ])
+        elif input_type=='2sum1_1diff2':
+            c1 = 0.2 * ( 2.0*ldc1 + ldc2 )
+            c2 = 0.2 * ( ldc1 - 2.0*ldc2 )
+            return np.column_stack([ c1, c2 ])
+        elif input_type=='rotated':
+            cos_t = np.cos(-i_rot_angle).value
+            sin_t = np.sin(-i_rot_angle).value
+            c1 = ldc1*cos_t - ldc2*sin_t
+            c2 = ldc1*sin_t + ldc2*cos_t
+            return np.column_stack([ c1, c2 ])
+    else:
+        c1_c2 = transform_square_root_ldcs( params, input_type, 'original', i_rot_angle=i_rot_angle )
+        ldcs_tr = transform_square_root_ldcs( c1_c2, 'original', output_type, o_rot_angle=o_rot_angle )
+        return ldcs_tr
+
+
+def check_square_root_ldcs(params, coeffs_type='original', i_rot_angle=None, positive=True, monotonically_decreasing=True):
+    """
+    This function checks if square root limb-darkening coefficients comply with the requirements of
+    (A) positive, (B) monotonically decreasing profile.
+
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :argument quantity i_rot_angle: angle for the rotated limb-darkening coefficients, given as input, with respect to the original ones (default is None)
+    :return: True, if the limb-darkening coefficients comply with the above requirements; False otherwise
+    :rtype: bool (or list of bool)
+    """
+    c1_c2 = transform_square_root_ldcs( params, coeffs_type, 'original', i_rot_angle=i_rot_angle )
+    c1 = c1_c2[:,0]
+    c2 = c1_c2[:,1]
+    check1 = np.isfinite(c1)
+    check2 = np.isfinite(c2)
+    cond = np.column_stack([ check1, check2])
+    if positive:
+        cond1 = (c1 + c2 <= 1) #positive
+        cond = np.column_stack([cond, cond1])
+    if monotonically_decreasing:
+        cond2 = (c1 >= 0) #monotonically decreasing
+        cond3 = (c1 + 2.0*c2 >= 0) #monotonically decreasing
+        cond = np.column_stack([cond, cond2, cond3])
+    cond = cond.all(axis=1)
+    return cond
+
+
+
+def get_wrms_square_root(params, mucut, intscut, weights, coeffs_type='original', i_rot_angle=None, o_rot_angle=None, positive=True, monotonically_decreasing=True, sum_axis=None):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
@@ -111,37 +499,214 @@ def square_root(params, mucut, intscut, weights):
     :param np.array intscut: 1D array with normalized model intensities at the mu values
     :param np.array weights: 1D array of weights for the fitting algorithm
     ..note:: mucut, intscut and weights must have the same size
+    :argument str coeffs_type: format of the given limb-darkening coefficients (default is 'original')
+    :argument quantity i_rot_angle: angle for the rotated limb-darkening coefficients, given as input, with respect to the original ones (default is None)
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
-    c1 = params[0]
-    c2 = params[1]
-    model = 1.0 - c1*(1.0-mucut**0.5) - c2*(1.0-mucut)
-    return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
+    params = np.atleast_2d(params)
+    mucut = np.atleast_2d(mucut)
+    intscut = np.atleast_2d(intscut)
+    weights = np.atleast_2d(weights)
+    mucut, check = make_same_format_2D(mucut, intscut, first_array='row')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_square_root] The given mu values and intensities have incompatible formats.')
+        return
+    weights, check = make_same_format_2D(weights, mucut, first_array='whatever')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_square_root] The given weights and mu values or intensities have incompatible formats.')
+        return
+    params, check = make_same_format_2D( params, intscut[:,:2], first_array='row' )
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_square_root] The given limb-darkening coefficients and mu values or intensities have incompatible formats.')
+        return
+    check_ldcs = check_square_root_ldcs( params, coeffs_type=coeffs_type, i_rot_angle=i_rot_angle, positive=positive, monotonically_decreasing=monotonically_decreasing )
+    model = np.zeros_like( intscut ) + np.inf
+    if check_ldcs.any():
+        model[check_ldcs,:] = get_intensities_from_ldcs(mucut[check_ldcs,:], params[check_ldcs,:], 'square_root', coeffs_type=coeffs_type, i_rot_angle=i_rot_angle)
+    return np.sum(weights*((intscut-model)**2), axis=sum_axis) / np.sum(weights, axis=sum_axis)
 
 
-def quadratic(params, mucut, intscut, weights):
+
+def transform_quadratic_ldcs( params, input_type, output_type, i_rot_angle=None, o_rot_angle=None ):
+    """
+    This function converts between various formats of quadratic limb-darkening coefficients:
+    original, (u1, u2) as defined by Kopal 1950, HarCi, 454, 1
+    square01_uniform, (q1, q2) as defined by Kipping 2013, MNRAS, 435, 2152
+    halfsquare01_uniform, (v1, v2) as defined by Kipping 2013, MNRAS, 435, 2152
+    sum_diff, (u+, u-) as defined by Brown et al. 2001, 
+    2sum1_1diff2, (2*u1+u2, u1-2*u2) as defined by Holman et al. 2006, 
+    rotated, as proposed by Pal 2008, 
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :param str output_type: requested format for the limb-darkening coefficients
+    :argument quantity i_rot_angle: angle for the rotated limb-darkening coefficients, given as input, with respect to the original ones (default is None)
+    :argument quantity o_rot_angle: angle for the rotated limb-darkening coefficients, requested as output, with respect to the original ones (default is None)
+    :return: the transformed limb-darkening coefficients with the requested output type
+    :rtype: float, float
+    """
+    params = np.asarray( params )
+    params = np.atleast_2d( params )
+    check = check_2Darray(params, n_col=2)
+    if not check:
+        print('ERROR: wrong format for the quadratic limb-darkening coefficients. It should be an Nx2 array or list of arrays.')
+        return
+    ldc1 = params[:,0]
+    ldc2 = params[:,1]
+    if input_type=='original':
+        if output_type=='original':
+            return np.column_stack([ ldc1, ldc2 ])
+        elif output_type=='square01_uniform':
+            q1 = ( ldc1 + ldc2 )**2.0
+            q2 = np.zeros_like(q1)
+            indices = np.where(q1>0)
+            q2[indices] = 0.5*ldc1[indices]/q1[indices]
+            return np.column_stack([ q1, q2 ])
+        elif output_type=='halfsquare01_uniform':
+            v1 = 0.5*ldc1
+            v2 = 1.0 - ldc1 - ldc2
+            return np.column_stack([ v1, v2 ])
+        elif output_type=='sum_diff':
+            uplus = ldc1 + ldc2
+            uminus = ldc1 - ldc2
+            return np.column_stack([ uplus, uminus ])
+        elif output_type=='2sum1_1diff2':
+            u2sum1 = 2.0*ldc1 + ldc2
+            u1diff2 = ldc1 - 2.0*ldc2
+            return np.column_stack([ u2sum1, u1diff2 ])
+        elif output_type=='rotated':
+            cos_t = np.cos(o_rot_angle).value
+            sin_t = np.sin(o_rot_angle).value
+            w1 = ldc1*cos_t - ldc2*sin_t
+            w2 = ldc1*sin_t + ldc2*cos_t
+            return np.column_stack([ w1, w2 ])
+    elif output_type=='original':
+        if input_type=='square01_uniform':
+            u1 = 2.0*np.sqrt(ldc1)*ldc2
+            u2 = np.sqrt(ldc1)*(1.0-2.0*ldc2)
+            return np.column_stack([ u1, u2 ])
+        elif input_type=='halfsquare01_uniform':
+            u1 = 2.0 * ldc1
+            u2 = 1.0 - 2.0*ldc1 - ldc2
+            return np.column_stack([ u1, u2 ])
+        elif input_type=='sum_diff':
+            u1 = 0.5 * ( ldc1 + ldc2 )
+            u2 = 0.5 * ( ldc1 - ldc2 )
+            return np.column_stack([ u1, u2 ])
+        elif input_type=='2sum1_1diff2':
+            u1 = 0.2 * ( 2.0*ldc1 + ldc2 )
+            u2 = 0.2 * ( ldc1 - 2.0*ldc2 )
+            return np.column_stack([ u1, u2 ])
+        elif input_type=='rotated':
+            cos_t = np.cos(-i_rot_angle).value
+            sin_t = np.sin(-i_rot_angle).value
+            u1 = ldc1*cos_t - ldc2*sin_t
+            u2 = ldc1*sin_t + ldc2*cos_t
+            return np.column_stack([ u1, u2 ])
+    else:
+        u1_u2 = transform_quadratic_ldcs( params, input_type, 'original', i_rot_angle=i_rot_angle )
+        ldcs_tr = transform_quadratic_ldcs( u1_u2, 'original', output_type, o_rot_angle=o_rot_angle )
+        return ldcs_tr
+
+
+def check_quadratic_ldcs(params, coeffs_type='original', i_rot_angle=None, positive=True, monotonically_decreasing=True):
+    """
+    This function checks if quadratic limb-darkening coefficients comply with the requirements of
+    (A) positive, (B) monotonically decreasing profile,
+    using the transformation defined by Kipping 2013, MNRAS, 435, 2152.
+    By default, a correction is applied to get valid coefficients.
+
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :argument quantity i_rot_angle: angle for the rotated limb-darkening coefficients, given as input, with respect to the original ones (default is None)
+    :return: True, if the limb-darkening coefficients comply with the above requirements; False otherwise
+    :rtype: bool (or list of bool)
+    """
+    u1_u2 = transform_square_root_ldcs( params, coeffs_type, 'original', i_rot_angle=i_rot_angle )
+    u1 = u1_u2[:,0]
+    u2 = u1_u2[:,1]
+    check1 = np.isfinite(u1)
+    check2 = np.isfinite(u2)
+    cond = np.column_stack([ check1, check2])
+    if positive:
+        cond1 = (u1 + u2 <= 1) #positive
+        cond = np.column_stack([cond, cond1])
+    if monotonically_decreasing:
+        cond2 = (u1 >= 0) #monotonically decreasing
+        cond3 = (u1 + 2.0*u2 >= 0) #monotonically decreasing
+        cond = np.column_stack([cond, cond2, cond3])
+    cond = cond.all(axis=1)
+    return cond
+
+
+def get_wrms_quadratic(params, mucut, intscut, weights, coeffs_type='original', i_rot_angle=None, o_rot_angle=None, positive=True, monotonically_decreasing=True, sum_axis=None):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
     with quadratic limb-darkening coefficients:
-    I(mu)/I(1) = 1.0 - g1*(1-mu) - g2*(1-mu)^2
+    I(mu)/I(1) = 1.0 - u1*(1-mu) - u2*(1-mu)^2
     
     :param np.array params: 1D array with two limb-darkening coefficients
     :param np.array mucut: 1D array with mu values
     :param np.array intscut: 1D array with normalized model intensities at the mu values
     :param np.array weights: 1D array of weights for the fitting algorithm
     ..note:: mucut, intscut and weights must have the same size
+    :argument str coeffs_type: format of the given limb-darkening coefficients (default is 'original')
+    :argument quantity i_rot_angle: angle for the rotated limb-darkening coefficients, given as input, with respect to the original ones (default is None)
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
-    g1 = params[0]
-    g2 = params[1]
-    model = 1.0 - g1*(1.0-mucut) - g2*(1.0-mucut)**2.0
-    return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
+    params = np.atleast_2d(params)
+    mucut = np.atleast_2d(mucut)
+    intscut = np.atleast_2d(intscut)
+    weights = np.atleast_2d(weights)
+    mucut, check = make_same_format_2D(mucut, intscut, first_array='row')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_quadratic] The given mu values and intensities have incompatible formats.')
+        return
+    weights, check = make_same_format_2D(weights, mucut, first_array='whatever')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_quadratic] The given weights and mu values or intensities have incompatible formats.')
+        return
+    params, check = make_same_format_2D( params, intscut[:,:2], first_array='row' )
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_quadratic] The given limb-darkening coefficients and mu values or intensities have incompatible formats.')
+        return
+    check_ldcs = check_quadratic_ldcs( params, coeffs_type=coeffs_type, i_rot_angle=i_rot_angle, positive=positive, monotonically_decreasing=monotonically_decreasing )
+    model = np.zeros_like( intscut ) + np.inf
+    if check_ldcs.any():
+        model[check_ldcs,:] = get_intensities_from_ldcs(mucut[check_ldcs,:], params[check_ldcs,:], 'quadratic', coeffs_type=coeffs_type, i_rot_angle=i_rot_angle)
+    return np.sum(weights*((intscut-model)**2), axis=sum_axis) / np.sum(weights, axis=sum_axis)
 
 
-def linear(params, mucut, intscut, weights):
+
+def check_linear_ldcs(params, positive=True, monotonically_decreasing=True):
+    """
+    This function checks if linear limb-darkening coefficients comply with the requirements of
+    (A) positive, (B) monotonically decreasing profile.
+    By default, a correction is applied to get valid coefficients.
+
+    
+    :param np.array params: float or 1D array with one limb-darkening coefficients (or N or list)
+    :return: True, if the limb-darkening coefficients comply with the above requirements; False otherwise
+    :rtype: bool (or list of bool)
+    """
+    u = copy.deepcopy( params )
+    check = np.isfinite(u)
+    cond = np.column_stack([ check, check ])[:,:1]
+    if positive:
+        cond1 = ( u <= 1.0 ) #positive
+        cond = np.column_stack([cond, cond1])
+    if monotonically_decreasing:
+        cond2 = ( u >=0.0 ) #monotonically decreasing
+        cond = np.column_stack([cond, cond2])
+    cond = cond.all(axis=1)
+    return cond
+
+
+def get_wrms_linear(params, mucut, intscut, weights, positive=True, monotonically_decreasing=True, sum_axis=None):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
@@ -156,12 +721,57 @@ def linear(params, mucut, intscut, weights):
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
-    u = params[0]
-    model = 1.0 - u*(1.0-mucut)
-    return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
+    params = np.column_stack([params, params])[:,:1]
+    mucut = np.atleast_2d(mucut)
+    intscut = np.atleast_2d(intscut)
+    weights = np.atleast_2d(weights)
+    mucut, check = make_same_format_2D(mucut, intscut, first_array='row')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_linear] The given mu values and intensities have incompatible formats.')
+        return
+    weights, check = make_same_format_2D(weights, mucut, first_array='whatever')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_linear] The given weights and mu values or intensities have incompatible formats.')
+        return
+    params, check = make_same_format_2D( params, intscut[:,:1], first_array='row' )
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_linear] The given limb-darkening coefficients and mu values or intensities have incompatible formats.')
+        return
+    check_ldcs = check_linear_ldcs( params, positive=positive, monotonically_decreasing=monotonically_decreasing )
+    model = np.zeros_like( intscut ) + np.inf
+    if check_ldcs.any():
+        model[check_ldcs,:] = get_intensities_from_ldcs(mucut[check_ldcs,:], params[check_ldcs,:], 'linear')
+    return np.sum(weights*((intscut-model)**2), axis=sum_axis) / np.sum(weights, axis=sum_axis)
 
 
-def gen_poly(params, mucut, intscut, weights):
+
+def check_gen_poly_ldcs(params, positive=True, monotonically_decreasing=True):
+    """
+    This function checks if gen_poly limb-darkening coefficients comply with the requirements of
+    (A) positive, (B) monotonically decreasing profile.
+
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :return: True, if the limb-darkening coefficients comply with the above requirements; False otherwise
+    :rtype: bool (or list of bool)
+    """
+    params = np.atleast_2d( params )
+    nc = np.shape(params)[1]
+    cond = np.isfinite( params )
+    if positive:
+        cond1 = (np.sum( params, axis=1 ) <= 1.0) #positive
+        cond = np.column_stack([cond, cond1])
+    if monotonically_decreasing:
+        cond2 = (params[:,0] >= 0.0) #monotonically decreasing
+        deriv = make_same_format_2D(1+np.arange(nc), params, first_array='row')[0]
+        cond3 = (np.sum( deriv*params, axis=1 ) >= 0.0) #monotonically decreasing
+        cond = np.column_stack([cond, cond2, cond3])
+    cond = cond.all(axis=1)
+    return cond
+
+
+def get_wrms_gen_poly(params, mucut, intscut, weights, positive=True, monotonically_decreasing=True, sum_axis=None):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
@@ -176,15 +786,59 @@ def gen_poly(params, mucut, intscut, weights):
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
-    g = params.copy()
-    n_params = len(g)
-    model = 1.0
-    for n in range(n_params):
-        model -= g[n]*(1.0-mucut**(n+1.0))
-    return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
+    params = np.atleast_2d(params)
+    nc = np.shape(params)[1]
+    mucut = np.atleast_2d(mucut)
+    intscut = np.atleast_2d(intscut)
+    weights = np.atleast_2d(weights)
+    mucut, check = make_same_format_2D(mucut, intscut, first_array='row')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_gen_poly', nc,'] The given mu values and intensities have incompatible formats.')
+        return
+    weights, check = make_same_format_2D(weights, mucut, first_array='whatever')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_gen_poly', nc,'] The given weights and mu values or intensities have incompatible formats.')
+        return
+    params, check = make_same_format_2D( params, intscut[:,:nc], first_array='row' )
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_gen_poly', nc,'] The given limb-darkening coefficients and mu values or intensities have incompatible formats.')
+        return
+    check_ldcs = check_gen_poly_ldcs( params, positive=positive, monotonically_decreasing=monotonically_decreasing )
+    model = np.zeros_like( intscut ) + np.inf
+    if check_ldcs.any():
+        model[check_ldcs,:] = get_intensities_from_ldcs(mucut[check_ldcs,:], params[check_ldcs,:], 'gen_poly')
+    return np.sum(weights*((intscut-model)**2), axis=sum_axis) / np.sum(weights, axis=sum_axis)
 
 
-def gen_claret(params, mucut, intscut, weights):
+
+
+def check_gen_claret_ldcs(params, positive=True, monotonically_decreasing=True):
+    """
+    This function checks if gen_claret4 limb-darkening coefficients comply with the requirements of
+    (A) positive, (B) monotonically decreasing profile.
+
+    
+    :param np.array params: 1D array with two limb-darkening coefficients (or Nx2 array or list)
+    :param str input_type: format of the given limb-darkening coefficients
+    :return: True, if the limb-darkening coefficients comply with the above requirements; False otherwise
+    :rtype: bool (or list of bool)
+    """
+    params = np.atleast_2d( params )
+    nc = np.shape(params)[1]
+    cond = np.isfinite( params )
+    if positive:
+        cond1 = (np.sum( params, axis=1 ) <= 1.0) #positive
+        cond = np.column_stack([cond, cond1])
+    if monotonically_decreasing:
+        cond2 = (params[:,0] >= 0.0) #monotonically decreasing
+        deriv = make_same_format_2D(1+np.arange(nc), params, first_array='row')[0]
+        cond3 = (np.sum( deriv*params, axis=1 ) >= 0.0) #monotonically decreasing
+        cond = np.column_stack([cond, cond2, cond3])
+    cond = cond.all(axis=1)
+    return cond
+
+
+def get_wrms_gen_claret(params, mucut, intscut, weights, positive=True, monotonically_decreasing=True, sum_axis=None):
     """
     This function computes the weighted root mean square of residuals
     between the model intensities and the parametrized values
@@ -199,12 +853,28 @@ def gen_claret(params, mucut, intscut, weights):
     :return: the weighted rms of residuals between model and intscut
     :rtype: float
     """
-    c = params.copy()
-    n_params = len(c)
-    model = 1.0
-    for n in range(n_params):
-        model -= c[n]*(1.0-mucut**((n+1.0)/2))
-    return np.sum(weights*((intscut-model)**2)) / np.sum(weights)
+    params = np.atleast_2d(params)
+    nc = np.shape(params)[1]
+    mucut = np.atleast_2d(mucut)
+    intscut = np.atleast_2d(intscut)
+    weights = np.atleast_2d(weights)
+    mucut, check = make_same_format_2D(mucut, intscut, first_array='row')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_gen_claret', nc,'] The given mu values and intensities have incompatible formats.')
+        return
+    weights, check = make_same_format_2D(weights, mucut, first_array='whatever')
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_gen_claret', nc,'] The given weights and mu values or intensities have incompatible formats.')
+        return
+    params, check = make_same_format_2D( params, intscut[:,:nc], first_array='row' )
+    if not check:
+        print('ERROR: [In SAIL.get_wrms_gen_claret', nc,'] The given limb-darkening coefficients and mu values or intensities have incompatible formats.')
+        return
+    check_ldcs = check_gen_claret_ldcs( params, positive=positive, monotonically_decreasing=monotonically_decreasing )
+    model = np.zeros_like( intscut ) + np.inf
+    if check_ldcs.any():
+        model[check_ldcs,:] = get_intensities_from_ldcs(mucut[check_ldcs,:], params[check_ldcs,:], 'gen_claret')
+    return np.sum(weights*((intscut-model)**2), axis=sum_axis) / np.sum(weights, axis=sum_axis)
 
 #limb_darkening_laws_func = {'claret4':claret4, 'square_root':square_root, 'quadratic':quadratic, 'linear':linear, 'gen_claret':gen_claret, 'gen_poly':gen_poly}
 
@@ -569,10 +1239,10 @@ def check_configuration(input_dict):
         print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
         check = False
     else:
-        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015', 'Stagger_2018']
+        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015']
         stellar_models_grid = stellar_models_grid[0]
         if stellar_models_grid not in allowed_stellar_models_grid:
-            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018 and Stagger_2015.')
+            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, and Stagger_2015.')
             check = False
 
     #Checking the choice of limb_darkening_laws; at least one law must be specified in the input file (no default).
@@ -1195,11 +1865,6 @@ def check_passband_limits(pb_waves, stellar_models_grid):
         maximum_wavelength = 1600000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
-    elif stellar_models_grid == 'Stagger_2018':
-        minimum_wavelength = 1010.0 * u.Angstrom
-        maximum_wavelength = 199960.16 * u.Angstrom
-        if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
-            check = False
     elif stellar_models_grid == 'Stagger_2015':
         minimum_wavelength = 2000.172119140625 * u.Angstrom
         maximum_wavelength = 10000.0791015625 * u.Angstrom
@@ -1330,7 +1995,7 @@ def get_passband_intensities(model_dict, passbands_dict):
 
 
 
-def rescale_and_weights(mu, intensities, stellar_models_grid):
+def rescale_and_weights(mu, intensities, stellar_models_grid, user_geometry='pp', user_r_cut=0.99623):
     """
     This function finds the drop-off in the spherical intensity models, removes the values after the drop-off and rescales the other mu/radi values,
     then applies the quasi-spherical cut-off and computes weights for the intensity model-fit.
@@ -1363,13 +2028,17 @@ def rescale_and_weights(mu, intensities, stellar_models_grid):
         weights_dr[0] = 0.5*radi[1]
         weights_dr[-1] = (1.0-radi[-1]) + 0.5*(radi[-1]-radi[-2])
         return mu, intensities, weights_dr
-    elif stellar_models_grid in ['Stagger_2018', 'Stagger_2015']:
+    elif stellar_models_grid in ['Stagger_2015']:
         #mu increasing, r decreasing
         weights_dr = np.zeros_like(radi)
         weights_dr[1:-1] = -0.5*(radi[2:]-radi[:-2])
         weights_dr[0] = (1.0-radi[0]) - 0.5*(radi[1]-radi[0])
         weights_dr[-1] = 0.5*radi[-2]
         return mu, intensities, weights_dr
+    elif stellar_models_grid in ['Userfile']:
+        return mu, intensities, weights_dr
+
+
 
 
 
@@ -1402,7 +2071,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.9, -0.5, 0.9, -0.5))
             while conv==False:
-                ldc_claret4 = minimize(claret4, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
+                ldc_claret4 = minimize(get_wrms_claret4, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_claret4.success
                 params = ldc_claret4.x
             ldc_dict['passbands'][passband]['laws']['claret4']['coefficients'] = ldc_claret4.x
@@ -1412,7 +2081,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.5, 1.0))
             while conv==False:
-                ldc_power2 = minimize(power2, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
+                ldc_power2 = minimize(get_wrms_power2, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_power2.success
                 params = ldc_power2.x
             ldc_dict['passbands'][passband]['laws']['power2']['coefficients'] = ldc_power2.x
@@ -1420,9 +2089,9 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
         if 'square_root' in limb_darkening_laws:
             ldc_dict['passbands'][passband]['laws']['square_root'] = {}
             conv = False
-            params = np.array((0.9, -0.5))
+            params = np.array((0.9, -0.2))
             while conv==False:
-                ldc_square_root = minimize(square_root, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
+                ldc_square_root = minimize(get_wrms_square_root, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_square_root.success
                 params = ldc_square_root.x
             ldc_dict['passbands'][passband]['laws']['square_root']['coefficients'] = ldc_square_root.x
@@ -1430,9 +2099,9 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
         if 'quadratic' in limb_darkening_laws:
             ldc_dict['passbands'][passband]['laws']['quadratic'] = {}
             conv = False
-            params = np.array((0.9, -0.5))
+            params = np.array((0.9, -0.2))
             while conv==False:
-                ldc_quadratic = minimize(quadratic, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
+                ldc_quadratic = minimize(get_wrms_quadratic, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_quadratic.success
                 params = ldc_quadratic.x
             ldc_dict['passbands'][passband]['laws']['quadratic']['coefficients'] = ldc_quadratic.x
@@ -1442,7 +2111,7 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             conv = False
             params = np.array((0.5))
             while conv==False:
-                ldc_linear = minimize(linear, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
+                ldc_linear = minimize(get_wrms_linear, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                 conv = ldc_linear.success
                 params = ldc_linear.x
             ldc_dict['passbands'][passband]['laws']['linear']['coefficients'] = ldc_linear.x
@@ -1451,9 +2120,9 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             for n in gen_poly_orders:
                 ldc_dict['passbands'][passband]['laws']['gen_poly'+str(n)] = {}
                 conv = False
-                params = np.ones(n)/n
+                params = 0.5*np.ones(n)/n
                 while conv==False:
-                    ldc_gen_poly = minimize(gen_poly, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
+                    ldc_gen_poly = minimize(get_wrms_gen_poly, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                     conv = ldc_gen_poly.success
                     params = ldc_gen_poly.x
                 ldc_dict['passbands'][passband]['laws']['gen_poly'+str(n)]['coefficients'] = ldc_gen_poly.x
@@ -1462,9 +2131,9 @@ def get_limb_darkening_coefficients(integ_dict, limb_darkening_laws, stellar_mod
             for n in gen_claret_orders:
                 ldc_dict['passbands'][passband]['laws']['gen_claret'+str(n)] = {}
                 conv = False
-                params = np.ones(n)/n
+                params = 0.5*np.ones(n)/n
                 while conv==False:
-                    ldc_gen_claret = minimize(gen_claret, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
+                    ldc_gen_claret = minimize(get_wrms_gen_claret, params, args=(res_mu, res_integ_ints, weights), method='nelder-mead', options={'xatol':1e-8,'maxfev':10000,'disp':False})
                     conv = ldc_gen_claret.success
                     params = ldc_gen_claret.x
                 ldc_dict['passbands'][passband]['laws']['gen_claret'+str(n)]['coefficients'] = ldc_gen_claret.x
