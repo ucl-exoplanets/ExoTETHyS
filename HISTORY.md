@@ -46,3 +46,6 @@ Second online release
 
 **version 2.0.4**
 * Slight modification of \_database.py (lines 57-63) to fix an issue, suggested by Lorenzo Mugnai.
+
+**version 2.0.5**
+* Added JWST NIRSPEC PRISM passband.
