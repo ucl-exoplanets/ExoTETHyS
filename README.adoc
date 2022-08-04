@@ -12,7 +12,7 @@
 #*Tools for Exoplanetary Transits around Host Stars*#
 
 image::logo.png[width=40%]
-*version: 2.0.4*
+*version: 2.0.5*
 
 ifdef::env-github[]
 :tip-caption: :bulb:
