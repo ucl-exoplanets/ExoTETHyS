@@ -49,3 +49,7 @@ Second online release
 
 **version 2.0.5**
 * Added JWST NIRSPEC PRISM passband.
+
+**version 2.0.6**
+* Introduced new functions that enable some transformations of the LDCs, and also apply physical constraints (monotonically decreasing intensity profiles).
+* The new functions are also vectorized.
