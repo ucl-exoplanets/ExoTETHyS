@@ -53,3 +53,6 @@ Second online release
 **version 2.0.6**
 * Introduced new functions that enable some transformations of the LDCs, and also apply physical constraints (monotonically decreasing intensity profiles).
 * The new functions are also vectorized.
+
+**version 2.0.7**
+* Fixed bug in sail.get_intensities_from_ldcs, about checking the LDCs.
