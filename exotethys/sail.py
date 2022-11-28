@@ -43,7 +43,7 @@ def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_r
     if law=='claret4':
         check_ldcs = check_claret4_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
         if not check_ldcs.all():
-            indices = list( np.where( not check_ldcs )[0] )
+            indices = list( np.where( ~check_ldcs )[0] )
             print('WARNING: [In SAIL.get_intensities_from_ldcs] Some claret4 limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         c1, check = make_same_format_2D(coefficients[:,0], mu, first_array='column')
         c2, check = make_same_format_2D(coefficients[:,1], mu, first_array='column')
@@ -53,7 +53,7 @@ def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_r
     elif law=='power2':
         check_ldcs = check_power2_ldcs( coefficients, coeffs_type=coeffs_type, finite=finite, positive=positive, monotonically_decreasing=monotonically_decreasing)
         if not check_ldcs.all():
-            indices = list( np.where( not check_ldcs )[0] )
+            indices = list( np.where( ~check_ldcs )[0] )
             print('WARNING: [In SAIL.get_intensities_from_ldcs] Some power2 limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         c_alpha = transform_power2_ldcs( coefficients, coeffs_type, 'original' )
         c, check = make_same_format_2D(c_alpha[:,0], mu, first_array='column')
@@ -64,7 +64,7 @@ def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_r
     elif law=='square_root':
         check_ldcs = check_square_root_ldcs( coefficients, coeffs_type=coeffs_type, i_rot_angle=i_rot_angle, positive=positive, monotonically_decreasing=monotonically_decreasing)
         if not check_ldcs.all():
-            indices = list( np.where( not check_ldcs )[0] )
+            indices = list( np.where( ~check_ldcs )[0] )
             print('WARNING: [In SAIL.get_intensities_from_ldcs] Some square root limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         c1_c2 = transform_square_root_ldcs( coefficients, coeffs_type, 'original', i_rot_angle=i_rot_angle )
         c1, check = make_same_format_2D(c1_c2[:,0], mu, first_array='column')
@@ -73,7 +73,7 @@ def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_r
     elif law=='quadratic':
         check_ldcs = check_quadratic_ldcs( coefficients, coeffs_type=coeffs_type, i_rot_angle=i_rot_angle, positive=positive, monotonically_decreasing=monotonically_decreasing)
         if not check_ldcs.all():
-            indices = list( np.where( not check_ldcs )[0] )
+            indices = list( np.where( ~check_ldcs )[0] )
             print('WARNING: [In SAIL.get_intensities_from_ldcs] Some quadratic limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         u1_u2 = transform_quadratic_ldcs( coefficients, coeffs_type, 'original', i_rot_angle=i_rot_angle )
         u1, check = make_same_format_2D(u1_u2[:,0], mu, first_array='column')
@@ -82,7 +82,7 @@ def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_r
     elif law=='linear':
         check_ldcs = check_linear_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
         if not check_ldcs.all():
-            indices = list( np.where( not check_ldcs )[0] )
+            indices = list( np.where( ~check_ldcs )[0] )
             print('WARNING: [In SAIL.get_intensities_from_ldcs] Some linear limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         u, check = make_same_format_2D(coefficients, mu, first_array='column')
         model = 1.0 - u*(1.0-mu)
@@ -90,7 +90,7 @@ def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_r
         nc = np.shape(coefficients)[1]
         check_ldcs = check_gen_poly_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
         if not check_ldcs.all():
-            indices = list( np.where( not check_ldcs )[0] )
+            indices = list( np.where( ~check_ldcs )[0] )
             print('WARNING: [In SAIL.get_intensities_from_ldcs] Some gen_poly', nc, 'limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         model = 1.0
         for n in range(nc):
@@ -100,7 +100,7 @@ def get_intensities_from_ldcs(mu, coefficients, law, coeffs_type='original', i_r
         nc = np.shape(coefficients)[1]
         check_ldcs = check_gen_claret_ldcs( coefficients, positive=positive, monotonically_decreasing=monotonically_decreasing)
         if not check_ldcs.all():
-            indices = list( np.where( not check_ldcs )[0] )
+            indices = list( np.where( ~check_ldcs )[0] )
             print('WARNING: [In SAIL.get_intensities_from_ldcs] Some gen_claret', nc, 'limb-darkening coefficients do not comply with the requirements. The corresponding indices are', indices, '.')
         model = 1.0
         for n in range(nc):
