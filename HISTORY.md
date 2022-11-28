@@ -56,3 +56,6 @@ Second online release
 
 **version 2.0.7**
 * Fixed bug in sail.get_intensities_from_ldcs, about checking the LDCs.
+
+**version 2.0.8**
+* Added uniform\_stagger\_2018 passband.
