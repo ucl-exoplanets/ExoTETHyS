@@ -59,3 +59,6 @@ Second online release
 
 **version 2.0.8**
 * Added uniform\_stagger\_2018 passband.
+
+**version 2.0.9**
+* Fixed bug in Kipping's transform for quadratic and square-root LDCs.
