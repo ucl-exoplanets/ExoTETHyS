@@ -408,7 +408,7 @@ def transform_square_root_ldcs( params, input_type, output_type, i_rot_angle=Non
             q1 = ( ldc1 + ldc2 )**2.0
             q2 = np.zeros_like(q1)
             indices = np.where(q1>0)
-            q2[indices] = 0.5*ldc1[indices]/q1[indices]
+            q2[indices] = 0.5*ldc1[indices]/np.sqrt(q1[indices])
             return np.column_stack([ q1, q2 ])
         elif output_type=='halfsquare01_uniform':
             v1 = 0.5*ldc1
@@ -561,7 +561,7 @@ def transform_quadratic_ldcs( params, input_type, output_type, i_rot_angle=None,
             q1 = ( ldc1 + ldc2 )**2.0
             q2 = np.zeros_like(q1)
             indices = np.where(q1>0)
-            q2[indices] = 0.5*ldc1[indices]/q1[indices]
+            q2[indices] = 0.5*ldc1[indices]/np.sqrt(q1[indices])
             return np.column_stack([ q1, q2 ])
         elif output_type=='halfsquare01_uniform':
             v1 = 0.5*ldc1
