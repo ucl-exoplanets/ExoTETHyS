@@ -1239,10 +1239,10 @@ def check_configuration(input_dict):
         print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
         check = False
     else:
-        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015', 'Stagger_2018']
+        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015', 'Stagger_2018', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023']
         stellar_models_grid = stellar_models_grid[0]
         if stellar_models_grid not in allowed_stellar_models_grid:
-            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018 and Stagger_2015.')
+            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018, Stagger_2015, MPS_Atlas_set1_2023 and MPS_Atlas_set2_2023.')
             check = False
 
     #Checking the choice of limb_darkening_laws; at least one law must be specified in the input file (no default).
@@ -1607,7 +1607,8 @@ def stellar_params_from_file_name(file_name):
     :return: a numpy array with the effective temperature, log gravity and metallicity for the input file name.
     :rtype: np.array
     """
-    params = os.path.basename(file_name).replace('.pickle', '').split('_')
+    file_ext = os.path.splitext(file_name)[-1]
+    params = os.path.basename(file_name).replace(file_ext, '').split('_')
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
     mh = float(params[2].replace('MH', ''))
@@ -1970,7 +1971,7 @@ def get_waves_fromR(lambda1, lambda2, R=1e6):
     return waves
 
 
-def get_passband_intensities(model_dict, passbands_dict):
+def get_passband_intensities(model_dict, passbands_dict, wave_air_to_vac=0):
 
     """
     This function calls the calculation of integrated intensities for various passbands.
@@ -1984,6 +1985,8 @@ def get_passband_intensities(model_dict, passbands_dict):
     """
     passbands = list(passbands_dict.keys())
     model_wavelengths = model_dict['wavelengths']
+    if wave_air_to_vac==-1:
+        model_wavelengths = wavelength_from_vacuum_to_air( model_wavelengths.value ) * u.Angstrom
     model_intensities = model_dict['intensities']
     model_mu = model_dict['mu']
     norm_index = np.argmax(model_mu)
@@ -2026,7 +2029,7 @@ def rescale_and_weights(mu, intensities, stellar_models_grid, user_geometry='pp'
         weights_dr_qs[0] = (1.0-radicut_dr_qs[0]) - 0.5*(radicut_dr_qs[1]-radicut_dr_qs[0])
         weights_dr_qs[-1] = 0.5*radicut_dr_qs[-2]
         return mucut_dr_qs, intensitiescut_dr_qs, weights_dr_qs
-    elif stellar_models_grid in ['Atlas_2000']:
+    elif stellar_models_grid in ['Atlas_2000', 'MPS_Atlas_set1_2023']:
         #mu decreasing, r increasing
         weights_dr = np.zeros_like(radi)
         weights_dr[1:-1] = 0.5*(radi[2:]-radi[:-2])
