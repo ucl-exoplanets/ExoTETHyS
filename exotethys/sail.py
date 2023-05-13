@@ -1014,6 +1014,11 @@ def check_2Darray(arr, n_col=None):
     return check
 
 
+def wavelength_from_vacuum_to_air(wavelength_in_vacuum): #in Angstrom
+    s = 1e4 / wavelength_in_vacuum
+    n = 1 + 0.0000834254 + 0.02406147 / (130 - s * s) + 0.00015998 / (38.9 - s * s)
+    return wavelength_in_vacuum / n
+
 
 def read_configuration(filename):
     """
