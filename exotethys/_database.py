@@ -70,17 +70,17 @@ class Database:
                     update = True
                 else:
                     update = False
-            else:
-                os.mkdir(self.directory_path)
-                update = True
+        else:
+            os.mkdir(self.directory_path)
+            update = True
 
-            #with open(os.path.join(package_name, info_file_name), 'rb') as file:
-            with open(info_file_path,'rb') as file: #Christophe correction
-                dbx_files_dict = pickle.load(file)
-                self.dbx_files = dbx_files_dict[database_name]
+        #with open(os.path.join(package_name, info_file_name), 'rb') as file:
+        with open(info_file_path,'rb') as file: #Christophe correction
+            dbx_files_dict = pickle.load(file)
+            self.dbx_files = dbx_files_dict[database_name]
 
-            #dbx_files = pickle.load(open(info_file_path, 'rb'))
-            #dbx_files = dbx_files['{0}_{1}'.format(database_name, directory_name)]
+        #dbx_files = pickle.load(open(info_file_path, 'rb'))
+        #dbx_files = dbx_files['{0}_{1}'.format(database_name, directory_name)]
 
 
 #    def self_print(self):
@@ -124,7 +124,6 @@ class Database:
 	def get_filename_list(self):
 		file_list = list(self.dbx_files.keys())
 		return file_list
-
 
 
 databases = {
