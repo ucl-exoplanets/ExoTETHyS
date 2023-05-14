@@ -121,9 +121,9 @@ class Database:
         return model_dict
 
 
-	def get_filename_list(self):
-		file_list = list(self.dbx_files.keys())
-		return file_list
+    def get_filename_list(self):
+        file_list = list(self.dbx_files.keys())
+        return file_list
 
 
 databases = {
