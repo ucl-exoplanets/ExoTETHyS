@@ -2034,7 +2034,7 @@ def rescale_and_weights(mu, intensities, stellar_models_grid, user_geometry='pp'
         weights_dr_qs[0] = (1.0-radicut_dr_qs[0]) - 0.5*(radicut_dr_qs[1]-radicut_dr_qs[0])
         weights_dr_qs[-1] = 0.5*radicut_dr_qs[-2]
         return mucut_dr_qs, intensitiescut_dr_qs, weights_dr_qs
-    elif stellar_models_grid in ['Atlas_2000', 'MPS_Atlas_set1_2023']:
+    elif stellar_models_grid in ['Atlas_2000', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023']:
         #mu decreasing, r increasing
         weights_dr = np.zeros_like(radi)
         weights_dr[1:-1] = 0.5*(radi[2:]-radi[:-2])
