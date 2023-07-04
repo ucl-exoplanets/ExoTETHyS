@@ -128,5 +128,7 @@ class Database:
 
 databases = {
 "Phoenix_2012_13":Database('Phoenix_2012_13', date_to_update='200412', vital=True), "Phoenix_drift_2012":Database('Phoenix_drift_2012', date_to_update='201205', vital=True),
-"Phoenix_2018":Database('Phoenix_2018', date_to_update='200412', vital=True), "Atlas_2000":Database('Atlas_2000', date_to_update='200403', vital=True), "Stagger_2015":Database('Stagger_2015', date_to_update='201001', vital=True), "Stagger_2018":Database('Stagger_2018', date_to_update='220216', vital=True), "MPS_Atlas_set1_2023":Database('MPS_Atlas_set1_2023', date_to_update='230512', vital=True)
+"Phoenix_2018":Database('Phoenix_2018', date_to_update='200412', vital=True), "Atlas_2000":Database('Atlas_2000', date_to_update='200403', vital=True),
+"Stagger_2015":Database('Stagger_2015', date_to_update='201001', vital=True), "Stagger_2018":Database('Stagger_2018', date_to_update='220216', vital=True),
+"MPS_Atlas_set1_2023":Database('MPS_Atlas_set1_2023', date_to_update='230512', vital=True), "MPS_Atlas_set2_2023":Database('MPS_Atlas_set2_2023', date_to_update='230704', vital=True)
 }
