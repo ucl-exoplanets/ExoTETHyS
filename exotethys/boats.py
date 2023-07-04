@@ -1106,7 +1106,7 @@ def check_passband_limits(pb_waves, stellar_models_grid):
         maximum_wavelength = 9000000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
-    elif stellar_models_grid == 'Atlas_2000':
+    elif stellar_models_grid in ['Atlas_2000', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023']:
         minimum_wavelength = 90.9 * u.Angstrom
         maximum_wavelength = 1600000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
