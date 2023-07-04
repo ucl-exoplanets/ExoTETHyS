@@ -303,10 +303,10 @@ def check_configuration(input_dict):
             print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
             check = False
         else:
-            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2018', 'Stagger_2015', 'Blackbody', 'Userfile']
+            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2018', 'Stagger_2015', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023', 'Blackbody', 'Userfile']
             stellar_models_grid = stellar_models_grid[0]
             if stellar_models_grid not in allowed_stellar_models_grid:
-                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018, Stagger_2015, Blackbody and Userfile.')
+                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018, Stagger_2015, MPS_Atlas_set1_2023, MPS_Atlas_set2_2023, Blackbody and Userfile.')
                 check = False
         if check:
             #stellar_models_grid = stellar_models_grid[0]
