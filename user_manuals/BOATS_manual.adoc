@@ -11,7 +11,7 @@
 [big]#*Bias in the Occultation Analysis of Transiting Systems*#
 
 image::https://github.com/ucl-exoplanets/ExoTETHyS/blob/master/logo.png[width=10%]
-*version: 2.0.0*
+*version: 2.0.10*
 
 ifdef::env-github[]
 :tip-caption: :bulb:
@@ -58,7 +58,7 @@ The BOATS configuration file is a text file in which each line begins with a key
 Below I describe the available keywords:
 
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2018_, _Stagger_2015_, _Blackbody_ or _Userfile_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2018_, _Stagger_2015_, _MPS_Atlas_set1_2023_, _MPS_Atlas_set1_2023_, _Blackbody_ or _Userfile_ +
 only one choice per run (i.e., configuration file) is allowed
 
 *planet_models_grid* (MANDATORY) +
@@ -143,6 +143,10 @@ only one value per run (i.e., configuration file) is allowed
 *star_radius_unit* (MANDATORY) +
 values: string representation of astropy.unit length (e.g., 'solRad'='Rsun', 'km', 'm')
 
+*star_database_interpolation* (OPTIONAL) +
+values: _nearest_  (default) or _seq_linear_ +
+only one value per run (i.e., configuration file) is allowed
+
 *orbital_semimajor_axis* (MANDATORY) +
 values: float type (orbital_semimajor_axis > star_radius) +
 only one value per run (i.e., configuration file) is allowed
@@ -226,6 +230,8 @@ NOTE: In principle, all examples can be used for either transit or eclipse calcu
 *boats_example7*: This example is to compute the bias over two instrument passbands one with one without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_NIRISS_MIRInobins_bb_bb_various_Ab_eps.pickle".
 
 *boats_example8*: This example is to compute the bias over four instrument passbands without wavelength bins, using _Blackbody_ stellar_models_grid, _Blackbody_ planet_models_grid with a list of planet_bond_albedo and planet_circulation_efficiency. It creates a file named "WASP43b_JWST_bb_bb_various_Tday_Tnight.pickle".
+
+*boats_example9*: This example is analogous to boats_example8, but using the new _MPS_Atlas_set1_2023_ grid.
 
 
 === BOATS output files
@@ -625,7 +631,7 @@ The manage_database subpackage (link:manage_database_manual.adoc[manage_database
 >>> filenames
 ['teff03000_logg5.50_MH0.0.pickle', 'teff05700_logg4.5_MH0.0.pickle', 'teff05800_logg4.5_MH0.0.pickle', 'teff06100_logg4.5_MH0.0.pickle']
 ```
-Note that the database files have _pickle_ format and contain _python_ dictionaries. Let's now read one of these files:
+Note that the older database files have _pickle_ format, while the newer ones (from 2023) are in _HDF5_ format. They contain _python_ dictionaries.:
 [source, bash]
 ```
 >>> import os, pickle
