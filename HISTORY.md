@@ -62,3 +62,7 @@ Second online release
 
 **version 2.0.9**
 * Fixed bug in Kipping's transform for quadratic and square-root LDCs.
+
+**version 2.0.10**
+* Added _MPS_Atlas_set1_2023_ and _MPS_Atlas_set2_2023_ grids, using _HDF5_ instead of _pickle_ format in the database files.
+
