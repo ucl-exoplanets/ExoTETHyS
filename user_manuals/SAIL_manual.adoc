@@ -61,7 +61,7 @@ _individual_ is to compute LDCs for specific targets with stellar parameters pro
 _grid_ is to obtain a grid of LDCs from the database models, that can be used as a base for interpolation
 
 *stellar_models_grid* (MANDATORY) +
-values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2018_ or _Stagger_2015_ +
+values: _Phoenix_2018_, _Phoenix_2012_13_, _Phoenix_drift_2012_, _Atlas_2000_, _Stagger_2018_, _Stagger_2015_, _MPS_Atlas_set1_2023_ or _MPS_Atlas_set2_2023_ +
 only one choice per run (i.e., configuration file) is allowed
 
 *limb_darkening_laws* (MANDATORY) +
@@ -191,6 +191,8 @@ The first variable is the list of file names in the database, the second variabl
 *sail_example8*: This example computes the _complete_ user_output for three targets read from file over multiple spectroscopic bins within an uniform passband. It creates three _basic_ files named "HD209458b_ldc.pickle", "Sun_ldc.pickle" and "Cool_ldc.pickle", and other two files named "HD209458bSunCool_neighbour_ldc.pickle" and "HD209458bSunCool_neighbour_intensities.pickle".
 
 *sail_example9*: This example is to compute the limb-darkening coefficients for a single stellar target and photometric passband. It creates a file named "stagger_example_ldc.pickle".
+
+*sail_example10*: This example is to compute the limb-darkening coefficients for a single stellar target, with a photometric passband and another with wavelength bins. It creates a file named "HD209458b_MPS1_ldc.pickle".
 
 
 === SAIL output files
@@ -368,12 +370,12 @@ The manage_database subpackage (link:manage_database_manual.adoc[manage_database
 >>> filenames
 ['teff03000_logg5.50_MH0.0.pickle', 'teff05700_logg4.5_MH0.0.pickle', 'teff05800_logg4.5_MH0.0.pickle', 'teff06100_logg4.5_MH0.0.pickle']
 ```
-Note that the database files have _pickle_ format and contain _python_ dictionaries. Let's now read one of these files:
+Note that the older database files have _pickle_ format, while the newer ones (from 2023) are in _HDF5_ format. They contain _python_ dictionaries. Let's now read one of these files:
 [source, bash]
 ```
 >>> import os, pickle
 >>> chosen_file_path = os.path.join(path, 'teff05800_logg4.5_MH0.0.pickle')
->>> content = pickle.load(open(chosen_file_path,'rb'),encoding='latin1')
+>>> content = pickle.load(open(chosen_file_path,'rb'))
 >>> content.keys()
 dict_keys(['mu', 'wavelengths', 'star_params', 'intensities', 'fluxes'])
 ```
