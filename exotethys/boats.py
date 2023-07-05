@@ -1229,11 +1229,12 @@ def stellar_params_from_file_name(file_name):
     :return: a numpy array with the effective temperature, log gravity and metallicity for the input file name.
     :rtype: np.array
     """
-    params = os.path.basename(file_name).replace('.pickle', '').split('_')
+    file_ext = os.path.splitext(file_name)[-1]
+    params = os.path.basename(file_name).replace(file_ext, '').split('_')
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
     mh = float(params[2].replace('MH', ''))
-    return np.array((teff, logg, mh))
+    return np.array([teff, logg, mh])
 
 
 def get_stellar_grid_parameters(stellar_models_grid):
