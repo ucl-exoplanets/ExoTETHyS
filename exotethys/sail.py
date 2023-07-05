@@ -1660,7 +1660,7 @@ def get_subgrid(input_dict):
         if teff_min>np.max(star_params_grid[:,0]):
             print('ERROR: star_minimum_effective_temperature is too high.')
             check = False
-        elif teff_min<=np.min(star_params_grid[:,0]):
+        elif teff_min<np.min(star_params_grid[:,0]):
             print('WARNING: star_minimum_effective_temperature is lower than the minimum temperature available in the grid.' )
         teff_min_indices = np.where(star_params_grid[:,0]>=teff_min)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, teff_min_indices)
@@ -1669,7 +1669,7 @@ def get_subgrid(input_dict):
         if teff_max<np.min(star_params_grid[:,0]):
             print('ERROR: star_maximum_effective_temperature is too low.')
             check = False
-        elif teff_max>=np.max(star_params_grid[:,0]):
+        elif teff_max>np.max(star_params_grid[:,0]):
             print('WARNING: star_maximum_effective_temperature is higher than the maximum temperature available in the grid.' )
         teff_max_indices = np.where(star_params_grid[:,0]<=teff_max)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, teff_max_indices)
@@ -1678,7 +1678,7 @@ def get_subgrid(input_dict):
         if logg_min>np.max(star_params_grid[:,1]):
             print('ERROR: star_minimum_log_gravity is too high.')
             check = False
-        elif logg_min<=np.min(star_params_grid[:,1]):
+        elif logg_min<np.min(star_params_grid[:,1]):
             print('WARNING: star_minimum_log_gravity is lower than the minimum log(g) available in the grid.' )
         logg_min_indices = np.where(star_params_grid[:,1]>=logg_min)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, logg_min_indices)
@@ -1687,7 +1687,7 @@ def get_subgrid(input_dict):
         if logg_max<np.min(star_params_grid[:,1]):
             print('ERROR: star_maximum_log_gravity is too low.')
             check = False
-        elif logg_max>=np.max(star_params_grid[:,1]):
+        elif logg_max>np.max(star_params_grid[:,1]):
             print('WARNING: star_maximum_log_gravity is higher than the maximum log(g) available in the grid.' )
         logg_max_indices = np.where(star_params_grid[:,1]<=logg_max)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, logg_max_indices)
@@ -1696,7 +1696,7 @@ def get_subgrid(input_dict):
         if mh_min>np.max(star_params_grid[:,2]):
             print('ERROR: star_minimum_metallicity is too high.')
             check = False
-        elif mh_min<=np.min(star_params_grid[:,2]):
+        elif mh_min<np.min(star_params_grid[:,2]):
             print('WARNING: star_minimum_metallicity is lower than the minimum metallicity available in the grid.' )
         mh_min_indices = np.where(star_params_grid[:,2]>=mh_min)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, mh_min_indices)
@@ -1705,7 +1705,7 @@ def get_subgrid(input_dict):
         if mh_max<np.min(star_params_grid[:,2]):
             print('ERROR: star_maximum_metallicity is too low.')
             check = False
-        elif mh_max>=np.max(star_params_grid[:,2]):
+        elif mh_max>np.max(star_params_grid[:,2]):
             print('WARNING: star_maximum_metallicity is higher than the maximum metallicity available in the grid.' )
         mh_max_indices = np.where(star_params_grid[:,2]<=mh_max)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, mh_max_indices)
