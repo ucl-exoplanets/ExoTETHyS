@@ -1014,6 +1014,11 @@ def check_2Darray(arr, n_col=None):
     return check
 
 
+def wavelength_from_vacuum_to_air(wavelength_in_vacuum): #in Angstrom
+    s = 1e4 / wavelength_in_vacuum
+    n = 1 + 0.0000834254 + 0.02406147 / (130 - s * s) + 0.00015998 / (38.9 - s * s)
+    return wavelength_in_vacuum / n
+
 
 def read_configuration(filename):
     """
@@ -1239,10 +1244,10 @@ def check_configuration(input_dict):
         print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
         check = False
     else:
-        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015', 'Stagger_2018']
+        allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2015', 'Stagger_2018', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023']
         stellar_models_grid = stellar_models_grid[0]
         if stellar_models_grid not in allowed_stellar_models_grid:
-            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018 and Stagger_2015.')
+            print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018, Stagger_2015, MPS_Atlas_set1_2023 and MPS_Atlas_set2_2023.')
             check = False
 
     #Checking the choice of limb_darkening_laws; at least one law must be specified in the input file (no default).
@@ -1607,7 +1612,8 @@ def stellar_params_from_file_name(file_name):
     :return: a numpy array with the effective temperature, log gravity and metallicity for the input file name.
     :rtype: np.array
     """
-    params = os.path.basename(file_name).replace('.pickle', '').split('_')
+    file_ext = os.path.splitext(file_name)[-1]
+    params = os.path.basename(file_name).replace(file_ext, '').split('_')
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
     mh = float(params[2].replace('MH', ''))
@@ -1654,7 +1660,7 @@ def get_subgrid(input_dict):
         if teff_min>np.max(star_params_grid[:,0]):
             print('ERROR: star_minimum_effective_temperature is too high.')
             check = False
-        elif teff_min<=np.min(star_params_grid[:,0]):
+        elif teff_min<np.min(star_params_grid[:,0]):
             print('WARNING: star_minimum_effective_temperature is lower than the minimum temperature available in the grid.' )
         teff_min_indices = np.where(star_params_grid[:,0]>=teff_min)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, teff_min_indices)
@@ -1663,7 +1669,7 @@ def get_subgrid(input_dict):
         if teff_max<np.min(star_params_grid[:,0]):
             print('ERROR: star_maximum_effective_temperature is too low.')
             check = False
-        elif teff_max>=np.max(star_params_grid[:,0]):
+        elif teff_max>np.max(star_params_grid[:,0]):
             print('WARNING: star_maximum_effective_temperature is higher than the maximum temperature available in the grid.' )
         teff_max_indices = np.where(star_params_grid[:,0]<=teff_max)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, teff_max_indices)
@@ -1672,7 +1678,7 @@ def get_subgrid(input_dict):
         if logg_min>np.max(star_params_grid[:,1]):
             print('ERROR: star_minimum_log_gravity is too high.')
             check = False
-        elif logg_min<=np.min(star_params_grid[:,1]):
+        elif logg_min<np.min(star_params_grid[:,1]):
             print('WARNING: star_minimum_log_gravity is lower than the minimum log(g) available in the grid.' )
         logg_min_indices = np.where(star_params_grid[:,1]>=logg_min)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, logg_min_indices)
@@ -1681,7 +1687,7 @@ def get_subgrid(input_dict):
         if logg_max<np.min(star_params_grid[:,1]):
             print('ERROR: star_maximum_log_gravity is too low.')
             check = False
-        elif logg_max>=np.max(star_params_grid[:,1]):
+        elif logg_max>np.max(star_params_grid[:,1]):
             print('WARNING: star_maximum_log_gravity is higher than the maximum log(g) available in the grid.' )
         logg_max_indices = np.where(star_params_grid[:,1]<=logg_max)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, logg_max_indices)
@@ -1690,7 +1696,7 @@ def get_subgrid(input_dict):
         if mh_min>np.max(star_params_grid[:,2]):
             print('ERROR: star_minimum_metallicity is too high.')
             check = False
-        elif mh_min<=np.min(star_params_grid[:,2]):
+        elif mh_min<np.min(star_params_grid[:,2]):
             print('WARNING: star_minimum_metallicity is lower than the minimum metallicity available in the grid.' )
         mh_min_indices = np.where(star_params_grid[:,2]>=mh_min)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, mh_min_indices)
@@ -1699,7 +1705,7 @@ def get_subgrid(input_dict):
         if mh_max<np.min(star_params_grid[:,2]):
             print('ERROR: star_maximum_metallicity is too low.')
             check = False
-        elif mh_max>=np.max(star_params_grid[:,2]):
+        elif mh_max>np.max(star_params_grid[:,2]):
             print('WARNING: star_maximum_metallicity is higher than the maximum metallicity available in the grid.' )
         mh_max_indices = np.where(star_params_grid[:,2]<=mh_max)[0]
         subgrid_indices = np.intersect1d(subgrid_indices, mh_max_indices)
@@ -1860,7 +1866,7 @@ def check_passband_limits(pb_waves, stellar_models_grid):
         maximum_wavelength = 9000000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
-    elif stellar_models_grid == 'Atlas_2000':
+    elif stellar_models_grid in ['Atlas_2000', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023']:
         minimum_wavelength = 90.9 * u.Angstrom
         maximum_wavelength = 1600000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
@@ -1970,7 +1976,7 @@ def get_waves_fromR(lambda1, lambda2, R=1e6):
     return waves
 
 
-def get_passband_intensities(model_dict, passbands_dict):
+def get_passband_intensities(model_dict, passbands_dict, wave_air_to_vac=0):
 
     """
     This function calls the calculation of integrated intensities for various passbands.
@@ -1984,6 +1990,8 @@ def get_passband_intensities(model_dict, passbands_dict):
     """
     passbands = list(passbands_dict.keys())
     model_wavelengths = model_dict['wavelengths']
+    if wave_air_to_vac==-1:
+        model_wavelengths = wavelength_from_vacuum_to_air( model_wavelengths.value ) * u.Angstrom
     model_intensities = model_dict['intensities']
     model_mu = model_dict['mu']
     norm_index = np.argmax(model_mu)
@@ -2026,7 +2034,7 @@ def rescale_and_weights(mu, intensities, stellar_models_grid, user_geometry='pp'
         weights_dr_qs[0] = (1.0-radicut_dr_qs[0]) - 0.5*(radicut_dr_qs[1]-radicut_dr_qs[0])
         weights_dr_qs[-1] = 0.5*radicut_dr_qs[-2]
         return mucut_dr_qs, intensitiescut_dr_qs, weights_dr_qs
-    elif stellar_models_grid in ['Atlas_2000']:
+    elif stellar_models_grid in ['Atlas_2000', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023']:
         #mu decreasing, r increasing
         weights_dr = np.zeros_like(radi)
         weights_dr[1:-1] = 0.5*(radi[2:]-radi[:-2])

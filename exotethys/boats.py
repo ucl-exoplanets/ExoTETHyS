@@ -303,10 +303,10 @@ def check_configuration(input_dict):
             print('ERROR: invalid length=', len(stellar_models_grid), 'for stellar_models_grid. It must have length=1.')
             check = False
         else:
-            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2018', 'Stagger_2015', 'Blackbody', 'Userfile']
+            allowed_stellar_models_grid = ['Phoenix_2018', 'Phoenix_2012_13', 'Phoenix_drift_2012', 'Atlas_2000', 'Stagger_2018', 'Stagger_2015', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023', 'Blackbody', 'Userfile']
             stellar_models_grid = stellar_models_grid[0]
             if stellar_models_grid not in allowed_stellar_models_grid:
-                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018, Stagger_2015, Blackbody and Userfile.')
+                print('ERROR:',stellar_models_grid,'is not a valid stellar_models_grid. The allowed names are Phoenix_2018, Phoenix_2012_13, Phoenix_drift_2012, Atlas_2000, Stagger_2018, Stagger_2015, MPS_Atlas_set1_2023, MPS_Atlas_set2_2023, Blackbody and Userfile.')
                 check = False
         if check:
             #stellar_models_grid = stellar_models_grid[0]
@@ -1106,7 +1106,7 @@ def check_passband_limits(pb_waves, stellar_models_grid):
         maximum_wavelength = 9000000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
             check = False
-    elif stellar_models_grid == 'Atlas_2000':
+    elif stellar_models_grid in ['Atlas_2000', 'MPS_Atlas_set1_2023', 'MPS_Atlas_set2_2023']:
         minimum_wavelength = 90.9 * u.Angstrom
         maximum_wavelength = 1600000.0 * u.Angstrom
         if np.min(pb_waves)<minimum_wavelength or np.max(pb_waves)>maximum_wavelength:
@@ -1229,11 +1229,12 @@ def stellar_params_from_file_name(file_name):
     :return: a numpy array with the effective temperature, log gravity and metallicity for the input file name.
     :rtype: np.array
     """
-    params = os.path.basename(file_name).replace('.pickle', '').split('_')
+    file_ext = os.path.splitext(file_name)[-1]
+    params = os.path.basename(file_name).replace(file_ext, '').split('_')
     teff = float(params[0].replace('teff', ''))
     logg = float(params[1].replace('logg', ''))
     mh = float(params[2].replace('MH', ''))
-    return np.array((teff, logg, mh))
+    return np.array([teff, logg, mh])
 
 
 def get_stellar_grid_parameters(stellar_models_grid):
