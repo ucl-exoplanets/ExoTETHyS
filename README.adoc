@@ -12,7 +12,7 @@
 #*Tools for Exoplanetary Transits around Host Stars*#
 
 image::logo.png[width=40%]
-*version: 2.0.5*
+*version: 2.0.10*
 
 ifdef::env-github[]
 :tip-caption: :bulb:
@@ -154,6 +154,10 @@ If you use this package for your research, please consider citing the following 
 (First use of the BOATS subpackage)
 
 If you adopt the built-in stellar model grids, please consider citing the relevant references:
+
+MPS_Atlas_set1_2023 & MPS_Atlas_set2_2023
+
+- Kostogryz, N., et al. 2023, RNAAS, 7, 39
 
 Atlas_2000
 
