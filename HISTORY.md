@@ -69,3 +69,6 @@ Second online release
 **version 2.0.11**
 * Added h5py and click packages in the requirements
 
+**version 2.0.12**
+* Switched from scipy.integrate.simps to scipy.integrate.simpson
+
