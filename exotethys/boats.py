@@ -18,7 +18,7 @@ from collections import OrderedDict
 from astropy.modeling.models import BlackBody
 import astropy.units as u
 from scipy.interpolate import interp1d
-from scipy.integrate import simps
+from scipy.integrate import simpson
 
 import copy
 import pickle
@@ -1578,7 +1578,7 @@ def get_passband_fluxes(model_wavelengths, photon_fluxes, passbands_dict):
         else:
             f_interp = interp1d(model_wavelengths.value, photon_fluxes.value, fill_value='extrapolate')
             my_photons = f_interp(my_waves.value)
-            photons_dict[passband] = (simps(my_photons*my_pce.value, my_waves.value) * photon_fluxes.unit * my_pce.unit * my_waves.unit).decompose()
+            photons_dict[passband] = (simpson(my_photons*my_pce.value, my_waves.value) * photon_fluxes.unit * my_pce.unit * my_waves.unit).decompose()
     return photons_dict
 
 
