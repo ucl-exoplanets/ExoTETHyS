@@ -16,7 +16,7 @@ import numpy as np
 from scipy.optimize import minimize
 from collections import OrderedDict
 from scipy.interpolate import interp1d
-from scipy.integrate import simps
+from scipy.integrate import simpson
 import astropy.units as u
 
 import copy
@@ -2002,7 +2002,7 @@ def get_passband_intensities(model_dict, passbands_dict, wave_air_to_vac=0):
         my_pce = passbands_dict[passband][1].value
         f_interp = interp1d(model_wavelengths.value, model_intensities.value, axis=0, fill_value='extrapolate')
         my_ints = f_interp(my_waves.value)
-        my_ints_integ = simps(my_ints*my_pce[:,None]*my_waves.value[:,None], my_waves.value, axis=0)
+        my_ints_integ = simpson(my_ints*my_pce[:,None]*my_waves.value[:,None], my_waves.value, axis=0)
         integ_dict[passband] = my_ints_integ/my_ints_integ[norm_index]
     return integ_dict
 
