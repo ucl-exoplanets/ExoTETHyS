@@ -72,3 +72,8 @@ Second online release
 **version 2.0.12**
 * Switched from scipy.integrate.simps to scipy.integrate.simpson
 
+**version 2.0.13**
+* Resolved compatibility issue of simpsons from to scipy v 1.14.0
+* Replaced pkg_resources with importlib.resources in _database.py
+
+
