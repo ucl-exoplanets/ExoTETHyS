@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-import pkg_resources
+#import pkg_resources
+import importlib.resources
 
 #from ._0imports import *
 import os
@@ -40,7 +41,9 @@ class Database:
         package_data = {package_name:'Passbands/*.pass'}
         last_update_file_name = 'database_last_update.txt'
 
-        info_file_path = pkg_resources.resource_filename(package_name, info_file_name)
+        #info_file_path = pkg_resources.resource_filename(package_name, info_file_name)
+        with importlib.resources.path(package_name, info_file_name) as resource_path:
+            info_file_path = str(resource_path)
         package_path = os.path.join(os.path.expanduser('~'), '.{0}'.format(package_name))
         if not os.path.isdir(package_path):
             os.mkdir(package_path)
