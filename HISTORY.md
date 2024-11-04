@@ -76,4 +76,6 @@ Second online release
 * Resolved compatibility issue of simpsons from to scipy v 1.14.0
 * Replaced pkg_resources with importlib.resources in _database.py
 
+**version 2.0.14**
+* Replaced pkg_resources with importlib.resources in sail.py and boats.py
 
