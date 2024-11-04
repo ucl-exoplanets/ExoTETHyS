@@ -78,4 +78,5 @@ Second online release
 
 **version 2.0.14**
 * Replaced pkg_resources with importlib.resources in sail.py and boats.py
+* Updated JWST passbands in "Passbands", moved the old ones to a folder named "old"
 
