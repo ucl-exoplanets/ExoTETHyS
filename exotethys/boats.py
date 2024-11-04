@@ -440,7 +440,7 @@ def check_configuration(input_dict):
 
     #Checking the case of built-in passbands
     #passbands_path_package = pkg_resources.resource_filename('exotethys','Passbands/')
-    passbands_path_package = str( importlib.resources.files('exotethys','Passbands/') )
+    passbands_path_package = str( importlib.resources.files('exotethys') / 'Passbands/' )
     list_passbands = [f for f in os.listdir(passbands_path_package) if f.endswith('.pass')]
     allowed_passbands = [f[:-5] for f in list_passbands] 
     input_dict_local['passbands_ext'] = ['']
